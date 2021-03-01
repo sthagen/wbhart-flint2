@@ -22,7 +22,7 @@ main(void)
     slong i, j;
     FLINT_TEST_INIT(state);
 
-    flint_printf("jacobi....");
+    flint_printf("kronecker....");
     fflush(stdout);
 
     for (i = 0; i < 3000 * flint_test_multiplier(); i++)
@@ -38,13 +38,12 @@ main(void)
         for (j = 0; j < 100; j++)
         {
             fmpz_randtest(a, state, 150);
-            fmpz_randtest_unsigned(n, state, 150);
-            fmpz_setbit(n, 0);
+            fmpz_randtest(n, state, 150);
 
             fmpz_get_mpz(aa, a);
             fmpz_get_mpz(nn, n);
 
-            if (mpz_jacobi(aa, nn) != fmpz_jacobi(a, n))
+            if (mpz_kronecker(aa, nn) != fmpz_kronecker(a, n))
             {
                 flint_printf("FAIL:\n");
                 gmp_printf("a = %Zd, n = %Zd\n", aa, nn);
@@ -59,7 +58,7 @@ main(void)
     }
 
     FLINT_TEST_CLEANUP(state);
-    
+
     flint_printf("PASS\n");
     return 0;
 }
