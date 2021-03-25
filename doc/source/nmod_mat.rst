@@ -167,7 +167,7 @@ Random matrix generation
     and `m-1` inclusive, where `m` is the modulus of ``mat``.
 
     The matrix can be transformed into a dense matrix with unchanged
-    rank by subsequently calling ``nmod_mat_randops()``.
+    rank by subsequently calling :func:`nmod_mat_randops`.
 
 .. function:: void nmod_mat_randops(nmod_mat_t mat, slong count, flint_rand_t state)
 
@@ -480,7 +480,7 @@ Nonsingular square solving
 
 .. function:: int nmod_mat_can_solve_inner(slong * rank, slong * perm, slong * pivots, nmod_mat_t X, const nmod_mat_t A, const nmod_mat_t B)
 
-    As for `nmod_mat_can_solve()` except that if `rank` is not `NULL` the
+    As for :func:`nmod_mat_can_solve` except that if `rank` is not `NULL` the
     value it points to will be set to the rank of `A`. If `perm` is not `NULL`
     then it must be a valid initialised permutation whose length is the number
     of rows of `A`. After the function call it will be set to the row
@@ -649,6 +649,9 @@ Strong echelon form and Howell form
     Puts `A` into strong echelon form. The Howell form and the strong echelon
     form are equal up to permutation of the rows, see [FieHof2014]_ for a
     definition of the strong echelon form and the algorithm used here.
+    Note that [FieHof2014]_ defines strong echelon form as a lower left normal form,
+    while the implemented version returns an upper right normal form,
+    agreeing with the definition of Howell form in [StoMul1998]_.
 
     `A` must have at least as many rows as columns.
 
