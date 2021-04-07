@@ -192,6 +192,8 @@ FLINT_DLL slong fmpz_get_si(const fmpz_t f);
 
 FLINT_DLL ulong fmpz_get_ui(const fmpz_t f);
 
+FLINT_DLL mp_limb_t fmpz_get_nmod(const fmpz_t f, nmod_t mod);
+
 FMPZ_INLINE void
 fmpz_get_uiui(mp_limb_t * hi, mp_limb_t * low, const fmpz_t f)
 {
@@ -290,15 +292,19 @@ fmpz_neg_uiui(fmpz_t f, mp_limb_t hi, mp_limb_t lo)
     }
 }
 
+FLINT_DLL void fmpz_get_signed_uiui(ulong * hi, ulong * lo, const fmpz_t x);
+
 FLINT_DLL void fmpz_set_signed_uiui(fmpz_t r, ulong hi, ulong lo);
 
 FLINT_DLL void fmpz_set_signed_uiuiui(fmpz_t r, ulong hi, ulong mid, ulong lo);
 
-FLINT_DLL void fmpz_set_ui_array(fmpz_t out, const ulong * in, slong in_len);
+FLINT_DLL void fmpz_get_ui_array(ulong * out, slong n, const fmpz_t in);
 
-FLINT_DLL void fmpz_get_ui_array(ulong * out, slong out_len, const fmpz_t in);
+FLINT_DLL void fmpz_set_ui_array(fmpz_t out, const ulong * in, slong n);
 
-FLINT_DLL void fmpz_set_signed_ui_array(fmpz_t out, const ulong * in, slong in_len);
+FLINT_DLL void fmpz_get_signed_ui_array(ulong * out, slong n, const fmpz_t in);
+
+FLINT_DLL void fmpz_set_signed_ui_array(fmpz_t out, const ulong * in, slong n);
 
 FLINT_DLL void fmpz_get_mpz(mpz_t x, const fmpz_t f);
 
