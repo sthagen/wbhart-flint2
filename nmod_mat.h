@@ -92,7 +92,21 @@ FLINT_DLL void nmod_mat_init(nmod_mat_t mat, slong rows, slong cols, mp_limb_t n
 FLINT_DLL void nmod_mat_init_set(nmod_mat_t mat, const nmod_mat_t src);
 FLINT_DLL void nmod_mat_clear(nmod_mat_t mat);
 FLINT_DLL void nmod_mat_one(nmod_mat_t mat);
+
 FLINT_DLL void nmod_mat_swap(nmod_mat_t mat1, nmod_mat_t mat2);
+
+NMOD_MAT_INLINE void
+nmod_mat_swap_entrywise(nmod_mat_t mat1, nmod_mat_t mat2)
+{
+    slong i, j;
+    for (i = 0; i < nmod_mat_nrows(mat1); i++)
+    {
+       mp_limb_t * row1 = mat1->rows[i];
+       mp_limb_t * row2 = mat2->rows[i];
+       for (j = 0; j < nmod_mat_ncols(mat1); j++)
+          MP_LIMB_SWAP(row1[j], row2[j]);
+    }
+}
 
 /* Windows and concatenation */
 
@@ -157,14 +171,9 @@ FLINT_DLL void nmod_mat_scalar_mul(nmod_mat_t B, const nmod_mat_t A, mp_limb_t c
 FLINT_DLL void nmod_mat_scalar_addmul_ui(nmod_mat_t dest,
                        const nmod_mat_t X, const nmod_mat_t Y, const mp_limb_t b);
 
-NMOD_MAT_INLINE
-void nmod_mat_scalar_mul_add(nmod_mat_t dest, const nmod_mat_t X,
-                                const mp_limb_t b, const nmod_mat_t Y)
-{
-    flint_printf("WARNING: nmod_mat_scalar_mul_add is deprecated. "
-                 "Please use nmod_mat_scalar_addmul_ui\n");
-    nmod_mat_scalar_addmul_ui(dest, X, Y, b);
-}
+
+/* deprecated */
+#define nmod_mat_scalar_mul_add(dest, X, b, Y) nmod_mat_scalar_addmul_ui(dest, X, Y, b)
 
 NMOD_MAT_INLINE
 void nmod_mat_scalar_mul_fmpz(nmod_mat_t res, const nmod_mat_t M, const fmpz_t c)

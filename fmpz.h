@@ -635,6 +635,9 @@ FLINT_DLL void fmpz_gcdinv(fmpz_t d, fmpz_t a, const fmpz_t f, const fmpz_t g);
 
 FLINT_DLL void fmpz_xgcd(fmpz_t d, fmpz_t a, fmpz_t b, const fmpz_t f, const fmpz_t g);
 
+FLINT_DLL void fmpz_xgcd_canonical_bezout(fmpz_t d, fmpz_t a, fmpz_t b,
+                                            const fmpz_t f, const fmpz_t g);
+
 FLINT_DLL void fmpz_xgcd_partial(fmpz_t co2, fmpz_t co1, 
                                        fmpz_t r2, fmpz_t r1, const fmpz_t L);
 
@@ -705,6 +708,8 @@ FLINT_DLL void fmpz_tdiv_r_2exp(fmpz_t f, const fmpz_t g, ulong exp);
 FLINT_DLL ulong fmpz_tdiv_ui(const fmpz_t g, ulong h);
 
 FLINT_DLL void fmpz_tdiv_q_2exp(fmpz_t f, const fmpz_t g, ulong exp);
+
+FLINT_DLL void fmpz_ndiv_qr(fmpz_t q, fmpz_t r, const fmpz_t a, const fmpz_t b);
 
 FLINT_DLL void fmpz_preinvn_init(fmpz_preinvn_t inv, const fmpz_t f);
 
