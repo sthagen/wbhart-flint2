@@ -38,12 +38,13 @@ main(void)
         ulong t;
 
         m = n_randint(state, 30);
-        mod = n_randtest_prime(state, 0);
+        mod = n_randtest(state);
+	mod += mod == 0;
 
         nmod_mat_init(A, m, m, mod);
         fmpz_mat_init(B, m, m);
 
-        switch (rep % 3)
+	switch (rep % 3)
         {
             case 0:
                 nmod_mat_randrank(A, state, m);
@@ -51,15 +52,15 @@ main(void)
                 break;
             case 1:
                 t = n_randint(state, m);
-                t = FLINT_MIN(t, m);
-                nmod_mat_randrank(A, state, m);
+		t = FLINT_MIN(t, m);
+                nmod_mat_randrank(A, state, t);
                 nmod_mat_randops(A, n_randint(state, 2*m + 1), state);
                 break;
             default:
                 nmod_mat_randtest(A, state);
         }
 
-        fmpz_mat_set_nmod_mat_unsigned(B, A);
+	fmpz_mat_set_nmod_mat_unsigned(B, A);
 
         Adet = nmod_mat_det(A);
 
@@ -70,6 +71,7 @@ main(void)
         if (Adet != fmpz_get_ui(Bdet))
         {
             flint_printf("FAIL\n");
+	    flint_printf("Adet = %wu, Bdet = %wu\n", Adet, fmpz_get_ui(Bdet));
             abort();
         }
 
