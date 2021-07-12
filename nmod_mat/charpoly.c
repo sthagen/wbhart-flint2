@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2011 Sebastian Pancratz
+    Copyright (C) 2021 Fredrik Johansson
 
     This file is part of FLINT.
 
@@ -9,19 +9,18 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
+#include <stdlib.h>
 #include <gmp.h>
 #include "flint.h"
-#include "fmpz.h"
-#include "fmpz_mod_poly.h"
+#include "nmod_vec.h"
+#include "nmod_mat.h"
+#include "nmod_poly.h"
 
-void fmpz_mod_poly_set_nmod_poly(fmpz_mod_poly_t f, const nmod_poly_t g)
+void nmod_mat_charpoly(nmod_poly_t cp, const nmod_mat_t mat)
 {
-    slong i;
-    
-    _fmpz_mod_poly_fit_length(f, g->length);
-    _fmpz_mod_poly_set_length(f, g->length);
-
-    for (i = 0; i < g->length; i++)
-       fmpz_set_ui(f->coeffs + i, g->coeffs[i]);
+    if (mat->r <= 8 || !n_is_prime(mat->mod.n))
+        nmod_mat_charpoly_berkowitz(cp, mat);
+    else
+        nmod_mat_charpoly_danilevsky(cp, mat);
 }
 
