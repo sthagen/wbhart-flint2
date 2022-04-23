@@ -33,7 +33,7 @@ main(void)
 
         *a = WORD(0);
 
-        fmpz_randtest(a, state, FLINT_BITS - 2);
+        fmpz_randtest(a, state, SMALL_FMPZ_BITCOUNT_MAX);
 
         *b = *a;
 
@@ -45,7 +45,8 @@ main(void)
         if (!result)
         {
             flint_printf("FAIL\n");
-            abort();
+            fflush(stdout);
+            flint_abort();
         }
     }
 

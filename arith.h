@@ -54,13 +54,13 @@ FLINT_DLL void arith_divisors(fmpz_poly_t res, const fmpz_t n);
 
 /* Stirling numbers **********************************************************/
 
-FLINT_DLL void arith_stirling_number_1u(fmpz_t s, slong n, slong k);
-FLINT_DLL void arith_stirling_number_1(fmpz_t s, slong n, slong k);
-FLINT_DLL void arith_stirling_number_2(fmpz_t s, slong n, slong k);
+FLINT_DLL void arith_stirling_number_1u(fmpz_t s, ulong n, ulong k);
+FLINT_DLL void arith_stirling_number_1(fmpz_t s, ulong n, ulong k);
+FLINT_DLL void arith_stirling_number_2(fmpz_t s, ulong n, ulong k);
 
-FLINT_DLL void arith_stirling_number_1u_vec(fmpz * row, slong n, slong klen);
-FLINT_DLL void arith_stirling_number_1_vec(fmpz * row, slong n, slong klen);
-FLINT_DLL void arith_stirling_number_2_vec(fmpz * row, slong n, slong klen);
+FLINT_DLL void arith_stirling_number_1u_vec(fmpz * row, ulong n, slong klen);
+FLINT_DLL void arith_stirling_number_1_vec(fmpz * row, ulong n, slong klen);
+FLINT_DLL void arith_stirling_number_2_vec(fmpz * row, ulong n, slong klen);
 
 FLINT_DLL void arith_stirling_number_1u_vec_next(fmpz * row,
         const fmpz * prev, slong n, slong klen);
@@ -86,7 +86,7 @@ extern const mp_limb_t bell_number_tab[];
 FLINT_DLL double arith_bell_number_size(ulong n);
 
 FLINT_DLL void arith_bell_number(fmpz_t b, ulong n);
-FLINT_DLL void arith_bell_number_bsplit(fmpz_t res, ulong n);
+FLINT_DLL void arith_bell_number_dobinski(fmpz_t res, ulong n);
 FLINT_DLL void arith_bell_number_multi_mod(fmpz_t res, ulong n);
 
 FLINT_DLL void arith_bell_number_vec(fmpz * b, slong n);
@@ -97,7 +97,8 @@ FLINT_DLL mp_limb_t arith_bell_number_nmod(ulong n, nmod_t mod);
 
 FLINT_DLL void arith_bell_number_nmod_vec(mp_ptr b, slong n, nmod_t mod);
 FLINT_DLL void arith_bell_number_nmod_vec_recursive(mp_ptr b, slong n, nmod_t mod);
-FLINT_DLL void arith_bell_number_nmod_vec_series(mp_ptr b, slong n, nmod_t mod);
+FLINT_DLL int arith_bell_number_nmod_vec_series(mp_ptr b, slong n, nmod_t mod);
+FLINT_DLL void arith_bell_number_nmod_vec_ogf(mp_ptr res, slong len, nmod_t mod);
 
 
 /* Euler numbers *************************************************************/

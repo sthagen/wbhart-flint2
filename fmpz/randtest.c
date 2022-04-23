@@ -38,7 +38,7 @@ fmpz_randtest_unsigned(fmpz_t f, flint_rand_t state, flint_bitcnt_t bits)
     m    = n_randlimb(state);
     bits = n_randint(state, bits + 1);
 
-    if (bits <= FLINT_BITS - 2)
+    if (bits <= SMALL_FMPZ_BITCOUNT_MAX)
     {
         _fmpz_demote(f);
         if (m & UWORD(3))
@@ -48,7 +48,7 @@ fmpz_randtest_unsigned(fmpz_t f, flint_rand_t state, flint_bitcnt_t bits)
             m >>= 2;
             if (bits == 0)
                 *f = 0;
-            else if (bits < FLINT_BITS - 2)
+            else if (bits < SMALL_FMPZ_BITCOUNT_MAX)
                 *f = m & UWORD(1);
             else
                 *f = COEFF_MAX;
@@ -56,10 +56,10 @@ fmpz_randtest_unsigned(fmpz_t f, flint_rand_t state, flint_bitcnt_t bits)
     }
     else
     {
-        __mpz_struct *mpz_ptr = _fmpz_promote(f);
+        __mpz_struct * mf = _fmpz_promote(f);
 
         _flint_rand_init_gmp(state);
-        mpz_rrandomb(mpz_ptr, state->gmp_state, bits);
+        mpz_rrandomb(mf, state->gmp_state, bits);
         _fmpz_demote_val(f);
     }
 }

@@ -53,6 +53,7 @@ void test_resultant(
         flint_printf("r: ");
         fmpz_print(r);
         flint_printf("\n");
+        fflush(stdout);
         flint_abort();
     }
 
@@ -94,6 +95,7 @@ main(void)
         if (!fmpz_mpoly_equal(s, t, ctx))
         {
             flint_printf("FAIL: check linear discriminant\n");
+            fflush(stdout);
             flint_abort();
         }
 
@@ -109,6 +111,7 @@ main(void)
         if (!fmpz_mpoly_equal(s, t, ctx))
         {
             flint_printf("FAIL: check quadratic discriminant\n");
+            fflush(stdout);
             flint_abort();
         }
 
@@ -126,6 +129,7 @@ main(void)
         if (!fmpz_mpoly_equal(s, t, ctx))
         {
             flint_printf("FAIL: check cubic discriminant\n");
+            fflush(stdout);
             flint_abort();
         }
 
@@ -152,6 +156,9 @@ main(void)
                 fmpz_mpoly_one(f, ctx);
 
             fmpz_mpoly_zero(g, ctx);
+
+            if (fmpz_mpoly_ctx_nvars(ctx) < 1)
+                continue;
 
             while (fmpz_mpoly_degree_si(f, 0, ctx) < 100)
             {

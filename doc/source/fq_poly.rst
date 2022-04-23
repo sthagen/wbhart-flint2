@@ -1268,6 +1268,43 @@ Derivative
     Sets ``rop`` to the derivative of ``op``.
 
 
+Square root
+--------------------------------------------------------------------------------
+
+
+.. function:: void _fq_poly_invsqrt_series(fq_struct * g, const fq_struct * h, slong n, fq_ctx_t mod)
+
+    Set the first `n` terms of `g` to the series expansion of `1/\sqrt{h}`.
+    It is assumed that `n > 0`, that `h` has constant term 1 and that `h`
+    is zero-padded as necessary to length `n`. Aliasing is not permitted.
+
+.. function:: void fq_poly_invsqrt_series(fq_poly_t g, const fq_poly_t h, slong n, fq_ctx_t ctx)
+
+    Set `g` to the series expansion of `1/\sqrt{h}` to order `O(x^n)`.
+    It is assumed that `h` has constant term 1.
+
+.. function:: void _fq_poly_sqrt_series(fq_struct * g, const fq_struct * h, slong n, fq_ctx_t ctx)
+
+    Set the first `n` terms of `g` to the series expansion of `\sqrt{h}`.
+    It is assumed that `n > 0`, that `h` has constant term 1 and that `h`
+    is zero-padded as necessary to length `n`. Aliasing is not permitted.
+
+.. function:: void fq_poly_sqrt_series(fq_poly_t g, const fq_poly_t h, slong n, fq_ctx_t ctx)
+
+    Set `g` to the series expansion of `\sqrt{h}` to order `O(x^n)`.
+    It is assumed that `h` has constant term 1.
+
+.. function:: int _fq_poly_sqrt(fq_struct * s, const fq_struct * p, slong n, fq_ctx_t mod)
+
+    If ``(p, n)`` is a perfect square, sets ``(s, n / 2 + 1)``
+    to a square root of `p` and returns 1. Otherwise returns 0.
+
+.. function:: int fq_poly_sqrt(fq_poly_t s, const fq_poly_t p, fq_ctx_t mod)
+
+    If `p` is a perfect square, sets `s` to a square root of `p`
+    and returns 1. Otherwise returns 0.
+
+
 Evaluation
 --------------------------------------------------------------------------------
 

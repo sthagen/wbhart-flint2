@@ -32,14 +32,11 @@ main(void)
     {
        fmpz_mpoly_ctx_t ctx;
        fmpz_mpoly_t f, g, h, k, r;
-       ordering_t ord;
-       slong nvars, len, len1, len2;
+       slong len, len1, len2;
        slong coeff_bits, exp_bits, exp_bits1, exp_bits2;
        fmpz_mpoly_struct * qarr[1], * darr[1];
-       ord = mpoly_ordering_randtest(state);
-       nvars = n_randint(state, 10) + 1;
 
-       fmpz_mpoly_ctx_init(ctx, nvars, ord);
+       fmpz_mpoly_ctx_init_rand(ctx, state, 10);
 
        fmpz_mpoly_init(f, ctx);
        fmpz_mpoly_init(g, ctx);
@@ -80,6 +77,7 @@ main(void)
           {
              printf("FAIL\n");
              flint_printf("Check f*g/g = f\ni = %wd, j = %wd\n", i, j);
+             fflush(stdout);
              flint_abort();
           }
        }
@@ -97,9 +95,9 @@ main(void)
         fmpz_mpoly_ctx_t ctx;
         fmpz_mpoly_t f, r, k1, k2;
         fmpz_mpoly_struct * g, * q;
-        ordering_t ord;
-        slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2, num;
+        slong len, len1, len2, exp_bound, exp_bound1, exp_bound2, num;
         slong coeff_bits;
+        slong n;
         fmpz_mpoly_struct * qarr[5], * darr[5];
         fmpz * shifts, * strides;
 
@@ -108,11 +106,7 @@ main(void)
         g = (fmpz_mpoly_struct *) flint_malloc(num*sizeof(fmpz_mpoly_struct));
         q = (fmpz_mpoly_struct *) flint_malloc(num*sizeof(fmpz_mpoly_struct));
 
-        ord = mpoly_ordering_randtest(state);
-
-        nvars = n_randint(state, 9) + 1;
-
-        fmpz_mpoly_ctx_init(ctx, nvars, ord);
+        fmpz_mpoly_ctx_init_rand(ctx, state, 9);
 
         for (w = 0; w < num; w++)
         {
@@ -132,9 +126,10 @@ main(void)
         len1 = n_randint(state, 10);
         len2 = n_randint(state, 10) + 1;
 
-        exp_bound =  n_randint(state, 2 + 175/nvars/nvars) + 1;
-        exp_bound1 = n_randint(state, 2 + 175/nvars/nvars) + 1;
-        exp_bound2 = n_randint(state, 2 + 175/nvars/nvars) + 1;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        exp_bound =  n_randint(state, 2 + 175/n/n) + 1;
+        exp_bound1 = n_randint(state, 2 + 175/n/n) + 1;
+        exp_bound2 = n_randint(state, 2 + 175/n/n) + 1;
 
         coeff_bits = n_randint(state, 70);
 
@@ -184,6 +179,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check f = g1*q1 + ... + gn*qn + r for random polys"
                                                "\ni = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -215,9 +211,9 @@ main(void)
        fmpz_mpoly_ctx_t ctx;
        fmpz_mpoly_t f, r, k1, k2;
        fmpz_mpoly_struct * g, * q;
-       ordering_t ord;
-       slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2, num;
+       slong len, len1, len2, exp_bound, exp_bound1, exp_bound2, num;
        slong coeff_bits;
+       slong n;
        fmpz_mpoly_struct * qarr[5], * darr[5];
 
        num = n_randint(state, 5) + 1;
@@ -225,11 +221,7 @@ main(void)
        g = (fmpz_mpoly_struct *) flint_malloc(num*sizeof(fmpz_mpoly_struct));
        q = (fmpz_mpoly_struct *) flint_malloc(num*sizeof(fmpz_mpoly_struct));
 
-       ord = mpoly_ordering_randtest(state);
-	   
-       nvars = n_randint(state, 10) + 1;
-
-       fmpz_mpoly_ctx_init(ctx, nvars, ord);
+       fmpz_mpoly_ctx_init_rand(ctx, state, 10);
 
        for (w = 0; w < num; w++)
        {
@@ -249,9 +241,10 @@ main(void)
        len1 = n_randint(state, 10);
        len2 = n_randint(state, 10) + 1;
 
-       exp_bound =  n_randint(state, 3 + 200/nvars/nvars) + 1;
-       exp_bound1 = n_randint(state, 3 + 200/nvars/nvars) + 1;
-       exp_bound2 = n_randint(state, 3 + 200/nvars/nvars) + 1;
+       n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+       exp_bound =  n_randint(state, 3 + 200/n/n) + 1;
+       exp_bound1 = n_randint(state, 3 + 200/n/n) + 1;
+       exp_bound2 = n_randint(state, 3 + 200/n/n) + 1;
 
        coeff_bits = n_randint(state, 70);
 
@@ -286,6 +279,7 @@ main(void)
           {
              printf("FAIL\n");
              flint_printf("Check aliasing\ni = %wd, j = %wd\n", i, j);
+             fflush(stdout);
              flint_abort();
           }
        }

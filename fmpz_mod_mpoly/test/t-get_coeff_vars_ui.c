@@ -41,6 +41,7 @@ main(void)
         if (!fmpz_mod_mpoly_equal(f, g, ctx))
         {
             flint_printf("FAIL: check simple example\n");
+            fflush(stdout);
             flint_abort();
         }
         fmpz_mod_mpoly_clear(f, ctx);
@@ -60,6 +61,11 @@ main(void)
         slong var1;
 
         fmpz_mod_mpoly_ctx_init_rand_bits(ctx, state, 20, 200);
+        if (fmpz_mod_mpoly_ctx_nvars(ctx) < 1)
+        {
+            fmpz_mod_mpoly_ctx_clear(ctx);
+            continue;
+        }
 
         fmpz_mod_mpoly_init(f, ctx);
         fmpz_mod_mpoly_init(g, ctx);
@@ -91,6 +97,7 @@ main(void)
         {
             flint_printf("FAIL: check 1 variable sum of coefficients\n");
             flint_printf("i = %wd\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -112,12 +119,11 @@ main(void)
         ulong exps[2];
         slong var1, var2;
 
-again:
         fmpz_mod_mpoly_ctx_init_rand_bits(ctx, state, 20, 200);
         if (fmpz_mod_mpoly_ctx_nvars(ctx) < 2)
         {
             fmpz_mod_mpoly_ctx_clear(ctx);
-            goto again;
+            continue;
         }
 
         fmpz_mod_mpoly_init(f, ctx);
@@ -157,6 +163,7 @@ again:
         {
             flint_printf("FAIL: check 2 variable sum of coefficients\n");
             flint_printf("i = %wd\n", i);
+            fflush(stdout);
             flint_abort();
         }
 

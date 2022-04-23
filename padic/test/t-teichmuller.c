@@ -53,7 +53,8 @@ main(void)
             flint_printf("a = "), padic_print(a, ctx), flint_printf("\n");
             flint_printf("b = "), padic_print(b, ctx), flint_printf("\n");
             flint_printf("c = "), padic_print(c, ctx), flint_printf("\n");
-            abort();
+            fflush(stdout);
+            flint_abort();
         }
 
         padic_clear(a);
@@ -73,7 +74,7 @@ main(void)
 
         padic_t a, b, c;
 
-        prime = n_randprime(state, 2 + n_randint(state, FLINT_BITS - 2), 0);
+        prime = n_randprime(state, 2 + n_randint(state, SMALL_FMPZ_BITCOUNT_MAX), 0);
         fmpz_init_set_ui(p, prime);
         N = n_randint(state, PADIC_TEST_PREC_MAX);
         padic_ctx_init(ctx, p, FLINT_MAX(0, N-10), FLINT_MAX(0, N+10), PADIC_SERIES);
@@ -94,7 +95,8 @@ main(void)
             flint_printf("a = "), padic_print(a, ctx), flint_printf("\n");
             flint_printf("b = "), padic_print(b, ctx), flint_printf("\n");
             flint_printf("c = "), padic_print(c, ctx), flint_printf("\n");
-            abort();
+            fflush(stdout);
+            flint_abort();
         }
 
         padic_clear(a);

@@ -29,16 +29,12 @@ main(void)
     {
        fmpz_mpoly_ctx_t ctx;
        fmpz_mpoly_t f, g, h;
-       ordering_t ord;
        fmpz_t c;
-       slong nvars, len, coeff_bits, exp_bits;
+       slong len, coeff_bits, exp_bits;
 
        fmpz_init(c);
 
-       ord = mpoly_ordering_randtest(state);
-       nvars = n_randint(state, 20) + 1;
-
-       fmpz_mpoly_ctx_init(ctx, nvars, ord);
+       fmpz_mpoly_ctx_init_rand(ctx, state, 20);
 
        fmpz_mpoly_init(f, ctx);
        fmpz_mpoly_init(g, ctx);
@@ -65,6 +61,7 @@ main(void)
           {
              printf("FAIL\n");
              flint_printf("Check (f*a)/a = f\ni = %wd, j = %wd\n", i,j);
+             fflush(stdout);
              flint_abort();
           }
        }
@@ -81,16 +78,12 @@ main(void)
     {
        fmpz_mpoly_ctx_t ctx;
        fmpz_mpoly_t f, g, h;
-       ordering_t ord;
        fmpz_t c;
-       slong nvars, len, coeff_bits, exp_bits;
+       slong len, coeff_bits, exp_bits;
 
        fmpz_init(c);
 
-       ord = mpoly_ordering_randtest(state);
-       nvars = n_randint(state, 20) + 1;
-
-       fmpz_mpoly_ctx_init(ctx, nvars, ord);
+       fmpz_mpoly_ctx_init_rand(ctx, state, 20);
 
        fmpz_mpoly_init(f, ctx);
        fmpz_mpoly_init(g, ctx);
@@ -120,6 +113,7 @@ main(void)
           {
              printf("FAIL\n");
              flint_printf("Check aliasing\ni = %wd, j = %wd\n", i,j);
+             fflush(stdout);
              flint_abort();
           }
        }

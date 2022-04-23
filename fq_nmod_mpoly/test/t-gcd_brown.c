@@ -31,6 +31,7 @@ void gcd_check(
     {
         flint_printf("FAIL: check gcd can be computed\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -42,6 +43,7 @@ void gcd_check(
         {
             flint_printf("FAIL: check zero gcd\n");
             flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+            fflush(stdout);
             flint_abort();
         }
         goto cleanup;
@@ -51,6 +53,7 @@ void gcd_check(
     {
         flint_printf("FAIL: check gcd is monic\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -58,6 +61,7 @@ void gcd_check(
     {
         flint_printf("FAIL: check gcd divisor\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -66,6 +70,7 @@ void gcd_check(
     {
         flint_printf("FAIL: check divisibility\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -73,6 +78,7 @@ void gcd_check(
     {
         flint_printf("FAIL: check cofactor gcd can be computed\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -82,6 +88,7 @@ void gcd_check(
     {
         flint_printf("FAIL: check gcd of cofactors is one\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -106,7 +113,7 @@ main(void)
         fq_nmod_mpoly_ctx_t ctx;
         fq_nmod_mpoly_t a, b, t, g;
         slong len, len1, len2;
-        slong degbound;
+        slong n, degbound;
         flint_bitcnt_t pbits;
         slong deg;
 
@@ -124,7 +131,8 @@ main(void)
         len1 = n_randint(state, 150);
         len2 = n_randint(state, 150);
 
-        degbound = 1 + 50/ctx->minfo->nvars/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        degbound = 1 + 50/n/n;
 
         for (j = 0; j < 4; j++)
         {

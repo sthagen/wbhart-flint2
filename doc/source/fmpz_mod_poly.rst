@@ -369,7 +369,7 @@ Addition and subtraction
     Sets ``res`` to the negative of ``poly`` modulo `p`.
 
 
-Scalar multiplication
+Scalar multiplication and division
 --------------------------------------------------------------------------------
 
 
@@ -382,10 +382,9 @@ Scalar multiplication
 
     Sets ``res`` to ``poly`` multiplied by `x`.
 
+.. function:: void fmpz_mod_poly_scalar_addmul_fmpz(fmpz_mod_poly_t rop, const fmpz_mod_poly_t op, const fmpz_t x, const fmpz_mod_ctx_t ctx)
 
-Scalar division
---------------------------------------------------------------------------------
-
+    Adds to ``rop`` the product of ``op`` by the scalar ``x``.
 
 .. function:: void _fmpz_mod_poly_scalar_div_fmpz(fmpz *res, const fmpz *poly, slong len, const fmpz_t x, const fmpz_t p)
 
@@ -434,6 +433,12 @@ Multiplication
 .. function:: void fmpz_mod_poly_sqr(fmpz_mod_poly_t res, const fmpz_mod_poly_t poly, const fmpz_mod_ctx_t ctx)
 
     Computes ``res`` as the square of ``poly``.
+
+.. function:: void fmpz_mod_poly_mulhigh(fmpz_mod_poly_t res, const fmpz_mod_poly_t poly1, const fmpz_mod_poly_t poly2, slong start, const fmpz_mod_ctx_t ctx)
+
+    Computes the product of ``poly1`` and ``poly2`` and writes the
+    coefficients from ``start`` onwards into the high coefficients of
+    ``res``, the remaining coefficients being arbitrary.
 
 .. function:: void _fmpz_mod_poly_mulmod(fmpz * res, const fmpz * poly1, slong len1, const fmpz * poly2, slong len2, const fmpz * f, slong lenf, const fmpz_t p)
 
@@ -1691,6 +1696,50 @@ Composition
     sets `f(t) = g(h(t))`.
 
 
+
+Square roots
+--------------------------------------------------------------------------------
+
+The series expansions for `\sqrt{h}` and `1/\sqrt{h}` are defined
+by means of the generalised binomial theorem
+``h^r = (1+y)^r =
+\sum_{k=0}^{\infty} {r \choose k} y^k.``
+It is assumed that `h` has constant term `1` and that the coefficients
+`2^{-k}` exist in the coefficient ring (i.e. `2` must be invertible).
+
+.. function:: void _fmpz_mod_poly_invsqrt_series(fmpz * g, const fmpz * h, slong n, fmpz_mod_ctx_t mod)
+
+    Set the first `n` terms of `g` to the series expansion of `1/\sqrt{h}`.
+    It is assumed that `n > 0`, that `h` has constant term 1 and that `h`
+    is zero-padded as necessary to length `n`. Aliasing is not permitted.
+
+.. function:: void fmpz_mod_poly_invsqrt_series(fmpz_mod_poly_t g, const fmpz_mod_poly_t h, slong n, fmpz_ctx_t ctx)
+
+    Set `g` to the series expansion of `1/\sqrt{h}` to order `O(x^n)`.
+    It is assumed that `h` has constant term 1.
+
+.. function:: void _fmpz_mod_poly_sqrt_series(fmpz * g, const fmpz * h, slong n, fmpz_mod_ctx_t ctx)
+
+    Set the first `n` terms of `g` to the series expansion of `\sqrt{h}`.
+    It is assumed that `n > 0`, that `h` has constant term 1 and that `h`
+    is zero-padded as necessary to length `n`. Aliasing is not permitted.
+
+.. function:: void fmpz_mod_poly_sqrt_series(fmpz_mod_poly_t g, const fmpz_mod_poly_t h, slong n, fmpz_mod_ctx_t ctx)
+
+    Set `g` to the series expansion of `\sqrt{h}` to order `O(x^n)`.
+    It is assumed that `h` has constant term 1.
+
+.. function:: int _fmpz_mod_poly_sqrt(fmpz * s, const fmpz * p, slong n, fmpz_mod_ctx_t mod)
+
+    If ``(p, n)`` is a perfect square, sets ``(s, n / 2 + 1)``
+    to a square root of `p` and returns 1. Otherwise returns 0.
+
+.. function:: int fmpz_mod_poly_sqrt(fmpz_mod_poly_t s, const fmpz_mod_poly_t p, fmpz_mod_ctx_t mod)
+
+    If `p` is a perfect square, sets `s` to a square root of `p`
+    and returns 1. Otherwise returns 0.
+
+
 Modular composition
 --------------------------------------------------------------------------------
 
@@ -2013,6 +2062,27 @@ representation is ``"5*x^3+2*x+1"``.
 
     In case of success, returns a positive value.  In case of failure,
     returns a non-positive value.
+
+Inflation and deflation
+--------------------------------------------------------------------------------
+
+
+.. function:: void fmpz_mod_poly_inflate(fmpz_mod_poly_t result, const fmpz_mod_poly_t input, ulong inflation, const fmpz_mod_ctx_t ctx)
+
+    Sets ``result`` to the inflated polynomial `p(x^n)` where
+    `p` is given by ``input`` and `n` is given by ``inflation``.
+
+.. function:: void fmpz_mod_poly_deflate(fmpz_mod_poly_t result, const fmpz_mod_poly_t input, ulong deflation, const fmpz_mod_ctx_t ctx)
+
+    Sets ``result`` to the deflated polynomial `p(x^{1/n})` where
+    `p` is given by ``input`` and `n` is given by ``deflation``.
+    Requires `n > 0`.
+
+.. function:: ulong fmpz_mod_poly_deflation(const fmpz_mod_poly_t input, const fmpz_mod_ctx_t ctx)
+
+    Returns the largest integer by which ``input`` can be deflated.
+    As special cases, returns 0 if ``input`` is the zero polynomial
+    and 1 of ``input`` is a constant polynomial.
 
 Berlekamp-Massey Algorithm
 --------------------------------------------------------------------------------

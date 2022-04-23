@@ -604,7 +604,7 @@ void _fmpz_mpoly_mul_array_chunked_LEX(
     }
 
     /* whether the output coefficients are "small" */
-    small = Abits <= (FLINT_BITS - 2) && Bbits <= (FLINT_BITS - 2);
+    small = Abits <= (SMALL_FMPZ_BITCOUNT_MAX) && Bbits <= (SMALL_FMPZ_BITCOUNT_MAX);
 
     Pl = Al + Bl - 1;
     Plen = 0;
@@ -737,6 +737,7 @@ int _fmpz_mpoly_mul_array_LEX(
     int success;
     TMP_INIT;
 
+    FLINT_ASSERT(ctx->minfo->nvars > 0);
     FLINT_ASSERT(B->length != 0);
     FLINT_ASSERT(C->length != 0);
 
@@ -1136,7 +1137,7 @@ void _fmpz_mpoly_mul_array_chunked_DEG(
     FLINT_ASSERT(Pl == degb);
     Plen = 0;
 
-    if (Abits <= (FLINT_BITS - 2) && Bbits <= (FLINT_BITS - 2))
+    if (Abits <= (SMALL_FMPZ_BITCOUNT_MAX) && Bbits <= (SMALL_FMPZ_BITCOUNT_MAX))
     {
         ulong * coeff_array = (ulong *) TMP_ALLOC(3*array_size*sizeof(ulong));
         for (j = 0; j < 3*array_size; j++)
@@ -1254,6 +1255,7 @@ int _fmpz_mpoly_mul_array_DEG(
     ulong deg;
     int success;
 
+    FLINT_ASSERT(ctx->minfo->nvars > 0);
     FLINT_ASSERT(B->length != 0);
     FLINT_ASSERT(C->length != 0);
 
@@ -1338,9 +1340,9 @@ int fmpz_mpoly_mul_array(
         return 1;
     }
 
-    if (  1 != mpoly_words_per_exp(B->bits, ctx->minfo)
-       || 1 != mpoly_words_per_exp(C->bits, ctx->minfo)
-       )
+    if (ctx->minfo->nvars < 1 ||
+        1 != mpoly_words_per_exp(B->bits, ctx->minfo) ||
+        1 != mpoly_words_per_exp(C->bits, ctx->minfo))
     {
         return 0;
     }

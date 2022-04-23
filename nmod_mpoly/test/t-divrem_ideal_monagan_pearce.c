@@ -86,6 +86,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f*g/g = f\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -105,7 +106,6 @@ main(void)
         nmod_mpoly_ctx_t ctx;
         nmod_mpoly_t f, r, k1, k2;
         nmod_mpoly_struct * g, * q;
-        ordering_t ord;
         mp_limb_t modulus;
         slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2, num;
         nmod_mpoly_struct * qarr[5], * darr[5];
@@ -115,14 +115,11 @@ main(void)
         g = (nmod_mpoly_struct *) flint_malloc(num*sizeof(nmod_mpoly_struct));
         q = (nmod_mpoly_struct *) flint_malloc(num*sizeof(nmod_mpoly_struct));
 
-        ord = mpoly_ordering_randtest(state);
-
-        nvars = n_randint(state, 10) + 1;
-
         modulus = n_randint(state, FLINT_BITS - 1) + 1;
         modulus = n_randbits(state, modulus);
         modulus = n_nextprime(modulus, 1);
-        nmod_mpoly_ctx_init(ctx, nvars, ord, modulus);
+        nmod_mpoly_ctx_init_rand(ctx, state, 10, modulus);
+        nvars = ctx->minfo->nvars;
 
         for (w = 0; w < num; w++)
         {
@@ -142,9 +139,9 @@ main(void)
         len1 = n_randint(state, 20);
         len2 = n_randint(state, 10) + 1;
 
-        exp_bound = n_randint(state, 10/nvars + 1) + 2;
-        exp_bound1 = n_randint(state, 25/nvars + 1) + 2;
-        exp_bound2 = n_randint(state, 20/nvars + 1) + 1;
+        exp_bound = n_randint(state, 10/FLINT_MAX(WORD(1), nvars) + 1) + 2;
+        exp_bound1 = n_randint(state, 25/FLINT_MAX(WORD(1), nvars) + 1) + 2;
+        exp_bound2 = n_randint(state, 20/FLINT_MAX(WORD(1), nvars) + 1) + 1;
 
         for (j = 0; j < 4; j++)
         {
@@ -181,6 +178,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f = g1*q1 + ... + gn*qn + r for random polys\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -205,7 +203,6 @@ main(void)
         nmod_mpoly_ctx_t ctx;
         nmod_mpoly_t f, r, k1, k2;
         nmod_mpoly_struct * g, * q;
-        ordering_t ord;
         mp_limb_t modulus;
         slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2, num;
         nmod_mpoly_struct * qarr[5], * darr[5];
@@ -215,14 +212,11 @@ main(void)
         g = (nmod_mpoly_struct *) flint_malloc(num*sizeof(nmod_mpoly_struct));
         q = (nmod_mpoly_struct *) flint_malloc(num*sizeof(nmod_mpoly_struct));
 
-        ord = mpoly_ordering_randtest(state);
-
-        nvars = n_randint(state, 10) + 1;
-
         modulus = n_randint(state, FLINT_BITS - 1) + 1;
         modulus = n_randbits(state, modulus);
         modulus = n_nextprime(modulus, 1);
-        nmod_mpoly_ctx_init(ctx, nvars, ord, modulus);
+        nmod_mpoly_ctx_init_rand(ctx, state, 10, modulus);
+        nvars = ctx->minfo->nvars;
 
         for (w = 0; w < num; w++)
         {
@@ -242,9 +236,9 @@ main(void)
         len1 = n_randint(state, 20);
         len2 = n_randint(state, 10) + 1;
 
-        exp_bound = n_randint(state, 10/nvars + 1) + 2;
-        exp_bound1 = n_randint(state, 25/nvars + 1) + 2;
-        exp_bound2 = n_randint(state, 20/nvars + 1) + 1;
+        exp_bound = n_randint(state, 10/FLINT_MAX(WORD(1), nvars) + 1) + 2;
+        exp_bound1 = n_randint(state, 25/FLINT_MAX(WORD(1), nvars) + 1) + 2;
+        exp_bound2 = n_randint(state, 20/FLINT_MAX(WORD(1), nvars) + 1) + 1;
 
         for (j = 0; j < 4; j++)
         {
@@ -283,6 +277,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }

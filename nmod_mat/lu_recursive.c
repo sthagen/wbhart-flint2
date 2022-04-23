@@ -52,7 +52,8 @@ nmod_mat_lu_recursive(slong * P, nmod_mat_t A, int rank_check)
     m = A->r;
     n = A->c;
 
-    if (m < NMOD_MAT_LU_RECURSIVE_CUTOFF || n < NMOD_MAT_LU_RECURSIVE_CUTOFF)
+    /* main cutoffs are in nmod_mat_lu */
+    if (m <= 1 || n <= 1)
     {
         r1 = nmod_mat_lu_classical(P, A, rank_check);
         return r1;

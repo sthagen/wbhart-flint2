@@ -33,6 +33,11 @@ main(void)
         slong idx;
 
         fq_nmod_mpoly_ctx_init_rand(ctx, state, 20, FLINT_BITS, 10);
+        if (fq_nmod_mpoly_ctx_nvars(ctx) < 1)
+        {
+            fq_nmod_mpoly_ctx_clear(ctx);
+            continue;
+        }
 
         fq_nmod_mpoly_init(f, ctx);
         fq_nmod_mpoly_init(g, ctx);
@@ -87,6 +92,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check d(f*g) = df*g + f*dg\n"
                                                   "i = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -113,6 +119,11 @@ main(void)
         slong idx;
 
         fq_nmod_mpoly_ctx_init_rand(ctx, state, 20, FLINT_BITS, 2);
+        if (fq_nmod_mpoly_ctx_nvars(ctx) < 1)
+        {
+            fq_nmod_mpoly_ctx_clear(ctx);
+            continue;
+        }
 
         fq_nmod_mpoly_init(f, ctx);
         fq_nmod_mpoly_init(g, ctx);
@@ -167,6 +178,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check d(f*g) = df*g + f*dg with aliasing\n"
                                                    "i = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
         }

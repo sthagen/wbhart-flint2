@@ -33,6 +33,11 @@ main(void)
         slong idx;
 
         fmpz_mod_mpoly_ctx_init_rand_bits(ctx, state, 20, 200);
+        if (fmpz_mod_mpoly_ctx_nvars(ctx) < 1)
+        {
+            fmpz_mod_mpoly_ctx_clear(ctx);
+            continue;
+        }
 
         fmpz_mod_mpoly_init(f, ctx);
         fmpz_mod_mpoly_init(g, ctx);
@@ -84,7 +89,9 @@ main(void)
             {
                 flint_printf("FAIL: Check d(f*g) = df*g + f*dg\n");
                 flint_printf("i = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -111,6 +118,11 @@ main(void)
         slong idx;
 
         fmpz_mod_mpoly_ctx_init_rand_bits(ctx, state, 20, 200);
+        if (fmpz_mod_mpoly_ctx_nvars(ctx) < 1)
+        {
+            fmpz_mod_mpoly_ctx_clear(ctx);
+            continue;
+        }
 
         fmpz_mod_mpoly_init(f, ctx);
         fmpz_mod_mpoly_init(g, ctx);
@@ -162,6 +174,7 @@ main(void)
             {
                 flint_printf("FAIL: Check d(f*g) = df*g + f*dg with aliasing\n");
                 flint_printf("i = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
         }

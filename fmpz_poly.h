@@ -186,7 +186,13 @@ FLINT_DLL void _fmpz_poly_reverse(fmpz * res, const fmpz * poly, slong len, slon
 
 FLINT_DLL void fmpz_poly_reverse(fmpz_poly_t res, const fmpz_poly_t poly, slong n);
 
-FLINT_DLL ulong fmpz_poly_deflation(const fmpz_poly_t input);
+FLINT_DLL ulong _fmpz_poly_deflation(const fmpz* a, slong len);
+
+FMPZ_POLY_INLINE
+ulong fmpz_poly_deflation(const fmpz_poly_t input)
+{
+    return _fmpz_poly_deflation(input->coeffs, input->length);
+}
 
 FLINT_DLL void fmpz_poly_deflate(fmpz_poly_t result, const fmpz_poly_t input,
                                                               ulong deflation);
@@ -332,6 +338,12 @@ FLINT_DLL void fmpz_poly_scalar_mul_fmpz(fmpz_poly_t poly1,
 
 FLINT_DLL void fmpz_poly_scalar_addmul_fmpz(fmpz_poly_t poly1, 
                                    const fmpz_poly_t poly2, const fmpz_t x);
+
+FLINT_DLL void fmpz_poly_scalar_addmul_si(fmpz_poly_t poly1,
+                                   const fmpz_poly_t poly2, slong x);
+
+FLINT_DLL void fmpz_poly_scalar_addmul_ui(fmpz_poly_t poly1,
+                                   const fmpz_poly_t poly2, ulong x);
 
 FLINT_DLL void fmpz_poly_scalar_submul_fmpz(fmpz_poly_t poly1, 
                                    const fmpz_poly_t poly2, const fmpz_t x);
@@ -514,6 +526,10 @@ FLINT_DLL void fmpz_poly_mullow(fmpz_poly_t res,
 
 FLINT_DLL void fmpz_poly_mulhigh_n(fmpz_poly_t res, 
                   const fmpz_poly_t poly1, const fmpz_poly_t poly2, slong n);
+
+FLINT_DLL void _fmpz_poly_mulhigh(fmpz * res,
+                          const fmpz * poly1, slong len1,
+                                   const fmpz * poly2, slong len2, slong start);
 
 /* FFT precached multiplication **********************************************/
 
@@ -938,6 +954,10 @@ FLINT_DLL void _fmpz_poly_derivative(fmpz * rpoly, const fmpz * poly, slong len)
  
 FLINT_DLL void fmpz_poly_derivative(fmpz_poly_t res, const fmpz_poly_t poly);
 
+FLINT_DLL void _fmpz_poly_nth_derivative(fmpz * rpoly, const fmpz * poly, ulong n, slong len);
+
+FLINT_DLL void fmpz_poly_nth_derivative(fmpz_poly_t res, const fmpz_poly_t poly, ulong n);
+
 /*  Evaluation  **************************************************************/
 
 void 
@@ -1213,6 +1233,16 @@ void fmpz_poly_debug(const fmpz_poly_t poly)
     fflush(stdout);
 }
 
+/* Norms *********************************************************************/
+
+FMPZ_POLY_INLINE slong _fmpz_poly_hamming_weight(const fmpz * a, slong len)
+{
+    slong i, sum = 0;
+    for (i = 0; i < len; i++)
+        sum += !fmpz_is_zero(a + i);
+    return sum;
+}
+
 /*  CRT  ********************************************************************/
 
 FLINT_DLL void fmpz_poly_get_nmod_poly(nmod_poly_t res, const fmpz_poly_t poly);
@@ -1436,6 +1466,8 @@ FLINT_DLL void fmpz_poly_eta_qexp(fmpz_poly_t f, slong e, slong n);
 FLINT_DLL void _fmpz_poly_theta_qexp(fmpz * f, slong e, slong n);
 
 FLINT_DLL void fmpz_poly_theta_qexp(fmpz_poly_t f, slong e, slong n);
+
+FLINT_DLL void fmpz_poly_eulerian_polynomial(fmpz_poly_t poly, ulong n);
 
 #ifdef __cplusplus
 }

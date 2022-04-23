@@ -46,6 +46,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check fixed case 1\n");
+            fflush(stdout);
             flint_abort();
         }
 
@@ -58,6 +59,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check fixed case 2\n");
+            fflush(stdout);
             flint_abort();
         }
 
@@ -70,6 +72,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check fixed case 3\n");
+            fflush(stdout);
             flint_abort();
         }
 
@@ -134,6 +137,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f*(g + h) = f*g + f*h\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -153,24 +157,24 @@ main(void)
     {
         fmpz_mpoly_ctx_t ctx;
         fmpz_mpoly_t f, g, h;
-        slong len, len1, len2, nvars;
+        slong len, len1, len2, n;
         flint_bitcnt_t coeff_bits, exp_bound, exp_bound1, exp_bound2;
 
         fmpz_mpoly_ctx_init_rand(ctx, state, 4);
-        nvars = ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
 
         fmpz_mpoly_init(f, ctx);
         fmpz_mpoly_init(g, ctx);
         fmpz_mpoly_init(h, ctx);
 
-        exp_bound = 3 + n_randint(state, 1 + 100/nvars/nvars);
-        exp_bound1 = 3 + n_randint(state, 1 + 100/nvars/nvars);
-        exp_bound2 = 3 + n_randint(state, 1 + 100/nvars/nvars);
+        exp_bound = 3 + n_randint(state, 1 + 100/n/n);
+        exp_bound1 = 3 + n_randint(state, 1 + 100/n/n);
+        exp_bound2 = 3 + n_randint(state, 1 + 100/n/n);
 
         len = exp_bound + 1;
         len1 = exp_bound1 + 1;
         len2 = exp_bound2 + 1;
-        for (j = n_randint(state, nvars) + 2; j >= 0; j--)
+        for (j = n_randint(state, n) + 2; j >= 0; j--)
         {
             len *= exp_bound + 1;
             len1 *= exp_bound1 + 1;
@@ -200,6 +204,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing first arg\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -215,24 +220,24 @@ main(void)
     {
         fmpz_mpoly_ctx_t ctx;
         fmpz_mpoly_t f, g, h;
-        slong len, len1, len2, nvars;
+        slong len, len1, len2, n;
         flint_bitcnt_t coeff_bits, exp_bound, exp_bound1, exp_bound2;
 
         fmpz_mpoly_ctx_init_rand(ctx, state, 4);
-        nvars = ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
 
         fmpz_mpoly_init(f, ctx);
         fmpz_mpoly_init(g, ctx);
         fmpz_mpoly_init(h, ctx);
 
-        exp_bound = 3 + n_randint(state, 1 + 100/nvars/nvars);
-        exp_bound1 = 3 + n_randint(state, 1 + 100/nvars/nvars);
-        exp_bound2 = 3 + n_randint(state, 1 + 100/nvars/nvars);
+        exp_bound = 3 + n_randint(state, 1 + 100/n/n);
+        exp_bound1 = 3 + n_randint(state, 1 + 100/n/n);
+        exp_bound2 = 3 + n_randint(state, 1 + 100/n/n);
 
         len = exp_bound + 1;
         len1 = exp_bound1 + 1;
         len2 = exp_bound2 + 1;
-        for (j = n_randint(state, nvars) + 2; j >= 0; j--)
+        for (j = n_randint(state, n) + 2; j >= 0; j--)
         {
             len *= exp_bound + 1;
             len1 *= exp_bound1 + 1;
@@ -262,6 +267,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing second arg\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }

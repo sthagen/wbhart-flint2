@@ -23,19 +23,19 @@ fmpz_randm(fmpz_t f, flint_rand_t state, const fmpz_t m)
     flint_bitcnt_t bits = fmpz_bits(m);
     int sgn = fmpz_sgn(m);
 
-    if (bits <= FLINT_BITS - 2)
+    if (bits <= SMALL_FMPZ_BITCOUNT_MAX)
     {
         _fmpz_demote(f);
         *f =  (sgn >= 0) ? n_randint(state, *m) : - n_randint(state, -(*m));
     }
     else
     {
-        __mpz_struct *mpz_ptr = _fmpz_promote(f);
+        __mpz_struct * mf = _fmpz_promote(f);
 
         _flint_rand_init_gmp(state);
-        mpz_urandomm(mpz_ptr, state->gmp_state, COEFF_TO_PTR(*m));
+        mpz_urandomm(mf, state->gmp_state, COEFF_TO_PTR(*m));
         if (sgn < 0)
-            mpz_neg(mpz_ptr, mpz_ptr);
+            mpz_neg(mf, mf);
         _fmpz_demote_val(f);
     }
 }

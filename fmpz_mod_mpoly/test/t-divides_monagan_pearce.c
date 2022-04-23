@@ -69,6 +69,7 @@ main(void)
             {
                 flint_printf("FAIL: Check f*g/g = f sparse\n");
                 flint_printf("i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -77,6 +78,7 @@ main(void)
             {
                 flint_printf("FAIL: Check f*g/g = f sparse input modification\n");
                 flint_printf("i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -99,6 +101,7 @@ main(void)
         fmpz_mod_mpoly_t f, g, h, k;
         slong len, len1, len2;
         mp_limb_t max_bound, * exp_bound, * exp_bound1, * exp_bound2;
+        slong n;
 
         fmpz_mod_mpoly_ctx_init_rand_bits_prime(ctx, state, 6, 200);
 
@@ -111,7 +114,8 @@ main(void)
         len1 = n_randint(state, 100);
         len2 = n_randint(state, 100);
 
-        max_bound = 1 + 150/ctx->minfo->nvars/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        max_bound = 1 + 150/n/n;
         exp_bound = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
@@ -144,6 +148,7 @@ main(void)
             {
                 flint_printf("FAIL: Check f*g/g = f dense\n");
                 flint_printf("i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -167,6 +172,7 @@ main(void)
         slong len, len1, len2;
         mp_limb_t max_bound, * exp_bound, * exp_bound1, * exp_bound2;
         fmpz * shifts, * strides;
+        slong n;
 
         fmpz_mod_mpoly_ctx_init_rand_bits_prime(ctx, state, 6, 200);
 
@@ -179,7 +185,8 @@ main(void)
         len1 = n_randint(state, 50);
         len2 = n_randint(state, 50);
 
-        max_bound = 1 + 20/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        max_bound = 1 + 20/n;
         exp_bound = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
@@ -221,6 +228,7 @@ main(void)
             {
                 flint_printf("FAIL: Check divisibility of random polys\n");
                 flint_printf("i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -251,6 +259,7 @@ main(void)
         fmpz_mod_mpoly_t f, g, h, k;
         slong len, len1, len2;
         mp_limb_t max_bound, * exp_bound, * exp_bound1, * exp_bound2;
+        slong n;
 
         fmpz_mod_mpoly_ctx_init_rand_bits_prime(ctx, state, 6, 200);
 
@@ -263,7 +272,8 @@ main(void)
         len1 = n_randint(state, 100);
         len2 = n_randint(state, 100);
 
-        max_bound = 1 + 100/ctx->minfo->nvars/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        max_bound = 1 + 100/n/n;
         exp_bound = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
@@ -297,6 +307,7 @@ main(void)
             {
                 flint_printf("FAIL: Check f*g/g = f aliasing first\n");
                 flint_printf("i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -319,6 +330,7 @@ main(void)
         fmpz_mod_mpoly_t f, g, h, k;
         slong len, len1, len2;
         mp_limb_t max_bound, * exp_bound, * exp_bound1, * exp_bound2;
+        slong n;
 
         fmpz_mod_mpoly_ctx_init_rand_bits_prime(ctx, state, 6, 200);
 
@@ -331,7 +343,8 @@ main(void)
         len1 = n_randint(state, 100);
         len2 = n_randint(state, 100);
 
-        max_bound = 1 + 100/ctx->minfo->nvars/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        max_bound = 1 + 100/n/n;
         exp_bound = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
@@ -363,6 +376,7 @@ main(void)
             {
                 flint_printf("FAIL: Check f*g/g = f aliasing second\n");
                 flint_printf("i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }

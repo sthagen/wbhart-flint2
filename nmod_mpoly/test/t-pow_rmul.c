@@ -48,6 +48,26 @@ main(void)
     flint_printf("pow_rmul....");
     fflush(stdout);
 
+    {
+        nmod_mpoly_ctx_t ctx;
+        nmod_mpoly_t a, b;
+        nmod_mpoly_ctx_init(ctx, 20, ORD_LEX, 4);
+        nmod_mpoly_init(a, ctx);
+        nmod_mpoly_init(b, ctx);
+        nmod_mpoly_set_str_pretty(a, "1", NULL, ctx);
+        nmod_mpoly_set_str_pretty(b, "2 + 2*x1 + 2*x2 + 2*x3", NULL, ctx);
+        nmod_mpoly_pow_rmul(a, b, 3, ctx);
+        if (nmod_mpoly_is_zero(b, ctx) || !nmod_mpoly_is_zero(a, ctx))
+        {
+            flint_printf("FAIL: Check simple example\n");
+            fflush(stdout);
+            flint_abort();
+        }
+        nmod_mpoly_clear(a, ctx);
+        nmod_mpoly_clear(b, ctx);
+        nmod_mpoly_ctx_clear(ctx);
+    }
+
     for (i = 0; i < 10 * flint_test_multiplier(); i++)
     {
         nmod_mpoly_ctx_t ctx;
@@ -75,7 +95,7 @@ main(void)
         exp_bits2 = n_randint(state, 20) + 2;
 
         pow_bound = 250/(len1+1);
-        pow_bound = pow_bound/ctx->minfo->nvars;
+        pow_bound = pow_bound/FLINT_MAX(WORD(1), ctx->minfo->nvars);
         pow_bound = FLINT_MAX(pow_bound, UWORD(5));
 
         for (j = 0; j < 10; j++)
@@ -98,6 +118,7 @@ main(void)
             {
                 flint_printf("FAIL: Check pow_ui against pow_naive\n");
                 flint_printf("i = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -108,6 +129,7 @@ main(void)
             {
                 flint_printf("FAIL: Check aliasing\n");
                 flint_printf("i = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
         }

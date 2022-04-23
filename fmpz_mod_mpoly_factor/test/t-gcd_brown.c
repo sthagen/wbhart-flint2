@@ -138,6 +138,7 @@ void gcd_check(
 
         flint_printf("FAIL: Check gcd can be computed\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -147,6 +148,7 @@ void gcd_check(
         {
             flint_printf("FAIL: Check divisor of gcd\n");
             flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+            fflush(stdout);
             flint_abort();
         }
     }
@@ -157,6 +159,7 @@ void gcd_check(
         {
             flint_printf("FAIL: Check zero gcd\n");
             flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+            fflush(stdout);
             flint_abort();
         }
         goto cleanup;
@@ -166,6 +169,7 @@ void gcd_check(
     {
         flint_printf("FAIL: Check gcd has positive lc\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -176,6 +180,7 @@ void gcd_check(
     {
         flint_printf("FAIL: Check divisibility\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -189,6 +194,7 @@ void gcd_check(
 
         flint_printf("FAIL: Check gcd of cofactors can be computed\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -196,6 +202,7 @@ void gcd_check(
     {
         flint_printf("FAIL: Check gcd of cofactors is one\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -221,7 +228,7 @@ main(void)
         fmpz_mod_mpoly_ctx_t ctx;
         fmpz_mod_mpoly_t a, b, g, t;
         slong len, len1, len2;
-        slong degbound;
+        slong n, degbound;
 
         fmpz_mod_mpoly_ctx_init_rand_bits_prime(ctx, state, 5, 150);
 
@@ -234,7 +241,8 @@ main(void)
         len1 = n_randint(state, 60);
         len2 = n_randint(state, 60);
 
-        degbound = 1 + 50/ctx->minfo->nvars/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        degbound = 1 + 50/n/n;
 
         for (j = 0; j < 4; j++)
         {

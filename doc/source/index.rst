@@ -89,6 +89,7 @@ Integers mod n
 .. toctree::
    :maxdepth: 1
 
+   nmod.rst
    nmod_vec.rst
    nmod_mat.rst
    nmod_poly.rst
@@ -174,7 +175,6 @@ C++ Interface
    :maxdepth: 1
 
    flintxx.rst
-   flintxx_functions.rst
 
 References
 ----------------

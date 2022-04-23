@@ -27,18 +27,14 @@ main(void)
     {
         nmod_mpoly_ctx_t ctx;
         nmod_mpoly_t f, g, h, k, r;
-        ordering_t ord;
         mp_limb_t modulus;
-        slong nvars, len, len1, len2;
+        slong len, len1, len2;
         flint_bitcnt_t exp_bits, exp_bits1, exp_bits2;
-
-        ord = mpoly_ordering_randtest(state);
-        nvars = n_randint(state, 10) + 1;
 
         modulus = n_randint(state, FLINT_BITS - 1) + 1;
         modulus = n_randbits(state, modulus);
         modulus = n_nextprime(modulus, 1);
-        nmod_mpoly_ctx_init(ctx, nvars, ord, modulus);
+        nmod_mpoly_ctx_init_rand(ctx, state, 10, modulus);
 
         nmod_mpoly_init(f, ctx);
         nmod_mpoly_init(g, ctx);
@@ -76,6 +72,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f*g/g = f\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -94,18 +91,14 @@ main(void)
     {
         nmod_mpoly_ctx_t ctx;
         nmod_mpoly_t f, g, h, k, r;
-        ordering_t ord;
         mp_limb_t modulus;
         slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2;
-
-        ord = mpoly_ordering_randtest(state);
-
-        nvars = n_randint(state, 10) + 1;
 
         modulus = n_randint(state, FLINT_BITS - 1) + 1;
         modulus = n_randbits(state, modulus);
         modulus = n_nextprime(modulus, 1);
-        nmod_mpoly_ctx_init(ctx, nvars, ord, modulus);
+        nmod_mpoly_ctx_init_rand(ctx, state, 10, modulus);
+        nvars = ctx->minfo->nvars;
 
         nmod_mpoly_init(f, ctx);
         nmod_mpoly_init(g, ctx);
@@ -117,9 +110,9 @@ main(void)
         len1 = n_randint(state, 20);
         len2 = n_randint(state, 10) + 1;
 
-        exp_bound = n_randint(state, 50/nvars) + 1;
-        exp_bound1 = n_randint(state, 50/nvars) + 1;
-        exp_bound2 = n_randint(state, 50/nvars) + 1;
+        exp_bound = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
+        exp_bound1 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
+        exp_bound2 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
 
         for (j = 0; j < 4; j++)
         {
@@ -145,6 +138,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f = g*q + r for random polys\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -162,17 +156,14 @@ main(void)
     {
         nmod_mpoly_ctx_t ctx;
         nmod_mpoly_t f, g, h, r1, r2;
-        ordering_t ord;
         mp_limb_t modulus;
         slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2;
-
-        ord = mpoly_ordering_randtest(state);
-        nvars = n_randint(state, 10) + 1;
 
         modulus = n_randint(state, FLINT_BITS - 1) + 1;
         modulus = n_randbits(state, modulus);
         modulus = n_nextprime(modulus, 1);
-        nmod_mpoly_ctx_init(ctx, nvars, ord, modulus);
+        nmod_mpoly_ctx_init_rand(ctx, state, 10, modulus);
+        nvars = ctx->minfo->nvars;
 
         nmod_mpoly_init(f, ctx);
         nmod_mpoly_init(g, ctx);
@@ -184,9 +175,9 @@ main(void)
         len1 = n_randint(state, 10);
         len2 = n_randint(state, 10) + 1;
 
-        exp_bound = n_randint(state, 50/nvars) + 1;
-        exp_bound1 = n_randint(state, 50/nvars) + 1;
-        exp_bound2 = n_randint(state, 50/nvars) + 1;
+        exp_bound = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
+        exp_bound1 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
+        exp_bound2 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
 
         for (j = 0; j < 4; j++)
         {
@@ -213,6 +204,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing of quotient with first argument\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -230,17 +222,14 @@ main(void)
     {
         nmod_mpoly_ctx_t ctx;
         nmod_mpoly_t f, g, h, r1, r2;
-        ordering_t ord;
         mp_limb_t modulus;
         slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2;
-
-        ord = mpoly_ordering_randtest(state);
-        nvars = n_randint(state, 10) + 1;
 
         modulus = n_randint(state, FLINT_BITS - 1) + 1;
         modulus = n_randbits(state, modulus);
         modulus = n_nextprime(modulus, 1);
-        nmod_mpoly_ctx_init(ctx, nvars, ord, modulus);
+        nmod_mpoly_ctx_init_rand(ctx, state, 10, modulus);
+        nvars = ctx->minfo->nvars;
 
         nmod_mpoly_init(f, ctx);
         nmod_mpoly_init(g, ctx);
@@ -252,9 +241,9 @@ main(void)
         len1 = n_randint(state, 10);
         len2 = n_randint(state, 10) + 1;
 
-        exp_bound = n_randint(state, 50/nvars) + 1;
-        exp_bound1 = n_randint(state, 50/nvars) + 1;
-        exp_bound2 = n_randint(state, 50/nvars) + 1;
+        exp_bound = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
+        exp_bound1 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
+        exp_bound2 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
 
         for (j = 0; j < 4; j++)
         {
@@ -280,6 +269,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing of quotient with second argument\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -297,17 +287,14 @@ main(void)
     {
         nmod_mpoly_ctx_t ctx;
         nmod_mpoly_t f, g, h, k, r1;
-        ordering_t ord;
         mp_limb_t modulus;
         slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2;
-
-        ord = mpoly_ordering_randtest(state);
-        nvars = n_randint(state, 10) + 1;
 
         modulus = n_randint(state, FLINT_BITS - 1) + 1;
         modulus = n_randbits(state, modulus);
         modulus = n_nextprime(modulus, 1);
-        nmod_mpoly_ctx_init(ctx, nvars, ord, modulus);
+        nmod_mpoly_ctx_init_rand(ctx, state, 10, modulus);
+        nvars = ctx->minfo->nvars;
 
         nmod_mpoly_init(f, ctx);
         nmod_mpoly_init(g, ctx);
@@ -319,9 +306,9 @@ main(void)
         len1 = n_randint(state, 10);
         len2 = n_randint(state, 10) + 1;
 
-        exp_bound = n_randint(state, 50/nvars) + 1;
-        exp_bound1 = n_randint(state, 50/nvars) + 1;
-        exp_bound2 = n_randint(state, 50/nvars) + 1;
+        exp_bound = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
+        exp_bound1 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
+        exp_bound2 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
 
         for (j = 0; j < 4; j++)
         {
@@ -351,6 +338,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing of remainder with first argument\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -368,17 +356,14 @@ main(void)
     {
         nmod_mpoly_ctx_t ctx;
         nmod_mpoly_t f, g, h, k, r1;
-        ordering_t ord;
         mp_limb_t modulus;
         slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2;
-
-        ord = mpoly_ordering_randtest(state);
-        nvars = n_randint(state, 10) + 1;
 
         modulus = n_randint(state, FLINT_BITS - 1) + 1;
         modulus = n_randbits(state, modulus);
         modulus = n_nextprime(modulus, 1);
-        nmod_mpoly_ctx_init(ctx, nvars, ord, modulus);
+        nmod_mpoly_ctx_init_rand(ctx, state, 10, modulus);
+        nvars = ctx->minfo->nvars;
 
         nmod_mpoly_init(f, ctx);
         nmod_mpoly_init(g, ctx);
@@ -390,9 +375,9 @@ main(void)
         len1 = n_randint(state, 10);
         len2 = n_randint(state, 10) + 1;
 
-        exp_bound = n_randint(state, 50/nvars) + 1;
-        exp_bound1 = n_randint(state, 50/nvars) + 1;
-        exp_bound2 = n_randint(state, 50/nvars) + 1;
+        exp_bound = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
+        exp_bound1 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
+        exp_bound2 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars)) + 1;
 
         for (j = 0; j < 4; j++)
         {
@@ -421,6 +406,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing of remainder with second argument\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }

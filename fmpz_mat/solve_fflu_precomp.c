@@ -50,8 +50,8 @@ fmpz_mat_solve_fflu_precomp(fmpz_mat_t X,
     ulong FLINT_SET_BUT_UNUSED(rem);
     slong fbits = fmpz_mat_max_bits(FFLU);
     slong bbits = fmpz_mat_max_bits(B);
-    int small = FLINT_ABS(fbits) <= FLINT_BITS - 2
-             && FLINT_ABS(bbits) <= FLINT_BITS - 2;
+    int small = FLINT_ABS(fbits) <= SMALL_FMPZ_BITCOUNT_MAX
+             && FLINT_ABS(bbits) <= SMALL_FMPZ_BITCOUNT_MAX;
     int sgn, dsgn = 0, den1 = 0, work_to_do, flag = 1;
     fmpz_mat_t Xx;
     fmpz * diag;
@@ -97,8 +97,12 @@ fmpz_mat_solve_fflu_precomp(fmpz_mat_t X,
                 {
                     uden = FLINT_ABS((slong)(diag[i - 1]));
                     dsgn = 0 > (slong)(diag[i - 1]);
-                    count_leading_zeros(norm, uden);
-                    invert_limb(dinv, uden << norm);
+                    if (uden != 0) /* see #1029 */
+                    {
+                       count_leading_zeros(norm, uden);
+                       invert_limb(dinv, uden << norm);
+                    } else
+                       dinv = 0;
                     den1 = fmpz_is_one(diag + i - 1);
                 }
 
@@ -226,8 +230,12 @@ fmpz_mat_solve_fflu_precomp(fmpz_mat_t X,
 
                     uden = FLINT_ABS((slong)(diag[l]));
                     dsgn = 0 > (slong)(diag[l]);
-                    count_leading_zeros(norm, uden);
-                    invert_limb(dinv, uden << norm);
+                    if (uden != 0) /* see #1029 */
+                    {
+                       count_leading_zeros(norm, uden);
+                       invert_limb(dinv, uden << norm);
+                    } else
+                       dinv = 0;
 
                     for (j = piv[l] + 1; j < c; j++)
                     {

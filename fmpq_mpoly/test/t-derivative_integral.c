@@ -28,14 +28,12 @@ main(void)
     {
         fmpq_mpoly_ctx_t ctx;
         fmpq_mpoly_t f, g, h, fp, gp, hp, t1, t2;
-        ordering_t ord;
         slong nvars, len, len1, len2;
         slong idx, coeff_bits, exp_bits, exp_bits1, exp_bits2;
 
-        ord = mpoly_ordering_randtest(state);
         nvars = n_randint(state, 20) + 1;
 
-        fmpq_mpoly_ctx_init(ctx, nvars, ord);
+        fmpq_mpoly_ctx_init(ctx, nvars, mpoly_ordering_randtest(state));
 
         fmpq_mpoly_init(f, ctx);
         fmpq_mpoly_init(g, ctx);
@@ -91,7 +89,9 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check d(f*g) = df*g + f*dg\n");
                 flint_printf("i = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -112,14 +112,12 @@ main(void)
     {
         fmpq_mpoly_ctx_t ctx;
         fmpq_mpoly_t f, g, h, fp, gp, t1, t2;
-        ordering_t ord;
         slong nvars, len, len1, len2;
         slong idx, coeff_bits, exp_bits, exp_bits1, exp_bits2;
 
-        ord = mpoly_ordering_randtest(state);
         nvars = n_randint(state, 20) + 1;
 
-        fmpq_mpoly_ctx_init(ctx, nvars, ord);
+        fmpq_mpoly_ctx_init(ctx, nvars, mpoly_ordering_randtest(state));
 
         fmpq_mpoly_init(f, ctx);
         fmpq_mpoly_init(g, ctx);
@@ -176,6 +174,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check d(f*g) = df*g + f*dg with aliasing\n");
                 flint_printf("i = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
        }
@@ -194,14 +193,12 @@ main(void)
     {
         fmpq_mpoly_ctx_t ctx;
         fmpq_mpoly_t f, g, f1;
-        ordering_t ord;
         slong nvars, len, len1, len2;
         slong idx, coeff_bits, exp_bits, exp_bits1, exp_bits2;
 
-        ord = mpoly_ordering_randtest(state);
         nvars = n_randint(state, 20) + 1;
 
-        fmpq_mpoly_ctx_init(ctx, nvars, ord);
+        fmpq_mpoly_ctx_init(ctx, nvars, mpoly_ordering_randtest(state));
 
         fmpq_mpoly_init(f, ctx);
         fmpq_mpoly_init(g, ctx);
@@ -242,6 +239,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check d(int(f)) = f with aliasing\n");
                 flint_printf("i = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
         }

@@ -46,6 +46,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check example\n");
+            fflush(stdout);
             flint_abort();
         }
 
@@ -102,6 +103,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f*g/g = f\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -113,6 +115,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check f*g/g = f aliasing dividend\n"
                                                    "i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -123,6 +126,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check f*g/g = f aliasing divisor\n"
                                                    "i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -145,7 +149,7 @@ main(void)
         slong len, len1, len2;
         mp_limb_t max_bound, * exp_bound, * exp_bound1, * exp_bound2;
         fmpz * shifts, * strides;
-        slong nvars;
+        slong n, nvars;
 
         modulus = n_randint(state, FLINT_BITS - 1) + 1;
         modulus = n_randbits(state, modulus);
@@ -163,7 +167,8 @@ main(void)
         len1 = n_randint(state, 20);
         len2 = n_randint(state, 10) + 1;
 
-        max_bound = 1 + 400/nvars/nvars;
+        n = FLINT_MAX(WORD(1), nvars);
+        max_bound = 1 + 400/n/n;
         exp_bound = (mp_limb_t *) flint_malloc(nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(nvars*sizeof(mp_limb_t));
@@ -207,6 +212,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check f = g*q + r for random polys\n"
                                                    "i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -217,6 +223,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check div matches divrem\n"
                                                    "i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -228,6 +235,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check div matches divrem aliasing dividend\n"
                                                    "i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
             
@@ -238,6 +246,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check div matches divrem aliasing divisor\n"
                                                    "i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }

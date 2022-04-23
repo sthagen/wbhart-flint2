@@ -46,6 +46,7 @@ main(void)
 	     {
 	        flint_printf("FAIL\n");
             flint_printf("Check example1: sqr\n");
+	        fflush(stdout);
 	        flint_abort();
 	     }
 
@@ -55,6 +56,7 @@ main(void)
         {
             flint_printf("FAIL\n");
             flint_printf("Check example1\n");
+            fflush(stdout);
             flint_abort();
         }
 
@@ -67,6 +69,7 @@ main(void)
         {
             flint_printf("FAIL\n");
             flint_printf("Check example 2\n");
+            fflush(stdout);
             flint_abort();
         }
 
@@ -123,6 +126,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check sqrt(f^2) returns 1\n");
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -130,6 +134,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check sqrt(f^2) = +-f\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -140,6 +145,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check sqrt(f^2) returns 1: nocheck\n");
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -147,6 +153,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check sqrt(f)^2 = +-f\ni = %wd, j = %wd: nocheck\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -199,6 +206,9 @@ main(void)
             fmpz_mpoly_mul(g, f, f, ctx);
             fmpz_mpoly_assert_canonical(g, ctx);
 
+            if (nvars < 1)
+                continue;
+
             fmpz_mpoly_gen(x, n_randint(state, nvars), ctx);
             fmpz_mpoly_mul(k, x, x, ctx);
             fmpz_mpoly_add(k, k, x, ctx);
@@ -214,6 +224,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check nonsquare returns 0\n");
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -221,6 +232,7 @@ main(void)
             {
                printf("FAIL\n");
                flint_printf("Nonsquare returns 0 sqrt\n");
+               fflush(stdout);
                flint_abort();
             }
         }
@@ -272,6 +284,7 @@ main(void)
                 {
                     flint_printf("FAIL\n");
                     flint_printf("Check sqrt(random)\n");
+                    fflush(stdout);
                     flint_abort();
                 }
             }
@@ -279,6 +292,7 @@ main(void)
             {
                flint_printf("FAIL\n");
                flint_printf("Nonsquare returns 0 sqrt\n");
+               fflush(stdout);
                flint_abort();
             }
         }
@@ -335,6 +349,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing\n");
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -345,6 +360,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing: nocheck\n");
+                fflush(stdout);
                 flint_abort();
             }
         }

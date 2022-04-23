@@ -48,7 +48,8 @@ main(void)
             flint_printf("FAIL:\n");
             fmpz_poly_print(a), flint_printf("\n\n");
             fmpz_poly_print(b), flint_printf("\n\n");
-            abort();
+            fflush(stdout);
+            flint_abort();
         }
 
         fmpz_poly_clear(a);
@@ -74,7 +75,8 @@ main(void)
             flint_printf("FAIL:\n");
             fmpz_poly_print(a), flint_printf("\n\n");
             fmpz_poly_print(b), flint_printf("\n\n");
-            abort();
+            fflush(stdout);
+            flint_abort();
         }
 
         fmpz_poly_clear(a);
@@ -85,8 +87,8 @@ main(void)
     for (i = 0; i < 1000 * flint_test_multiplier(); i++)
     {
         fmpz_poly_t a, b, c;
-        slong n1 = (slong) n_randbits(state, (FLINT_BITS - 2) / 2);
-        slong n2 = (slong) n_randbits(state, (FLINT_BITS - 2) / 2);
+        slong n1 = (slong) n_randbits(state, (SMALL_FMPZ_BITCOUNT_MAX) / 2);
+        slong n2 = (slong) n_randbits(state, (SMALL_FMPZ_BITCOUNT_MAX) / 2);
         if (n_randint(state, 2))
             n1 = -n1;
         if (n_randint(state, 2))
@@ -108,7 +110,8 @@ main(void)
             fmpz_poly_print(a), flint_printf("\n\n");
             fmpz_poly_print(b), flint_printf("\n\n");
             fmpz_poly_print(c), flint_printf("\n\n");
-            abort();
+            fflush(stdout);
+            flint_abort();
         }
 
         fmpz_poly_clear(a);

@@ -90,6 +90,7 @@ void _divides_check(
     if (divides != ndivides)
     {
         flint_printf("check divisibility i = %wd, j = %wd, %s\n", ii, jj, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -104,6 +105,7 @@ void _divides_check(
     if (!nmod_mpoly_equal(Q, Qcheck, ctx))
     {
         flint_printf("check quotient i = %wd, j = %wd, %s\n", ii, jj, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -188,6 +190,11 @@ main(void)
         modulus = n_nextprime(modulus, 1);
 
         nmod_mpoly_ctx_init_rand(ctx, state, 20, modulus);
+        if (ctx->minfo->nvars < 1)
+        {
+            nmod_mpoly_ctx_clear(ctx);
+            continue;
+        }
 
         nmod_mpoly_init(a, ctx);
         nmod_mpoly_init(b, ctx);

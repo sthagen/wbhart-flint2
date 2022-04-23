@@ -27,14 +27,10 @@ main(void)
     {
         fmpq_mpoly_ctx_t ctx;
         fmpq_mpoly_t f, g, h, k, r;
-        ordering_t ord;
-        slong nvars, len, len1, len2;
+        slong len, len1, len2;
         slong coeff_bits, exp_bits, exp_bits1, exp_bits2;
 
-        ord = mpoly_ordering_randtest(state);
-        nvars = n_randint(state, 10) + 1;
-
-        fmpq_mpoly_ctx_init(ctx, nvars, ord);
+        fmpq_mpoly_ctx_init_rand(ctx, state, 10);
 
         fmpq_mpoly_init(f, ctx);
         fmpq_mpoly_init(g, ctx);
@@ -74,6 +70,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f*g/g = f\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -90,15 +87,11 @@ main(void)
     {
         fmpq_mpoly_ctx_t ctx;
         fmpq_mpoly_t f, g, h, k, r;
-        ordering_t ord;
-        slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2;
+        slong len, len1, len2, exp_bound, exp_bound1, exp_bound2;
         slong coeff_bits;
+        slong n;
 
-        ord = mpoly_ordering_randtest(state);
-
-        nvars = n_randint(state, 10) + 1;
-
-        fmpq_mpoly_ctx_init(ctx, nvars, ord);
+        fmpq_mpoly_ctx_init_rand(ctx, state, 10);
 
         fmpq_mpoly_init(f, ctx);
         fmpq_mpoly_init(g, ctx);
@@ -110,9 +103,10 @@ main(void)
         len1 = n_randint(state, 20);
         len2 = n_randint(state, 20) + 1;
 
-        exp_bound = n_randint(state, 25/nvars + 1) + 2;
-        exp_bound1 = n_randint(state, 35/nvars + 1) + 4;
-        exp_bound2 = n_randint(state, 30/nvars + 1) + 2;
+        n = FLINT_MAX(WORD(1), fmpq_mpoly_ctx_nvars(ctx));
+        exp_bound = n_randint(state, 25/n + 1) + 2;
+        exp_bound1 = n_randint(state, 35/n + 1) + 4;
+        exp_bound2 = n_randint(state, 30/n + 1) + 2;
 
         coeff_bits = n_randint(state, 70);
 
@@ -140,6 +134,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f = g*q + r for random polys\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
        }
@@ -156,15 +151,11 @@ main(void)
     {
         fmpq_mpoly_ctx_t ctx;
         fmpq_mpoly_t f, g, h, k, r;
-        ordering_t ord;
-        slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2;
+        slong len, len1, len2, exp_bound, exp_bound1, exp_bound2;
         slong coeff_bits;
+        slong n;
 
-        ord = mpoly_ordering_randtest(state);
-
-        nvars = n_randint(state, 10) + 1;
-
-        fmpq_mpoly_ctx_init(ctx, nvars, ord);
+        fmpq_mpoly_ctx_init_rand(ctx, state, 10);
 
         fmpq_mpoly_init(f, ctx);
         fmpq_mpoly_init(g, ctx);
@@ -176,9 +167,10 @@ main(void)
         len1 = n_randint(state, 20);
         len2 = n_randint(state, 20) + 1;
 
-        exp_bound = n_randint(state, 35/nvars + 1) + 2;
-        exp_bound1 = n_randint(state, 35/nvars + 1) + 4;
-        exp_bound2 = n_randint(state, 30/nvars + 1) + 2;
+        n = FLINT_MAX(WORD(1), fmpq_mpoly_ctx_nvars(ctx));
+        exp_bound = n_randint(state, 35/n + 1) + 2;
+        exp_bound1 = n_randint(state, 35/n + 1) + 4;
+        exp_bound2 = n_randint(state, 30/n + 1) + 2;
 
         coeff_bits = n_randint(state, 70);
 
@@ -207,6 +199,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f = g*q + r for random polys, alias quotient and numerator\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
        }
@@ -223,15 +216,11 @@ main(void)
     {
         fmpq_mpoly_ctx_t ctx;
         fmpq_mpoly_t f, g, h, k, r;
-        ordering_t ord;
-        slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2;
+        slong len, len1, len2, exp_bound, exp_bound1, exp_bound2;
         slong coeff_bits;
+        slong n;
 
-        ord = mpoly_ordering_randtest(state);
-
-        nvars = n_randint(state, 10) + 1;
-
-        fmpq_mpoly_ctx_init(ctx, nvars, ord);
+        fmpq_mpoly_ctx_init_rand(ctx, state, 10);
 
         fmpq_mpoly_init(f, ctx);
         fmpq_mpoly_init(g, ctx);
@@ -243,9 +232,10 @@ main(void)
         len1 = n_randint(state, 20);
         len2 = n_randint(state, 20) + 1;
 
-        exp_bound = n_randint(state, 25/nvars + 1) + 2;
-        exp_bound1 = n_randint(state, 35/nvars + 1) + 4;
-        exp_bound2 = n_randint(state, 30/nvars + 1) + 2;
+        n = FLINT_MAX(WORD(1), fmpq_mpoly_ctx_nvars(ctx));
+        exp_bound = n_randint(state, 25/n + 1) + 2;
+        exp_bound1 = n_randint(state, 35/n + 1) + 4;
+        exp_bound2 = n_randint(state, 30/n + 1) + 2;
 
         coeff_bits = n_randint(state, 70);
 
@@ -274,6 +264,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f = g*q + r for random polys, alias quotient and numerator\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
        }
@@ -291,15 +282,11 @@ main(void)
     {
         fmpq_mpoly_ctx_t ctx;
         fmpq_mpoly_t f, g, h, k, r;
-        ordering_t ord;
-        slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2;
+        slong len, len1, len2, exp_bound, exp_bound1, exp_bound2;
         slong coeff_bits;
+        slong n;
 
-        ord = mpoly_ordering_randtest(state);
-
-        nvars = n_randint(state, 10) + 1;
-
-        fmpq_mpoly_ctx_init(ctx, nvars, ord);
+        fmpq_mpoly_ctx_init_rand(ctx, state, 10);
 
         fmpq_mpoly_init(f, ctx);
         fmpq_mpoly_init(g, ctx);
@@ -311,9 +298,10 @@ main(void)
         len1 = n_randint(state, 20);
         len2 = n_randint(state, 20) + 1;
 
-        exp_bound = n_randint(state, 25/nvars + 1) + 2;
-        exp_bound1 = n_randint(state, 35/nvars + 1) + 4;
-        exp_bound2 = n_randint(state, 30/nvars + 1) + 2;
+        n = FLINT_MAX(WORD(1), fmpq_mpoly_ctx_nvars(ctx));
+        exp_bound = n_randint(state, 25/n + 1) + 2;
+        exp_bound1 = n_randint(state, 35/n + 1) + 4;
+        exp_bound2 = n_randint(state, 30/n + 1) + 2;
 
         coeff_bits = n_randint(state, 70);
 
@@ -342,6 +330,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f = g*q + r for random polys, alias quotient and numerator\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
        }
@@ -358,15 +347,11 @@ main(void)
     {
         fmpq_mpoly_ctx_t ctx;
         fmpq_mpoly_t f, g, h, k, r;
-        ordering_t ord;
-        slong nvars, len, len1, len2, exp_bound, exp_bound1, exp_bound2;
+        slong len, len1, len2, exp_bound, exp_bound1, exp_bound2;
         slong coeff_bits;
+        slong n;
 
-        ord = mpoly_ordering_randtest(state);
-
-        nvars = n_randint(state, 10) + 1;
-
-        fmpq_mpoly_ctx_init(ctx, nvars, ord);
+        fmpq_mpoly_ctx_init_rand(ctx, state, 10);
 
         fmpq_mpoly_init(f, ctx);
         fmpq_mpoly_init(g, ctx);
@@ -378,9 +363,10 @@ main(void)
         len1 = n_randint(state, 20);
         len2 = n_randint(state, 20) + 1;
 
-        exp_bound = n_randint(state, 25/nvars + 1) + 2;
-        exp_bound1 = n_randint(state, 35/nvars + 1) + 4;
-        exp_bound2 = n_randint(state, 30/nvars + 1) + 2;
+        n = FLINT_MAX(WORD(1), fmpq_mpoly_ctx_nvars(ctx));
+        exp_bound = n_randint(state, 25/n + 1) + 2;
+        exp_bound1 = n_randint(state, 35/n + 1) + 4;
+        exp_bound2 = n_randint(state, 30/n + 1) + 2;
 
         coeff_bits = n_randint(state, 70);
 
@@ -409,6 +395,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f = g*q + r for random polys, alias quotient and numerator\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
        }

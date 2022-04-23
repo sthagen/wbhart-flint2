@@ -33,7 +33,7 @@ main(void)
         fmpz_t a, b;
 
         fmpz_init(a);
-        fmpz_randtest(a, state, FLINT_BITS - 2);
+        fmpz_randtest(a, state, SMALL_FMPZ_BITCOUNT_MAX);
         fmpz_init_set(b, a);
 
         result = fmpz_equal(a, b);
@@ -42,7 +42,8 @@ main(void)
             flint_printf("FAIL:\n\n");
             flint_printf("a = "), fmpz_print(a), flint_printf("\n");
             flint_printf("b = "), fmpz_print(b), flint_printf("\n");
-            abort();
+            fflush(stdout);
+            flint_abort();
         }
 
         fmpz_clear(a);
@@ -64,7 +65,8 @@ main(void)
             flint_printf("FAIL:\n\n");
             flint_printf("a = "), fmpz_print(a), flint_printf("\n");
             flint_printf("b = "), fmpz_print(b), flint_printf("\n");
-            abort();
+            fflush(stdout);
+            flint_abort();
         }
 
         fmpz_clear(a);

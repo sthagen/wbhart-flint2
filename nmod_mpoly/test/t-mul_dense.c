@@ -30,6 +30,7 @@ main(void)
         slong len, len1, len2;
         slong max_bound, exp_bound, exp_bound1, exp_bound2;
         mp_limb_t modulus;
+        slong n;
 
         modulus = n_randint(state, FLINT_BITS - 1) + 1;
         modulus = n_randbits(state, modulus);
@@ -46,7 +47,8 @@ main(void)
         len1 = n_randint(state, 200);
         len2 = n_randint(state, 200);
 
-        max_bound = 1 + 100/ctx->minfo->nvars/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        max_bound = 1 + 100/n/n;
         exp_bound = UWORD(1) << (FLINT_BITS - 1);
         exp_bound1 = n_randint(state, max_bound) + 1;
         exp_bound2 = n_randint(state, max_bound) + 1;
@@ -70,6 +72,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check mul_dense matches mul_johnson\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -89,6 +92,7 @@ main(void)
         slong len, len1, len2;
         slong max_bound, exp_bound, exp_bound1, exp_bound2;
         mp_limb_t modulus;
+        slong n;
 
         modulus = n_randint(state, FLINT_BITS - 1) + 1;
         modulus = n_randbits(state, modulus);
@@ -104,7 +108,8 @@ main(void)
         len1 = n_randint(state, 200);
         len2 = n_randint(state, 200);
 
-        max_bound = 1 + 100/ctx->minfo->nvars/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        max_bound = 1 + 100/n/n;
         exp_bound = UWORD(1) << (FLINT_BITS - 1);
         exp_bound1 = n_randint(state, max_bound) + 1;
         exp_bound2 = n_randint(state, max_bound) + 1;
@@ -127,6 +132,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing first argument\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -145,6 +151,7 @@ main(void)
         slong len, len1, len2;
         slong max_bound, exp_bound, exp_bound1, exp_bound2;
         mp_limb_t modulus;
+        slong n;
 
         modulus = n_randint(state, FLINT_BITS - 1) + 1;
         modulus = n_randbits(state, modulus);
@@ -160,7 +167,8 @@ main(void)
         len1 = n_randint(state, 200);
         len2 = n_randint(state, 200);
 
-        max_bound = 1 + 100/ctx->minfo->nvars/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        max_bound = 1 + 100/n/n;
         exp_bound = UWORD(1) << (FLINT_BITS - 1);
         exp_bound1 = n_randint(state, max_bound) + 1;
         exp_bound2 = n_randint(state, max_bound) + 1;
@@ -183,6 +191,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing first argument\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }

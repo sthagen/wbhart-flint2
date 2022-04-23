@@ -133,15 +133,8 @@ static int _try_dense_univar(
     Bdeg = Bexps[NB*0 + 0] & maskB;
     Cdeg = Cexps[NC*0 + 0] & maskC;
 
-    if (z_mul_checked(&BClen, Blen, Clen))
-    {
-        if (z_add_checked(&Adeg, Bdeg, Cdeg))
-            return 0;
-    }
-    else
-    {
-        Adeg = Bdeg + Cdeg;
-    }
+    if (z_mul_checked(&BClen, Blen, Clen) || z_add_checked(&Adeg, Bdeg, Cdeg))
+        return 0;
 
     if (Adeg > WORD_MAX/FLINT_BITS)
         return 0;
@@ -229,6 +222,8 @@ void fmpz_mpoly_mul(
         fmpz_mpoly_mul_monomial(A, B, C, ctx);
         return;
     }
+
+    FLINT_ASSERT(nvars > 0);
 
     if (nvars == 1 && B->bits <= FLINT_BITS && C->bits <= FLINT_BITS)
     {

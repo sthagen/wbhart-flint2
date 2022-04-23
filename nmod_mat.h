@@ -129,13 +129,30 @@ FLINT_DLL void nmod_mat_randtril(nmod_mat_t mat, flint_rand_t state, int unit);
 FLINT_DLL void nmod_mat_randtriu(nmod_mat_t mat, flint_rand_t state, int unit);
 
 
-FLINT_DLL void nmod_mat_print_pretty(const nmod_mat_t mat);
+FLINT_DLL int nmod_mat_fprint_pretty(FILE* file, const nmod_mat_t mat);
+
+NMOD_MAT_INLINE void nmod_mat_print_pretty(const nmod_mat_t mat)
+{
+    nmod_mat_fprint_pretty(stdout, mat);
+}
+
+NMOD_MAT_INLINE int nmod_mat_print(const nmod_mat_t mat)
+{
+    return nmod_mat_fprint_pretty(stdout, mat);
+}
+
+NMOD_MAT_INLINE int nmod_mat_fprint(FILE* f, const nmod_mat_t mat)
+{
+    return nmod_mat_fprint_pretty(f, mat);
+}
 
 FLINT_DLL int nmod_mat_equal(const nmod_mat_t mat1, const nmod_mat_t mat2);
 
 FLINT_DLL void nmod_mat_zero(nmod_mat_t mat);
 
 FLINT_DLL int nmod_mat_is_zero(const nmod_mat_t mat);
+
+FLINT_DLL int nmod_mat_is_one(const nmod_mat_t mat);
 
 NMOD_MAT_INLINE
 int nmod_mat_is_zero_row(const nmod_mat_t mat, slong i)
@@ -352,6 +369,7 @@ FLINT_DLL void nmod_mat_solve_triu_classical(nmod_mat_t X, const nmod_mat_t U, c
 
 FLINT_DLL slong nmod_mat_lu(slong * P, nmod_mat_t A, int rank_check);
 FLINT_DLL slong nmod_mat_lu_classical(slong * P, nmod_mat_t A, int rank_check);
+FLINT_DLL slong nmod_mat_lu_classical_delayed(slong * P, nmod_mat_t A, int rank_check);
 FLINT_DLL slong nmod_mat_lu_recursive(slong * P, nmod_mat_t A, int rank_check);
 
 /* Nonsingular solving */
@@ -409,9 +427,6 @@ FLINT_DLL void nmod_mat_similarity(nmod_mat_t M, slong r, ulong d);
 /* Cutoff between classical and recursive triangular solving */
 #define NMOD_MAT_SOLVE_TRI_ROWS_CUTOFF 64
 #define NMOD_MAT_SOLVE_TRI_COLS_CUTOFF 64
-
-/* Cutoff between classical and recursive LU decomposition */
-#define NMOD_MAT_LU_RECURSIVE_CUTOFF 4
 
 /*
    Suggested initial modulus size for multimodular algorithms. This should

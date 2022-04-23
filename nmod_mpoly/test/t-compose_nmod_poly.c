@@ -52,6 +52,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check non-example 1\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -65,6 +66,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check example 2\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -72,6 +74,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check example 2 equality\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -105,9 +108,9 @@ main(void)
         nmod_mpoly_init(f, ctx1);
         nmod_poly_init(g, modulus);
 
-        len1 = n_randint(state, 50/nvars1 + 1);
+        len1 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars1) + 1);
         len2 = n_randint(state, 100);
-        exp_bound1 = n_randint(state, 200/nvars1 + 2) + 1;
+        exp_bound1 = n_randint(state, 200/FLINT_MAX(WORD(1), nvars1) + 2) + 1;
 
         nmod_mpoly_randtest_bound(f, state, len1, exp_bound1, ctx1);
 
@@ -135,6 +138,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check composition success\ni: %wd\n", i);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -145,6 +149,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check composition and evalall commute\ni: %wd\n", i);
+                fflush(stdout);
                 flint_abort();
             }
         }

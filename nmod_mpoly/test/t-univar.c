@@ -33,7 +33,7 @@ main(void)
         flint_bitcnt_t exp_bits1, exp_bits2, bits;
         mp_limb_t modulus;
 
-        modulus = n_randint(state, FLINT_BITS - 2) + 2;
+        modulus = n_randint(state, SMALL_FMPZ_BITCOUNT_MAX) + 2;
         modulus = n_randbits(state, modulus);
         nmod_mpoly_ctx_init_rand(ctx, state, 20, modulus);
         nmod_mpoly_init(f, ctx);
@@ -62,6 +62,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check mpoly -> mpoly_univar -> mpoly\ni: %wd  j: %wd\n",i,j);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -72,6 +73,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check mpoly -> mpoly_univar -> mpoly with bits\ni: %wd  j: %wd\n",i,j);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -92,6 +94,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check construction\ni: %wd  j: %wd\n",i,j);
+                fflush(stdout);
                 flint_abort();
             }
         }

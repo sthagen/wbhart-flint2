@@ -53,6 +53,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check non-example 1\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -65,6 +66,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check non-example 2\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -77,6 +79,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check example 3\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -151,6 +154,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check composition success with generators\n"
                                                      "i: %wd, j: %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -161,6 +165,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check composition with generators\n"
                                                      "i: %wd, j: %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -228,6 +233,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check composition success\ni: %wd\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -239,6 +245,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check composition with identity\ni: %wd\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -283,9 +290,9 @@ main(void)
         nmod_mpoly_init(g1, ctx2);
         nmod_mpoly_init(g2, ctx2);
 
-        len1 = n_randint(state, 50/nvars1 + 1);
-        len2 = n_randint(state, 10/nvars2 + 2);
-        exp_bound1 = n_randint(state, 12/nvars1 + 1) + 2;
+        len1 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars1) + 1);
+        len2 = n_randint(state, 10/FLINT_MAX(WORD(1), nvars2) + 2);
+        exp_bound1 = n_randint(state, 12/FLINT_MAX(WORD(1), nvars1) + 1) + 2;
         exp_bits2 = n_randint(state, 200) + 1;
 
         nmod_mpoly_randtest_bound(f, state, len1, exp_bound1, ctx1);
@@ -320,6 +327,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check composition success\ni: %wd\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -334,6 +342,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check composition and evalall commute\ni: %wd\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -403,6 +412,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check composition success\ni: %wd\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -415,6 +425,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check composition with constants matches evalall\ni: %wd\n", i);
+            fflush(stdout);
             flint_abort();
         }
 

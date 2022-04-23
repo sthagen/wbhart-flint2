@@ -46,6 +46,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check example1\n");
+            fflush(stdout);
             flint_abort();
         }
 
@@ -101,6 +102,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f*g/g = f\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -120,6 +122,7 @@ main(void)
         mp_limb_t max_bound, * exp_bound, * exp_bound1, * exp_bound2;
         flint_bitcnt_t coeff_bits;
         fmpz * shifts, * strides;
+        slong n;
 
         fmpz_mpoly_ctx_init_rand(ctx, state, 10);
 
@@ -135,7 +138,8 @@ main(void)
 
         coeff_bits = n_randint(state, 70);
 
-        max_bound = 1 + 500/ctx->minfo->nvars/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        max_bound = 1 + 500/n/n;
         exp_bound = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
@@ -175,6 +179,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check output agrees with divrem\n"
                                                    "i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -207,6 +212,7 @@ main(void)
         mp_limb_t max_bound, * exp_bound, * exp_bound1, * exp_bound2;
         flint_bitcnt_t coeff_bits;
         fmpz * shifts, * strides;
+        slong n;
 
         fmpz_mpoly_ctx_init_rand(ctx, state, 10);
 
@@ -221,7 +227,8 @@ main(void)
 
         coeff_bits = n_randint(state, 70);
 
-        max_bound = 1 + 500/ctx->minfo->nvars/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        max_bound = 1 + 500/n/n;
         exp_bound = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
@@ -260,6 +267,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check aliasing of quotient with first argument\n"
                                                    "i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -291,6 +299,7 @@ main(void)
         mp_limb_t max_bound, * exp_bound, * exp_bound1, * exp_bound2;
         flint_bitcnt_t coeff_bits;
         fmpz * shifts, * strides;
+        slong n;
 
         fmpz_mpoly_ctx_init_rand(ctx, state, 10);
 
@@ -305,7 +314,8 @@ main(void)
 
         coeff_bits = n_randint(state, 70);
 
-        max_bound = 1 + 500/ctx->minfo->nvars/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        max_bound = 1 + 500/n/n;
         exp_bound = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(ctx->minfo->nvars*sizeof(mp_limb_t));
@@ -344,6 +354,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check aliasing of quotient with second argument\n"
                                                    "i = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }

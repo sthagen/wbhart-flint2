@@ -65,13 +65,16 @@ typedef struct
    void * address;
 } fmpz_block_header_s;
 
+/* The largest bit count for an fmpz to be small */
+#define SMALL_FMPZ_BITCOUNT_MAX (FLINT_BITS - 2)
+
 /* maximum positive value a small coefficient can have */
-#define COEFF_MAX ((WORD(1) << (FLINT_BITS - 2)) - WORD(1))
+#define COEFF_MAX ((WORD(1) << SMALL_FMPZ_BITCOUNT_MAX) - WORD(1))
 
 /* minimum negative value a small coefficient can have */
-#define COEFF_MIN (-((WORD(1) << (FLINT_BITS - 2)) - WORD(1)))
+#define COEFF_MIN (-((WORD(1) << SMALL_FMPZ_BITCOUNT_MAX) - WORD(1)))
 
-#define COEFF_IS_MPZ(x) (((x) >> (FLINT_BITS - 2)) == WORD(1))  /* is x a pointer not an integer */
+#define COEFF_IS_MPZ(x) (((x) >> SMALL_FMPZ_BITCOUNT_MAX) == WORD(1))  /* is x a pointer not an integer */
 
 FLINT_DLL __mpz_struct * _fmpz_new_mpz(void);
 
@@ -294,7 +297,20 @@ fmpz_neg_uiui(fmpz_t f, mp_limb_t hi, mp_limb_t lo)
 
 FLINT_DLL void fmpz_get_signed_uiui(ulong * hi, ulong * lo, const fmpz_t x);
 
-FLINT_DLL void fmpz_set_signed_uiui(fmpz_t r, ulong hi, ulong lo);
+FMPZ_INLINE void
+fmpz_set_signed_uiui(fmpz_t r, ulong hi, ulong lo)
+{
+    if (((slong) hi) < 0)
+    {
+        hi = -hi - (lo != 0);
+        lo = -lo;
+        fmpz_neg_uiui(r, hi, lo);
+    }
+    else
+    {
+        fmpz_set_uiui(r, hi, lo);
+    }
+}
 
 FLINT_DLL void fmpz_set_signed_uiuiui(fmpz_t r, ulong hi, ulong mid, ulong lo);
 
@@ -482,6 +498,8 @@ FLINT_DLL void fmpz_mul(fmpz_t f, const fmpz_t g, const fmpz_t h);
 
 FLINT_DLL void fmpz_mul_2exp(fmpz_t f, const fmpz_t g, ulong exp);
 
+FLINT_DLL void fmpz_one_2exp(fmpz_t f, ulong exp);
+
 FLINT_DLL void fmpz_add_ui(fmpz_t f, const fmpz_t g, ulong x);
 
 FLINT_DLL void fmpz_sub_ui(fmpz_t f, const fmpz_t g, ulong x);
@@ -608,7 +626,13 @@ FLINT_DLL void fmpz_sqrtrem(fmpz_t f, fmpz_t r, const fmpz_t g);
 
 FLINT_DLL ulong fmpz_fdiv_ui(const fmpz_t g, ulong h);
 
-FLINT_DLL ulong fmpz_mod_ui(fmpz_t f, const fmpz_t g, ulong h);
+FMPZ_INLINE ulong
+fmpz_mod_ui(fmpz_t f, const fmpz_t g, ulong h)
+{
+    h = fmpz_fdiv_ui(g, h);
+    fmpz_set_ui(f, h);
+    return h;
+}
 
 FLINT_DLL void fmpz_mod(fmpz_t f, const fmpz_t g, const fmpz_t h);
 
@@ -627,6 +651,7 @@ fmpz_negmod(fmpz_t r, const fmpz_t a, const fmpz_t mod)
 }
 
 FLINT_DLL void fmpz_gcd(fmpz_t f, const fmpz_t g, const fmpz_t h);
+FLINT_DLL void fmpz_gcd_ui(fmpz_t res, const fmpz_t a, ulong b);
 FLINT_DLL void fmpz_gcd3(fmpz_t f, const fmpz_t a, const fmpz_t b, const fmpz_t c);
 
 FLINT_DLL void fmpz_lcm(fmpz_t f, const fmpz_t g, const fmpz_t h);

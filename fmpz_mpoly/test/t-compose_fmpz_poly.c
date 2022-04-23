@@ -52,6 +52,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check non-example 1\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -65,6 +66,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check example 2\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -74,6 +76,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check example 2 equality\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -109,9 +112,9 @@ main(void)
         fmpz_init(fe);
         fmpz_init(ge);
 
-        len1 = n_randint(state, 50/nvars1 + 1);
+        len1 = n_randint(state, 50/FLINT_MAX(WORD(1), nvars1) + 1);
         len2 = n_randint(state, 40);
-        exp_bound1 = n_randint(state, 200/nvars1 + 2) + 1;
+        exp_bound1 = n_randint(state, 200/FLINT_MAX(WORD(1), nvars1) + 2) + 1;
         coeff_bits = n_randint(state, 100) + 1;
         coeff_bits2 = n_randint(state, 10) + 1;
 
@@ -145,6 +148,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check evaluation success\ni: %wd\n", i);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -154,6 +158,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check composition and evalall commute\ni: %wd\n", i);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -206,7 +211,7 @@ main(void)
         fmpz_init(fe);
 
         len1 = n_randint(state, 50);
-        exp_bound1 = n_randint(state, 200/nvars1 + 2) + 1;
+        exp_bound1 = n_randint(state, 200/FLINT_MAX(WORD(1), nvars1) + 2) + 1;
         coeff_bits = n_randint(state, 100) + 1;
 
         fmpz_mpoly_randtest_bound(f, state, len1, coeff_bits, exp_bound1, ctx1);
@@ -238,6 +243,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check evaluation success\ni: %wd\n", i);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -247,6 +253,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check composition with constants matches evalall\ni: %wd\n", i);
+                fflush(stdout);
                 flint_abort();
             }
             fmpz_poly_clear(t);
@@ -329,6 +336,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check evaluation success\ni: %wd\n", i);
+                fflush(stdout);
                 flint_abort();
             }
 
@@ -338,6 +346,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check multiprecision composition with constants matches evalall\ni: %wd\n", i);
+                fflush(stdout);
                 flint_abort();
             }
             fmpz_poly_clear(t);

@@ -20,7 +20,7 @@
 void
 fmpz_randbits(fmpz_t f, flint_rand_t state, flint_bitcnt_t bits)
 {
-    if (bits <= FLINT_BITS - 2)
+    if (bits <= SMALL_FMPZ_BITCOUNT_MAX)
     {
         _fmpz_demote(f);
         *f = n_randbits(state, bits);
@@ -29,13 +29,13 @@ fmpz_randbits(fmpz_t f, flint_rand_t state, flint_bitcnt_t bits)
     }
     else
     {
-        __mpz_struct *mpz_ptr = _fmpz_promote(f);
+        __mpz_struct *mf = _fmpz_promote(f);
         _flint_rand_init_gmp(state);
-        mpz_urandomb(mpz_ptr, state->gmp_state, bits);
-        mpz_setbit(mpz_ptr, bits - 1);
+        mpz_urandomb(mf, state->gmp_state, bits);
+        mpz_setbit(mf, bits - 1);
 
         if (n_randint(state, 2))
-            mpz_neg(mpz_ptr, mpz_ptr);
+            mpz_neg(mf, mf);
 
         _fmpz_demote_val(f);
     }

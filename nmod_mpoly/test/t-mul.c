@@ -35,7 +35,7 @@ main(void)
         flint_bitcnt_t exp_bits, exp_bits1, exp_bits2;
         mp_limb_t modulus;
 
-        modulus = n_randint(state, FLINT_BITS - 2) + 2;
+        modulus = n_randint(state, SMALL_FMPZ_BITCOUNT_MAX) + 2;
         modulus = n_randbits(state, modulus);
         nmod_mpoly_ctx_init_rand(ctx, state, 5, modulus);
 
@@ -80,6 +80,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f*(g + h) = f*g + f*h with bit bound\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -99,27 +100,28 @@ main(void)
     {
         nmod_mpoly_ctx_t ctx;
         nmod_mpoly_t f, g, h;
-        slong len, len1, len2, nvars;
+        slong len, len1, len2;
         flint_bitcnt_t exp_bound, exp_bound1, exp_bound2;
         mp_limb_t modulus;
+        slong n;
 
-        modulus = n_randint(state, FLINT_BITS - 2) + 2;
+        modulus = n_randint(state, SMALL_FMPZ_BITCOUNT_MAX) + 2;
         modulus = n_randbits(state, modulus);
         nmod_mpoly_ctx_init_rand(ctx, state, 4, modulus);
-        nvars = ctx->minfo->nvars;
 
         nmod_mpoly_init(f, ctx);
         nmod_mpoly_init(g, ctx);
         nmod_mpoly_init(h, ctx);
 
-        exp_bound = 3 + n_randint(state, 1 + 100/nvars/nvars);
-        exp_bound1 = 3 + n_randint(state, 1 + 100/nvars/nvars);
-        exp_bound2 = 3 + n_randint(state, 1 + 100/nvars/nvars);
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        exp_bound = 3 + n_randint(state, 1 + 100/n/n);
+        exp_bound1 = 3 + n_randint(state, 1 + 100/n/n);
+        exp_bound2 = 3 + n_randint(state, 1 + 100/n/n);
 
         len = exp_bound + 1;
         len1 = exp_bound1 + 1;
         len2 = exp_bound2 + 1;
-        for (j = n_randint(state, nvars) + 2; j >= 0; j--)
+        for (j = n_randint(state, n) + 2; j >= 0; j--)
         {
             len *= exp_bound + 1;
             len1 *= exp_bound1 + 1;
@@ -146,6 +148,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing first arg\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -161,27 +164,28 @@ main(void)
     {
         nmod_mpoly_ctx_t ctx;
         nmod_mpoly_t f, g, h;
-        slong len, len1, len2, nvars;
+        slong len, len1, len2;
         flint_bitcnt_t exp_bound, exp_bound1, exp_bound2;
         mp_limb_t modulus;
+        slong n;
 
-        modulus = n_randint(state, FLINT_BITS - 2) + 2;
+        modulus = n_randint(state, SMALL_FMPZ_BITCOUNT_MAX) + 2;
         modulus = n_randbits(state, modulus);
         nmod_mpoly_ctx_init_rand(ctx, state, 4, modulus);
-        nvars = ctx->minfo->nvars;
 
         nmod_mpoly_init(f, ctx);
         nmod_mpoly_init(g, ctx);
         nmod_mpoly_init(h, ctx);
 
-        exp_bound = 3 + n_randint(state, 1 + 100/nvars/nvars);
-        exp_bound1 = 3 + n_randint(state, 1 + 100/nvars/nvars);
-        exp_bound2 = 3 + n_randint(state, 1 + 100/nvars/nvars);
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        exp_bound = 3 + n_randint(state, 1 + 100/n/n);
+        exp_bound1 = 3 + n_randint(state, 1 + 100/n/n);
+        exp_bound2 = 3 + n_randint(state, 1 + 100/n/n);
 
         len = exp_bound + 1;
         len1 = exp_bound1 + 1;
         len2 = exp_bound2 + 1;
-        for (j = n_randint(state, nvars) + 2; j >= 0; j--)
+        for (j = n_randint(state, n) + 2; j >= 0; j--)
         {
             len *= exp_bound + 1;
             len1 *= exp_bound1 + 1;
@@ -209,6 +213,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check aliasing second arg\ni = %wd, j = %wd\n", i ,j);
+                fflush(stdout);
                 flint_abort();
             }
         }

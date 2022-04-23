@@ -412,6 +412,10 @@ Scalar absolute value, multiplication and division
 
     Sets ``poly1`` to ``poly2`` times ``2^exp``.
 
+.. function:: void fmpz_poly_scalar_addmul_si(fmpz_poly_t poly1, const fmpz_poly_t poly2, slong x)
+
+.. function:: void fmpz_poly_scalar_addmul_ui(fmpz_poly_t poly1, const fmpz_poly_t poly2, ulong x)
+
 .. function:: void fmpz_poly_scalar_addmul_fmpz(fmpz_poly_t poly1, const fmpz_poly_t poly2, const fmpz_t x)
 
     Sets ``poly1`` to ``poly1 + x * poly2``.
@@ -737,6 +741,15 @@ Multiplication
     of the product of ``poly1`` and ``poly2``, assuming the latter are 
     precisely `n` coefficients in length, zero padded if necessary.  The 
     remaining `n - 1` coefficients may be arbitrary.
+
+.. function:: void _fmpz_poly_mulhigh(fmpz * res, const fmpz * poly1, slong len1, const fmpz * poly2, slong len2, slong start)
+
+    Sets all but the low `n` coefficients of `res` to the corresponding
+    coefficients of the product of `poly1` of length `len1` and `poly2` of
+    length `len2`, the remaining coefficients being arbitrary. It is assumed
+    that `len1 >= len2 > 0` and that `0 < n < len1 + len2 - 1`. Aliasing of
+    inputs is not permitted.
+
 
 FFT precached multiplication
 --------------------------------------------------------------------------------
@@ -2081,6 +2094,16 @@ Derivative
 
     Sets ``res`` to the derivative of ``poly``.
 
+.. function:: void _fmpz_poly_nth_derivative(fmpz * rpoly, const fmpz * poly, ulong n, slong len)
+
+    Sets ``(rpoly, len - n)`` to the nth derivative of ``(poly, len)``.  
+    Also handles the cases where ``len <= n`` correctly. 
+    Supports aliasing of ``rpoly`` and ``poly``.
+    
+.. function:: void fmpz_poly_nth_derivative(fmpz_poly_t res, const fmpz_poly_t poly, ulong n)
+
+    Sets ``res`` to the nth derivative of ``poly``.
+
 
 Evaluation
 --------------------------------------------------------------------------------
@@ -3334,6 +3357,35 @@ Fibonacci polynomials
 
     Sets ``poly`` to the `n`-th Fibonacci polynomial.
     The coefficients are calculated using a hypergeometric recurrence.
+
+
+Eulerian numbers and polynomials
+--------------------------------------------------------------------------------
+
+Eulerian numbers are the coefficients to the Eulerian polynomials
+
+.. math ::
+
+    A_n(x) = \sum_{m = 0}^{n} A(n, m) x^m,
+
+where the Eulerian polynomials are defined by the exponential generating
+function
+
+.. math ::
+
+    \frac{x - 1}{x - e^{(x - 1) t}}
+    = \sum_{n = 0}^{\infty} A_n(x) \frac{t^n}{n!}.
+
+The Eulerian numbers can be expressed explicitly via the formula
+.. math ::
+    A(n, m) = \sum_{k = 0}^{m + 1} (-1)^k \binom{n + 1}{k} (m + 1 - k)^n.
+
+Note: Not to be confused with Euler numbers and polynomials.
+
+.. function:: void arith_eulerian_polynomial(fmpz_poly_t res, ulong n)
+
+    Sets ``res`` to the Eulerian polynomial `A_n(x)`, where we define
+    `A_0(x) = 1`. The polynomial is calculated via a recursive relation.
 
 
 Modular forms and q-series

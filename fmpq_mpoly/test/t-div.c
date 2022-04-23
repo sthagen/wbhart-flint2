@@ -46,6 +46,7 @@ main(void)
         {
             printf("FAIL\n");
             flint_printf("Check example\n");
+            fflush(stdout);
             flint_abort();
         }
 
@@ -100,6 +101,7 @@ main(void)
             {
                 printf("FAIL\n");
                 flint_printf("Check f*g/g = f\ni=%wd j=%wd\n",i,j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -137,7 +139,7 @@ main(void)
 
         coeff_bits = n_randint(state, 70);
 
-        max_bound = 1 + 400/nvars/nvars;
+        max_bound = 1 + 400/FLINT_MAX(WORD(1), nvars)/FLINT_MAX(WORD(1), nvars);
         exp_bound = (mp_limb_t *) flint_malloc(nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(nvars*sizeof(mp_limb_t));
@@ -178,6 +180,7 @@ main(void)
                 printf("FAIL\n");                   
                 flint_printf("Check output agrees with divrem\n"
                                                    "i = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -227,7 +230,7 @@ main(void)
 
         coeff_bits = n_randint(state, 70);
 
-        max_bound = 1 + 400/nvars/nvars;
+        max_bound = 1 + 400/FLINT_MAX(WORD(1), nvars)/FLINT_MAX(WORD(1), nvars);
         exp_bound = (mp_limb_t *) flint_malloc(nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(nvars*sizeof(mp_limb_t));
@@ -267,6 +270,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check aliasing of quotient with first argument\n"
                                                    "i = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -315,7 +319,7 @@ main(void)
 
         coeff_bits = n_randint(state, 70);
 
-        max_bound = 1 + 400/nvars/nvars;
+        max_bound = 1 + 400/FLINT_MAX(WORD(1), nvars)/FLINT_MAX(WORD(1), nvars);
         exp_bound = (mp_limb_t *) flint_malloc(nvars*sizeof(mp_limb_t));
         exp_bound1 = (mp_limb_t *) flint_malloc(nvars*sizeof(mp_limb_t));
         exp_bound2 = (mp_limb_t *) flint_malloc(nvars*sizeof(mp_limb_t));
@@ -355,6 +359,7 @@ main(void)
                 printf("FAIL\n");
                 flint_printf("Check aliasing of quotient with second argument\n"
                                                    "i = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
         }

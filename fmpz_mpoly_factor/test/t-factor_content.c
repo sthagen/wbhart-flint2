@@ -26,6 +26,7 @@ void check_content(const fmpz_mpoly_t p, const fmpz_mpoly_ctx_t ctx)
     if (!fmpz_mpoly_factor_content(g, p, ctx))
     {
         flint_printf("FAIL:\ncheck factorization could be computed\n");
+        fflush(stdout);
         flint_abort();
     }
 
@@ -34,6 +35,7 @@ void check_content(const fmpz_mpoly_t p, const fmpz_mpoly_ctx_t ctx)
         if (g->poly[i].length < 1 || fmpz_sgn(g->poly[i].coeffs + 0) < 0)
         {
             flint_printf("FAIL:\nfactorization is not unit normal\n");
+            fflush(stdout);
             flint_abort();
         }
     }
@@ -42,6 +44,7 @@ void check_content(const fmpz_mpoly_t p, const fmpz_mpoly_ctx_t ctx)
     if (!fmpz_mpoly_equal(q, p, ctx))
     {
         flint_printf("FAIL:\nfactorization does not match original polynomial\n");
+        fflush(stdout);
         flint_abort();
     }
 
@@ -54,6 +57,7 @@ void check_content(const fmpz_mpoly_t p, const fmpz_mpoly_ctx_t ctx)
                 if (!fmpz_mpoly_is_gen(g->poly + i, -1, ctx))
                 {
                     flint_printf("FAIL:\nmonomial is bad\n");
+                    fflush(stdout);
                     flint_abort();
                 }
             }
@@ -62,6 +66,7 @@ void check_content(const fmpz_mpoly_t p, const fmpz_mpoly_ctx_t ctx)
                 if (!fmpz_mpoly_content_vars(q, g->poly + i, &v, 1, ctx))
                 {
                     flint_printf("FAIL:\ncheck content could be computed\n");
+                    fflush(stdout);
                     flint_abort();
                 }
 
@@ -69,6 +74,7 @@ void check_content(const fmpz_mpoly_t p, const fmpz_mpoly_ctx_t ctx)
                 if (!fmpz_mpoly_is_one(q, ctx) && !fmpz_is_zero(deg))
                 {
                     flint_printf("FAIL:\ncontent is bad\n");
+                    fflush(stdout);
                     flint_abort();
                 }
             }
@@ -94,7 +100,7 @@ main(void)
     {
         fmpz_mpoly_ctx_t ctx;
         fmpz_mpoly_t a, t;
-        slong nfacs, len;
+        slong n, nfacs, len;
         ulong * expbounds;
         flint_bitcnt_t coeffbits;
 
@@ -103,7 +109,8 @@ main(void)
         fmpz_mpoly_init(a, ctx);
         fmpz_mpoly_init(t, ctx);
 
-        nfacs = 5 + (8 + n_randint(state, 8))/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        nfacs = 5 + (8 + n_randint(state, 8))/n;
         expbounds = FLINT_ARRAY_ALLOC(ctx->minfo->nvars, ulong);
         for (k = 0; k < ctx->minfo->nvars; k++)
             expbounds[k] = 3;
@@ -113,8 +120,11 @@ main(void)
         {
             len = 1 + n_randint(state, 9);
             coeffbits = 2 + n_randint(state, 100);
-            k = n_randint(state, ctx->minfo->nvars);
-            expbounds[k] = 1;
+            if (ctx->minfo->nvars > 0)
+            {            
+                k = n_randint(state, ctx->minfo->nvars);
+                expbounds[k] = 1;
+            }
             fmpz_mpoly_randtest_bounds(t, state, len, coeffbits, expbounds, ctx);
 
             if (!fmpz_mpoly_is_zero(t, ctx))

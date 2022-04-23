@@ -155,6 +155,7 @@ void gcd_check(
     {
         flint_printf("FAIL: Check gcd can be computed\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -164,6 +165,7 @@ void gcd_check(
         {
             flint_printf("FAIL: Check divisor of gcd\n");
             flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+            fflush(stdout);
             flint_abort();
         }
     }
@@ -174,6 +176,7 @@ void gcd_check(
         {
             flint_printf("FAIL: Check zero gcd\n");
             flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+            fflush(stdout);
             flint_abort();
         }
         goto cleanup;
@@ -183,6 +186,7 @@ void gcd_check(
     {
         flint_printf("FAIL: Check gcd has positive lc\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -193,6 +197,7 @@ void gcd_check(
     {
         flint_printf("FAIL: Check divisibility\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -203,6 +208,7 @@ void gcd_check(
     {
         flint_printf("FAIL: Check gcd of cofactors can be computed\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -210,6 +216,7 @@ void gcd_check(
     {
         flint_printf("FAIL: Check gcd of cofactors is one\n");
         flint_printf("i = %wd, j = %wd, %s\n", i, j, name);
+        fflush(stdout);
         flint_abort();
     }
 
@@ -239,6 +246,11 @@ main(void)
         slong degbound;
 
         fmpz_mpoly_ctx_init_rand(ctx, state, 5);
+        if (ctx->minfo->nvars < 1)
+        {
+            fmpz_mpoly_ctx_clear(ctx);
+            fmpz_mpoly_ctx_init(ctx, 1, ORD_LEX);
+        }
 
         fmpz_mpoly_init(g, ctx);
         fmpz_mpoly_init(a, ctx);

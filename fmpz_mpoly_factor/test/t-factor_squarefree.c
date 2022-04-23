@@ -25,6 +25,7 @@ void check_it(const fmpz_mpoly_t p, const fmpz_mpoly_ctx_t ctx)
     if (!fmpz_mpoly_factor_squarefree(g, p, ctx))
     {
         flint_printf("FAIL:\ncheck factorization could be computed\n");
+        fflush(stdout);
         flint_abort();        
     }
 
@@ -33,6 +34,7 @@ void check_it(const fmpz_mpoly_t p, const fmpz_mpoly_ctx_t ctx)
         if (g->poly[i].length < 1 || fmpz_sgn(g->poly[i].coeffs + 0) < 0)
         {
             flint_printf("FAIL:\nfactorization is not unit normal\n");
+            fflush(stdout);
             flint_abort();
         }
     }
@@ -41,6 +43,7 @@ void check_it(const fmpz_mpoly_t p, const fmpz_mpoly_ctx_t ctx)
     if (!fmpz_mpoly_equal(q, p, ctx))
     {
         flint_printf("FAIL:\nfactorization does not match original polynomial\n");
+        fflush(stdout);
         flint_abort();        
     }
 
@@ -52,6 +55,7 @@ void check_it(const fmpz_mpoly_t p, const fmpz_mpoly_ctx_t ctx)
             if (!fmpz_is_one(h->exp + j))
             {
                 flint_printf("FAIL:\nfactor has a square factor\n");
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -92,7 +96,7 @@ main(void)
         fmpz_mpoly_ctx_t ctx;
         fmpz_mpoly_t a, t;
         flint_bitcnt_t coeff_bits;
-        slong nfacs, len;
+        slong n, nfacs, len;
         ulong expbound, powbound, pow;
 
         fmpz_mpoly_ctx_init_rand(ctx, state, 10);
@@ -100,15 +104,16 @@ main(void)
         fmpz_mpoly_init(a, ctx);
         fmpz_mpoly_init(t, ctx);
 
-        nfacs = 1 + (7 + n_randint(state, 7))/ctx->minfo->nvars;
+        n = FLINT_MAX(WORD(1), ctx->minfo->nvars);
+        nfacs = 1 + (7 + n_randint(state, 7))/n;
         powbound = 1 + n_randint(state, 5);
-        expbound = 2 + 50/nfacs/ctx->minfo->nvars/powbound;
+        expbound = 2 + 50/nfacs/n/powbound;
 
         lower = 0;
         fmpz_mpoly_one(a, ctx);
         for (j = 0; j < nfacs; j++)
         {
-            len = 1 + n_randint(state, 60/powbound/ctx->minfo->nvars);
+            len = 1 + n_randint(state, 60/powbound/n);
             coeff_bits = 10 + n_randint(state, 200)/nfacs;
             fmpz_mpoly_randtest_bound(t, state, len, coeff_bits, expbound, ctx);
             if (fmpz_mpoly_is_zero(t, ctx))

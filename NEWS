@@ -1290,3 +1290,23 @@ v 2.6.3 -- 12 Aug 2020
  * Adjust soname on android
  * Allow disabling of dependency tracking
 
+2.8.2 -- 15 Oct 2021
+
+ * Fix an issue with --disable-dependency-tracking on some distributions
+
+2.8.3 -- 03 Nov 2021
+
+ * Fix a serious bug in nmod_poly_xgcd_hgcd, nmod_poly_xgcd, fmpz_poly_xgcd_modular, fmpz_poly_xgcd,
+   fmpq_poly_xgcd for polynomials of length >= 340.
+ * Fix some copyright assignments
+ * Fix some documentation errors
+
+2.8.4 -- 17 Nov 2021
+
+ * Fix a serious bug in fmpz_mod_poly_xgcd for polynomials of large length
+ * Fix an assertion failure in fmpz_mat_solve_fflu (only relevant if asserts enabled)
+ * Fix some bugs on 32 bit machines
+ * Work around a compiler bug on Apple M1
+ * Fix bug in nmod_mpoly_factor (returned 0 for some factorisations)
+ * Fix some documentation build errors and some doc formatting issues
+

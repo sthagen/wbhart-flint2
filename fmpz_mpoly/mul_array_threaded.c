@@ -116,7 +116,7 @@ void _fmpz_mpoly_mul_array_threaded_worker_LEX(void * varg)
         }
         Pbits += FLINT_BIT_COUNT(number) + 1; /* includes one bit for sign */
 
-        if (Abits <= FLINT_BITS - 2 && Bbits <= FLINT_BITS - 2)
+        if (Abits <= SMALL_FMPZ_BITCOUNT_MAX && Bbits <= SMALL_FMPZ_BITCOUNT_MAX)
         {
             if (Pbits <= FLINT_BITS)
             {
@@ -534,7 +534,7 @@ void _fmpz_mpoly_mul_array_threaded_worker_DEG(void * varg)
         }
         Pbits += FLINT_BIT_COUNT(number) + 1; /* includes one bit for sign */
 
-        if (Abits <= FLINT_BITS - 2 && Bbits <= FLINT_BITS - 2)
+        if (Abits <= SMALL_FMPZ_BITCOUNT_MAX && Bbits <= SMALL_FMPZ_BITCOUNT_MAX)
         {
             if (Pbits <= FLINT_BITS)
             {
@@ -894,7 +894,8 @@ int fmpz_mpoly_mul_array_threaded(
         return 1;
     }
 
-    if (1 != mpoly_words_per_exp(B->bits, ctx->minfo) ||
+    if (ctx->minfo->nvars < 1 ||
+        1 != mpoly_words_per_exp(B->bits, ctx->minfo) ||
         1 != mpoly_words_per_exp(C->bits, ctx->minfo))
     {
         return 0;

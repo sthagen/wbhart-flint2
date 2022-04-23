@@ -64,6 +64,7 @@ main(void)
         if (!fmpq_equal(cm, ce))
         {
             flint_printf("FAIL\ncheck a random monomial\ni = %wd\n", i);
+            fflush(stdout);
             flint_abort();
         }
 
@@ -79,6 +80,7 @@ main(void)
             if (!fmpq_equal(cm, ce))
             {
                 flint_printf("FAIL\ncheck all monomials in f\ni = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
         }
@@ -100,11 +102,12 @@ main(void)
             if (!fmpq_equal(cm, ce))
             {
                 flint_printf("FAIL\nset random coeff and check\ni = %wd, j = %wd\n", i, j);
+                fflush(stdout);
                 flint_abort();
             }
         }
 
-        for (k = 0; k < ctx->zctx->minfo->nvars; k++)
+        for (k = 0; k < nvars; k++)
         {
             fmpz_clear(exp[k]);
             flint_free(exp[k]); 

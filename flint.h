@@ -55,9 +55,9 @@
 /* flint version number */
 
 #define __FLINT_VERSION 2
-#define __FLINT_VERSION_MINOR 8
+#define __FLINT_VERSION_MINOR 9
 #define __FLINT_VERSION_PATCHLEVEL 0
-#define FLINT_VERSION "2.8.0"
+#define FLINT_VERSION "2.9.0"
 #define __FLINT_RELEASE (__FLINT_VERSION * 10000 + \
                          __FLINT_VERSION_MINOR * 100 + \
                          __FLINT_VERSION_PATCHLEVEL)
@@ -157,7 +157,10 @@ FLINT_DLL void flint_set_abort(FLINT_NORETURN void (*func)(void));
 #define flint_bitcnt_t ulong
 
 #if FLINT_USES_TLS
-#if __STDC_VERSION__ >= 201112L
+#if defined(__GNUC__) && __STDC_VERSION__ >= 201112L && __GNUC__ == 4 && __GNUC_MINOR__ < 9
+/* GCC 4.7, 4.8 with -std=gnu11 purport to support C11 via __STDC_VERSION__ but lack _Thread_local */
+#define FLINT_TLS_PREFIX __thread
+#elif __STDC_VERSION__ >= 201112L
 #define FLINT_TLS_PREFIX _Thread_local
 #elif defined(_MSC_VER)
 #define FLINT_TLS_PREFIX __declspec(thread)

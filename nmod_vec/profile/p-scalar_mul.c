@@ -58,7 +58,7 @@ void sample(void * arg, ulong count)
 
 int main(void)
 {
-   double min1, min2, max;
+   double min0, min1, min2, max;
    info_t info;
    flint_bitcnt_t i;
 
@@ -66,14 +66,19 @@ int main(void)
    {
       info.bits = i;
 
+	  info.length = 4;
+	  prof_repeat(&min0, &max, sample, (void *) &info);
+
 	  info.length = 1024;
 	  prof_repeat(&min1, &max, sample, (void *) &info);
 
 	  info.length = 65536;
 	  prof_repeat(&min2, &max, sample, (void *) &info);
 
-      flint_printf("bits %wd, length 128 %.1lf c/l, length 65536 %.1lf c/l\n", 
-         i, (min1/(double)FLINT_CLOCK_SCALE_FACTOR)/(1024*30),
+      flint_printf("bits %wd, length 4 %.1lf c/l, length 128 %.1lf c/l, length 65536 %.1lf c/l\n", 
+         i,
+         (min0/(double)FLINT_CLOCK_SCALE_FACTOR)/(4*30),
+         (min1/(double)FLINT_CLOCK_SCALE_FACTOR)/(1024*30),
 		 (min2/(double)FLINT_CLOCK_SCALE_FACTOR)/(65536*30)
 	  );
    }
