@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2007 David Howden
-    Copyright (C) 2007, 2008, 2009, 2010 William Hart
+    Copyright (C) 2007, 2008, 2009, 2010, 2022 William Hart
     Copyright (C) 2008 Richard Howell-Peak
     Copyright (C) 2011 Fredrik Johansson
 
@@ -28,15 +28,16 @@ nmod_poly_factor_equal_deg(nmod_poly_factor_t factors,
         nmod_poly_t f, g;
         flint_rand_t state;
 
-        nmod_poly_init_preinv(f, pol->mod.n, pol->mod.ninv);
+        nmod_poly_init_mod(f, pol->mod);
 
         flint_randinit(state);
 
-        while (!nmod_poly_factor_equal_deg_prob(f, state, pol, d)) {};
+        while (!nmod_poly_factor_equal_deg_prob(f, state, pol, d))
+           ;
 
         flint_randclear(state);
 
-        nmod_poly_init_preinv(g, pol->mod.n, pol->mod.ninv);
+        nmod_poly_init_mod(g, pol->mod);
         nmod_poly_div(g, pol, f);
 
         nmod_poly_factor_equal_deg(factors, f, d);

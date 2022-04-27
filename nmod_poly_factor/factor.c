@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2007 David Howden
-    Copyright (C) 2007, 2008, 2009, 2010 William Hart
+    Copyright (C) 2007, 2008, 2009, 2010, 2022 William Hart
     Copyright (C) 2008 Richard Howell-Peak
     Copyright (C) 2011 Fredrik Johansson
 
@@ -55,7 +55,7 @@ __nmod_poly_factor(nmod_poly_factor_t result,
 
     leading_coeff = *nmod_poly_lead(input);
 
-    nmod_poly_init_preinv(monic_input, input->mod.n, input->mod.ninv);
+    nmod_poly_init_mod(monic_input, input->mod);
     nmod_poly_make_monic(monic_input, input);
 
     if (len == 2)
@@ -73,9 +73,11 @@ __nmod_poly_factor(nmod_poly_factor_t result,
     for (i = 0; i < sqfree_factors->num; i++)
     {
         nmod_poly_factor_init(factors);
+
         __nmod_poly_factor1(factors, sqfree_factors->p + i, algorithm);
         nmod_poly_factor_pow(factors, sqfree_factors->exp[i]);
         nmod_poly_factor_concat(result, factors);
+
         nmod_poly_factor_clear(factors);
     }
 
@@ -109,17 +111,21 @@ __nmod_poly_factor_deflation(nmod_poly_factor_t result,
         nmod_poly_t def;
         mp_limb_t leading_coeff;
 
-        nmod_poly_init_preinv(def, input->mod.n, input->mod.ninv);
+        nmod_poly_init_mod(def, input->mod);
+
         nmod_poly_deflate(def, input, deflation);
         nmod_poly_factor_init(def_res);
         leading_coeff = __nmod_poly_factor(def_res, def, algorithm);
+
         nmod_poly_clear(def);
 
         for (i = 0; i < def_res->num; i++)
         {
             /* Inflate */
             nmod_poly_t pol;
-            nmod_poly_init_preinv(pol, input->mod.n, input->mod.ninv);
+
+            nmod_poly_init_mod(pol, input->mod);
+
             nmod_poly_inflate(pol, def_res->p + i, deflation);
 
             /* Factor inflation */
@@ -128,16 +134,21 @@ __nmod_poly_factor_deflation(nmod_poly_factor_t result,
             else
             {
                 nmod_poly_factor_t t;
+
                 nmod_poly_factor_init(t);
+
                 __nmod_poly_factor(t, pol, algorithm);
                 nmod_poly_factor_pow(t, def_res->exp[i]);
                 nmod_poly_factor_concat(result, t);
+
                 nmod_poly_factor_clear(t);
             }
+
             nmod_poly_clear(pol);
         }
 
         nmod_poly_factor_clear(def_res);
+
         return leading_coeff;  
     }
 }

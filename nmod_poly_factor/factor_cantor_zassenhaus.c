@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2007 David Howden
-    Copyright (C) 2007, 2008, 2009, 2010 William Hart
+    Copyright (C) 2007, 2008, 2009, 2010, 2022 William Hart
     Copyright (C) 2008 Richard Howell-Peak
     Copyright (C) 2011 Fredrik Johansson
 
@@ -20,10 +20,10 @@ nmod_poly_factor_cantor_zassenhaus(nmod_poly_factor_t res, const nmod_poly_t f)
     nmod_poly_t h, v, g, x;
     slong i, j, num;
 
-    nmod_poly_init_preinv(h, f->mod.n, f->mod.ninv);
-    nmod_poly_init_preinv(g, f->mod.n, f->mod.ninv);
-    nmod_poly_init_preinv(v, f->mod.n, f->mod.ninv);
-    nmod_poly_init_preinv(x, f->mod.n, f->mod.ninv);
+    nmod_poly_init_mod(h, f->mod);
+    nmod_poly_init_mod(g, f->mod);
+    nmod_poly_init_mod(v, f->mod);
+    nmod_poly_init_mod(x, f->mod);
 
     nmod_poly_set_coeff_ui(h, 1, 1);
     nmod_poly_set_coeff_ui(x, 1, 1);
@@ -49,8 +49,7 @@ nmod_poly_factor_cantor_zassenhaus(nmod_poly_factor_t res, const nmod_poly_t f)
             for (j = num; j < res->num; j++)
                 res->exp[j] = nmod_poly_remove(v, res->p + j);
         }
-    }
-    while (v->length >= 2*i + 3);
+    } while (v->length >= 2*i + 3);
 
     if (v->length > 1)
         nmod_poly_factor_insert(res, v, 1);

@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2012 Lina Kulakova
-
+    Copyright (C) 2022 William Hart
     This file is part of FLINT.
 
     FLINT is free software: you can redistribute it and/or modify it under
@@ -18,9 +18,9 @@ void nmod_poly_factor_kaltofen_shoup(nmod_poly_factor_t res,
     nmod_poly_t v;
     nmod_poly_factor_t sq_free, dist_deg;
     slong i, j, k, l, res_num, dist_deg_num;
-    slong *degs;
+    slong * degs;
 
-    nmod_poly_init_preinv(v, poly->mod.n, poly->mod.ninv);
+    nmod_poly_init_mod(v, poly->mod);
 
     nmod_poly_make_monic(v, poly);
     
@@ -28,10 +28,11 @@ void nmod_poly_factor_kaltofen_shoup(nmod_poly_factor_t res,
     {
         nmod_poly_factor_insert (res, v, 1);
         nmod_poly_clear (v);        
+
         return;        
     }
     
-    if (!(degs = flint_malloc(nmod_poly_degree(poly) * sizeof(slong))))
+    if (!(degs = (slong *) flint_malloc(nmod_poly_degree(poly)*sizeof(slong))))
     {
         flint_printf("Exception (nmod_poly_factor_kaltofen_shoup): \n");
         flint_printf("Not enough memory.\n");
