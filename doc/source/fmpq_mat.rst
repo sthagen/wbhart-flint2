@@ -453,6 +453,19 @@ Nonsingular solving
     solution. The matrices can have any shape but must have the same number of
     rows.
 
+.. function:: int fmpq_mat_can_solve_fraction_free(fmpq_mat_t X, const fmpq_mat_t A, const fmpq_mat_t B)
+
+    Returns `1` if ``AX = B`` has a solution and if so, sets ``X`` to one such
+    solution. The matrices can have any shape but must have the same number of
+    rows.
+
+.. function:: int fmpq_mat_can_solve(fmpq_mat_t X, const fmpq_mat_t A, const fmpq_mat_t B)
+
+    Returns `1` if ``AX = B`` has a solution and if so, sets ``X`` to one such
+    solution. The matrices can have any shape but must have the same number of
+    rows.
+
+
 Inverse
 --------------------------------------------------------------------------------
 
