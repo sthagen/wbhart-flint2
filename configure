@@ -61,7 +61,7 @@ FLINT_SOLIB=0
 # 2.8.2 => 16.1.2
 # 2.8.3 => 16.1.3
 # 2.8.4 => 16.1.4
-# 2.8.5 =? 16.1.5
+# 2.8.5 => 16.1.5
 # 2.9.0 => 17.0.0
 
 FLINT_MAJOR=17
@@ -687,15 +687,9 @@ if [ "$TLS" = "1" ]; then
    echo "__thread int x = 42; int main(int argc, char ** argv) { return x != 42; }" > build/test-tls.c
    $CC build/test-tls.c -o ./build/test-tls > /dev/null 2>&1
    if [ $? -eq 0 ]; then
-      build/test-tls > /dev/null 2>&1
-      if [ $? -eq 0 ]; then
-         printf "%s\n" "yes"
-	 echo "yes" >> config.log
-         CONFIG_TLS="#define FLINT_USES_TLS 1"
-      else
-         printf "%s\n" "no"
-	 echo "no" >> config.log
-      fi
+      printf "%s\n" "yes"
+      echo "yes" >> config.log
+      CONFIG_TLS="#define FLINT_USES_TLS 1"
       rm -f build/test-tls{,.c}
    else
       rm -f build/test-tls.c

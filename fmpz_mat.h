@@ -154,6 +154,13 @@ FLINT_DLL void fmpz_mat_concat_horizontal(fmpz_mat_t res,
 FLINT_DLL void fmpz_mat_concat_vertical(fmpz_mat_t res,
                            const fmpz_mat_t mat1,  const fmpz_mat_t mat2);
 
+FLINT_DLL void _fmpz_mat_read_only_window_init_strip_initial_zero_rows(
+                                             fmpz_mat_t A, const fmpz_mat_t B);
+
+FMPZ_MAT_INLINE void _fmpz_mat_read_only_window_clear(fmpz_mat_t A)
+{
+}
+
 /* Input and output  *********************************************************/
 
 FLINT_DLL int fmpz_mat_fprint(FILE * file, const fmpz_mat_t mat);
@@ -379,11 +386,11 @@ void fmpz_mat_invert_cols(fmpz_mat_t mat, slong * perm)
 
         if (perm)
         {
-            for (i =0; i < k; i++)
+            for (i = 0; i < k; i++)
             {
                 t = perm[i];
-                perm[i] = perm[c - i];
-                perm[c - i] = t;
+                perm[i] = perm[c - i - 1];
+                perm[c - i - 1] = t;
             }
         }
 
