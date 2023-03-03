@@ -8,12 +8,12 @@
 *.P
 *.ppm
 */.deps/*
-fmpz/fmpz.c
+src/fmpz/fmpz.c
+src/flint-config.h
+src/fft_tuning.h
+src/fmpz-conversions.h
 build/
-flint-config.h
 config.log
-fft_tuning.h
-fmpz-conversions.h
 /Makefile
 doc/build
 doc/latex/flint-manual.*
@@ -45,3 +45,5 @@ build.vc12
 build
 flint2
 .DS_Store
+python/__pycache__/*.pyc
+
