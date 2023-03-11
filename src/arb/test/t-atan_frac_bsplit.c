@@ -11,6 +11,12 @@
 
 #include "arb.h"
 
+#ifdef __GNUC__
+# define fabs __builtin_fabs
+#else
+# include <math.h>
+#endif
+
 int main()
 {
     slong iter;
@@ -21,7 +27,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         arb_t s, t;
         fmpz_t p, q;
@@ -77,6 +83,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

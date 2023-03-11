@@ -15,7 +15,6 @@
 
 ******************************************************************************/
 
-#include <stdio.h>
 #include "nf.h"
 #include "nf_elem.h"
 
@@ -31,7 +30,7 @@ main(void)
     flint_randinit(state);
 
     /* test a*^-1 = 1 */
-    for (i = 0; i < 10*antic_test_multiplier(); i++)
+    for (i = 0; i < 10*flint_test_multiplier(); i++)
     {
         nf_t nf;
         nf_elem_t a, b, c;
@@ -57,7 +56,7 @@ main(void)
            printf("a = "); nf_elem_print_pretty(a, nf, "x"); printf("\n");
            printf("b = "); nf_elem_print_pretty(b, nf, "x"); printf("\n");
            printf("c = "); nf_elem_print_pretty(c, nf, "x"); printf("\n");
-           abort();
+           flint_abort();
         }
 
         nf_elem_clear(a, nf);
@@ -68,7 +67,7 @@ main(void)
     }
     
     /* test aliasing a and b */
-    for (i = 0; i < 10 * antic_test_multiplier(); i++)
+    for (i = 0; i < 10 * flint_test_multiplier(); i++)
     {
         nf_t nf;
         nf_elem_t a, b, c;
@@ -94,7 +93,7 @@ main(void)
            printf("a = "); nf_elem_print_pretty(a, nf, "x"); printf("\n");
            printf("b = "); nf_elem_print_pretty(b, nf, "x"); printf("\n");
            printf("c = "); nf_elem_print_pretty(c, nf, "x"); printf("\n");
-           abort();
+           flint_abort();
         }
 
         nf_elem_clear(a, nf);
@@ -104,7 +103,7 @@ main(void)
     }
 
     /* test aliasing a and c */
-    for (i = 0; i < 10 * antic_test_multiplier(); i++)
+    for (i = 0; i < 10 * flint_test_multiplier(); i++)
     {
         fmpq_poly_t pol;
         nf_t nf;
@@ -137,7 +136,7 @@ main(void)
            printf("a = "); nf_elem_print_pretty(a, nf, "x"); printf("\n");
            printf("d = "); nf_elem_print_pretty(b, nf, "x"); printf("\n");
            printf("c = "); nf_elem_print_pretty(c, nf, "x"); printf("\n");
-           abort();
+           flint_abort();
         }
 
         nf_elem_clear(a, nf);

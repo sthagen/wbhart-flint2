@@ -9,7 +9,14 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "ulong_extras.h"
 #include "arb_hypgeom.h"
+
+#ifdef __GNUC__
+# define fabs __builtin_fabs
+#else
+# include <math.h>
+#endif
 
 int main()
 {
@@ -20,7 +27,7 @@ int main()
     fflush(stdout);
     flint_randinit(state);
 
-    for (iter = 0; iter < 10000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         arb_t r, s;
         fmpq_t q;
@@ -72,7 +79,7 @@ int main()
         fmpq_clear(q);
     }
 
-    for (iter = 0; iter < 50 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 50 * 0.1 * flint_test_multiplier(); iter++)
     {
         arb_t r, s;
         fmpq_t q;
@@ -127,6 +134,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

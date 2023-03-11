@@ -16,22 +16,22 @@
 #undef __STRICT_ANSI__
 #endif
 
-#include "qsieve.h"
-#include "fmpz_factor.h"
-#include "thread_support.h"
-
-#include <inttypes.h>
-#define _STDC_FORMAT_MACROS
-#include <time.h>
 #include <stdlib.h>
-#include <string.h>
+#include "thread_support.h"
+#include "fmpz.h"
+#include "fmpz_vec.h"
+#include "qsieve.h"
 
-#include <sys/types.h>
-#if (!defined (__WIN32) || defined(__CYGWIN__)) && !defined(_MSC_VER)
-#include <unistd.h>
-#endif
+#define _STDC_FORMAT_MACROS
+
 #if (defined(__WIN32) && !defined(__CYGWIN__)) || defined(_MSC_VER)
 #include <windows.h>
+#endif
+
+#ifdef __GNUC__
+# define strcpy __builtin_strcpy
+#else
+# include <math.h>
 #endif
 
 int compare_facs(const void * a, const void * b)

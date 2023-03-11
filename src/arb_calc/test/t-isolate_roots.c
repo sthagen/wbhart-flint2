@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "arb_poly.h"
 #include "arb_calc.h"
 
 /* sin((pi/2)x) */
@@ -42,7 +43,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 40 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 40 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong m, r, a, b, maxdepth, maxeval, maxfound, prec, i, j, num;
         arf_interval_ptr blocks;
@@ -144,6 +145,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

@@ -9,6 +9,8 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "perm.h"
+#include "fmpq_mat.h"
 #include "acb_mat.h"
 
 int fmpq_mat_is_invertible(const fmpq_mat_t A)
@@ -32,7 +34,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 10000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         fmpq_mat_t Q;
         acb_mat_t A, LU, P, L, U, T;
@@ -139,5 +141,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

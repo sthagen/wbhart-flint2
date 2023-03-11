@@ -22,7 +22,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 100 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 100 * 0.1 * flint_test_multiplier(); iter++)
     {
         ulong i, q;
         slong prec;
@@ -81,7 +81,7 @@ int main()
                 flint_printf("\n\n");
                 acb_vec_printd(v, G->phi_q, 10);
                 flint_printf("\n\n");
-                abort();
+                flint_abort();
             }
             else if (acb_rel_accuracy_bits(z) < prec - 8
                         || acb_rel_accuracy_bits(v + i) < prec - 8)
@@ -96,7 +96,7 @@ int main()
                     flint_printf("\nerrors %wd & %wd [prec = %wd]\n",
                         acb_rel_accuracy_bits(z),
                         acb_rel_accuracy_bits(v + i), prec);
-                    abort();
+                    flint_abort();
              }
 
             i++;
@@ -113,6 +113,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

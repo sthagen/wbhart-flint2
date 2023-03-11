@@ -15,9 +15,9 @@
 
  ******************************************************************************/
 
-#include <stdio.h>
 #include "nf.h"
 #include "nf_elem.h"
+#include "fmpz_mod_poly.h"
 
 int
 main(void)
@@ -30,7 +30,7 @@ main(void)
 
     flint_randinit(state);
 
-    for (i = 0; i < 100 * antic_test_multiplier(); i++)
+    for (i = 0; i < 100 * flint_test_multiplier(); i++)
     {
         slong j;
         nf_t nf;
@@ -71,7 +71,7 @@ main(void)
                 printf("a mod n = ");
                 fmpz_mod_poly_print_pretty(reduced_elem, "x", ctx);
                 printf("\n");
-                abort();
+                flint_abort();
             }
         }
 
@@ -83,7 +83,7 @@ main(void)
         nf_clear(nf);
     }
 
-    for (i = 0; i < 100 * antic_test_multiplier(); i++)
+    for (i = 0; i < 100 * flint_test_multiplier(); i++)
     {
         slong j;
         nf_t nf;
@@ -136,7 +136,7 @@ main(void)
                 printf("a mod n = ");
                 fmpz_mod_poly_print_pretty(reduced_elem, "x", ctx);
                 printf("\n");
-                abort();
+                flint_abort();
             }
         }
 

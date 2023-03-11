@@ -11,6 +11,12 @@
 
 #include "acb_dirichlet.h"
 
+#ifdef __GNUC__
+# define log __builtin_log
+#else
+# include <math.h>
+#endif
+
 const signed char chi[8][6] = {
   {1, 1},
   {2, 0, 1},
@@ -42,7 +48,7 @@ int main()
     fflush(stdout);
     flint_randinit(state);
 
-    for (iter = 0; iter < 3000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 3000 * 0.1 * flint_test_multiplier(); iter++)
     {
         arb_t res1, res2;
         ulong s;
@@ -128,6 +134,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

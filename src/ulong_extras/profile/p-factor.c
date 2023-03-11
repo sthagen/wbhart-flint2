@@ -9,8 +9,6 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "profiler.h"
 #include "flint.h"
 #include "ulong_extras.h"
@@ -68,8 +66,8 @@ int main(void)
 {
    double min, max;
    fac_one_line_t params;
-   FLINT_TEST_INIT(state);
    int i;
+   FLINT_TEST_INIT(state);
    
 
    params.composites = flint_malloc(1024*sizeof(ulong));

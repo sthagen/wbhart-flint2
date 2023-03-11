@@ -9,9 +9,8 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "fmpz.h"
+#include "nmod_vec.h"
 
 int
 main(void)

@@ -9,12 +9,8 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <gmp.h>
-#include "flint.h"
 #include "gmpcompat.h"
-#include "ulong_extras.h"
+#include "mpn_extras.h"
 #include "fft.h"
 
 /* set p = 2^wn + 1 */

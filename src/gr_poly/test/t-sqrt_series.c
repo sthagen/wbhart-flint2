@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "ulong_extras.h"
 #include "gr_poly.h"
 
 extern gr_static_method_table _ca_methods;
@@ -69,7 +70,7 @@ test_sqrt_series(flint_rand_t state, int which)
             status |= gr_poly_sqrt_series_miller(B, B, n, ctx);
             break;
         default:
-            abort();
+            flint_abort();
     }
 
     if (status == GR_SUCCESS)
@@ -115,5 +116,5 @@ int main()
     flint_randclear(state);
     flint_cleanup_master();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

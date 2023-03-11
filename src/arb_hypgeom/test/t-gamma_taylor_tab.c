@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "arb_poly.h"
 #include "arb_hypgeom.h"
 
 ARB_DLL extern arb_hypgeom_gamma_coeff_t arb_hypgeom_gamma_coeffs[ARB_HYPGEOM_GAMMA_TAB_NUM];
@@ -79,6 +80,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

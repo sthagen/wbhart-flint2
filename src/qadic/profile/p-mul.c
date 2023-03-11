@@ -19,12 +19,9 @@
         B = [b{0},...,b{d-1}], where b{i} = (5+2*i)^{3N}, 
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
-#include <gmp.h>
 
 #include "flint.h"
 #include "fmpz.h"
@@ -53,7 +50,6 @@ main(void)
 
 for (l = 0; l < len; l++)
 {
-    FLINT_TEST_INIT(state);
     slong d = 97, i, n = N[l], r;
     clock_t c0, c1;
     long double cputime;
@@ -62,7 +58,7 @@ for (l = 0; l < len; l++)
     qadic_ctx_t ctx;
     qadic_t a, b, z;
 
-    
+    FLINT_TEST_INIT(state);
 
     fmpz_init_set_ui(p, 17);
 
@@ -130,5 +126,7 @@ for (l = 0; l < len; l++)
     for (l = 0; l < len; l++)
         flint_printf("%wd, ", T[l]);
     flint_printf("\n");
+
+    return 0;
 }
 

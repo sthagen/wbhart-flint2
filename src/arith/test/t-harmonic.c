@@ -9,17 +9,9 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <gmp.h>
-#include "flint.h"
-#include "arith.h"
-#include "fmpz.h"
+#include "mpn_extras.h"
 #include "fmpq.h"
-#include "ulong_extras.h"
-#include "profiler.h"
-
+#include "arith.h"
 
 void numerical_test(fmpq_t res, slong n, double ans)
 {

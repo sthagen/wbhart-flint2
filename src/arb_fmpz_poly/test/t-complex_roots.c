@@ -9,6 +9,9 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "fmpq_poly.h"
+#include "acb.h"
+#include "arb_poly.h"
 #include "arith.h"
 #include "arb_fmpz_poly.h"
 
@@ -97,7 +100,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 500 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 500 * 0.1 * flint_test_multiplier(); iter++)
     {
         fmpz_poly_t f, g;
         fmpq_poly_t h;
@@ -204,6 +207,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

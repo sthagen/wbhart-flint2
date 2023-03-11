@@ -9,7 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
-#include "fmpz_mpoly.h"
+#include "fmpz_poly.h"
 #include "gr.h"
 #include "gr_vec.h"
 
@@ -114,5 +114,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf(" [%wd success, %wd domain, %wd unable] PASS\n", count_success, count_domain, count_unable);
-    return EXIT_SUCCESS;
+    return 0;
 }

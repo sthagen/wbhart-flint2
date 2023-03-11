@@ -1,4 +1,5 @@
 
+#include "fmpz_mat.h"
 #include "gr_mat.h"
 
 void perm(gr_mat_t A, slong * P)
@@ -269,5 +270,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

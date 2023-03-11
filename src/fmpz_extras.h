@@ -12,16 +12,11 @@
 #ifndef FMPZ_EXTRAS_H
 #define FMPZ_EXTRAS_H
 
-#include <limits.h>
-#include "flint.h"
 #include "fmpz.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/* currently defined in the arb module, but global to the library */
-double arb_test_multiplier(void);
 
 /* should be in flint */
 slong arb_flint_get_num_available_threads(void);

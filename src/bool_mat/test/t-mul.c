@@ -22,7 +22,7 @@ int main()
     flint_randinit(state);
 
     /* test aliasing */
-    for (iter = 0; iter < 10000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong m, n;
         bool_mat_t A, B, C, D;
@@ -83,7 +83,7 @@ int main()
         }
     }
 
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong m, n, k, l;
         bool_mat_t a, b, c, d, ab, ac, bd, cd, s;
@@ -237,5 +237,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

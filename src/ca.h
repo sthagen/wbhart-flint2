@@ -18,13 +18,10 @@
 #define CA_INLINE static __inline__
 #endif
 
-#include <stdio.h>
 #include "flint.h"
-#include "nf.h"
-#include "nf_elem.h"
-#include "calcium.h"
-#include "qqbar.h"
 #include "fmpz_mpoly_q.h"
+#include "nf_elem.h"
+#include "qqbar.h"
 #include "utils_flint.h"
 #include "fexpr.h"
 

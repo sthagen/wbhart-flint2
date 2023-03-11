@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "calcium.h"
 #include "fmpz_mpoly_q.h"
 
 int main()
@@ -21,7 +22,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 10000 * calcium_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         fmpz_mpoly_ctx_t ctx;
         fmpz_mpoly_q_t A, B, C, D;
@@ -86,6 +87,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

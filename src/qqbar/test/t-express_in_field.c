@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "fmpq_poly.h"
 #include "qqbar.h"
 
 int main()
@@ -21,7 +22,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 200 * calcium_test_multiplier(); iter++)
+    for (iter = 0; iter < 200 * 0.1 * flint_test_multiplier(); iter++)
     {
         fmpq_poly_t f, g;
         qqbar_t x, alpha;
@@ -76,6 +77,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

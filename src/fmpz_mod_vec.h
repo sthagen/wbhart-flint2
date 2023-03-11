@@ -18,12 +18,10 @@
 #define FMPZ_MOD_VEC_INLINE static __inline__
 #endif
 
-#include <gmp.h>
-#include "flint.h"
-#include "fmpz_mod.h"
+#include "fmpz_mod_types.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 FLINT_DLL void _fmpz_mod_vec_set_fmpz_vec(fmpz * A, const fmpz * B, slong len,

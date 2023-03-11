@@ -18,10 +18,8 @@
 #define CALCIUM_INLINE static __inline__
 #endif
 
-#include <stdio.h>
-#include "flint.h"
 #include "fmpz.h"
-#include "acb.h"
+#include "acb_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,8 +36,6 @@ const char * calcium_version(void);
 #define __CALCIUM_RELEASE (__CALCIUM_VERSION * 10000 + \
                          __CALCIUM_VERSION_MINOR * 100 + \
                          __CALCIUM_VERSION_PATCHLEVEL)
-
-double calcium_test_multiplier(void);
 
 /* Input and output */
 

@@ -22,7 +22,7 @@ int main()
     flint_randinit(state);
     /* _flint_rand_init_gmp(state); */
 
-    for (iter = 0; iter < 100000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 100000 * 0.1 * flint_test_multiplier(); iter++)
     {
         arf_t x;
         fmpz_t q;
@@ -98,6 +98,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

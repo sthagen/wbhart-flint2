@@ -15,7 +15,6 @@
 
 ******************************************************************************/
 
-#include <stdio.h>
 #include "flint.h"
 #include "fmpq_poly.h"
 #include "nf.h"
@@ -31,7 +30,7 @@ int main(void)
 
     flint_randinit(state);
 
-    for (i = 0; i < 1000 * antic_test_multiplier(); i++)
+    for (i = 0; i < 1000 * flint_test_multiplier(); i++)
     {
         int is_int;
         int is_rat;
@@ -59,7 +58,7 @@ int main(void)
                 flint_printf("nf = "); nf_print(nf); flint_printf("\n");
                 flint_printf("f = "); fmpq_poly_print_pretty(f, "x"); flint_printf("\n");
                 flint_printf("a = "); nf_elem_print_pretty(a, nf, "x"); flint_printf("\n");
-                abort();
+                flint_abort();
             }
 
         nf_elem_clear(a, nf);

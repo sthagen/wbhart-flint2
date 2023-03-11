@@ -14,8 +14,7 @@
 
 ******************************************************************************/
 
-#include <stdlib.h>
-#include <gmp.h>
+#include "ulong_extras.h"
 #include "qfb.h"
 
 /*

@@ -9,7 +9,6 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <gmp.h>
 #include "profiler.h"
 #include "flint.h"
 #include "ulong_extras.h"
@@ -28,11 +27,12 @@ typedef struct
 void sample(void * arg, ulong count)
 {
    ulong * array = (ulong *) flint_malloc(200 * sizeof(ulong));
-   FLINT_TEST_INIT(state);
    ulong i, ninv, sum = 0;
    slong j;
    algo_s * alg = (algo_s *) arg;
    
+   FLINT_TEST_INIT(state);
+
    for (i = 0; i < count; i++)
    {
       for (j = 0; j < 200; j++)

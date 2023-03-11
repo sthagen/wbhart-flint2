@@ -21,22 +21,12 @@
 #define FMPZ_POLY_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdio.h>
-#undef ulong
-
-#include <gmp.h>
-#define ulong mp_limb_t
-
-#include "flint.h"
 #include "fmpz.h"
 #include "fmpz_vec.h"
-#include "nmod_poly.h"
-#include "fmpq.h"
+#include "nmod_types.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 #define FMPZ_POLY_INV_NEWTON_CUTOFF 32
@@ -47,30 +37,11 @@
 
 typedef struct
 {
-    fmpz * coeffs;
-    slong alloc;
-    slong length;
-} fmpz_poly_struct;
-
-typedef fmpz_poly_struct fmpz_poly_t[1];
-
-typedef struct
-{
    fmpz ** powers;
    slong len;
 } fmpz_poly_powers_precomp_struct;
 
 typedef fmpz_poly_powers_precomp_struct fmpz_poly_powers_precomp_t[1];
-
-typedef struct {
-    fmpz c;
-    fmpz_poly_struct *p;
-    slong *exp;
-    slong num;
-    slong alloc;
-} fmpz_poly_factor_struct;
-
-typedef fmpz_poly_factor_struct fmpz_poly_factor_t[1];
 
 typedef struct
 {

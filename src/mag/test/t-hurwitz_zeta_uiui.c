@@ -9,7 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
-#include "fmpr.h"
+#include "arf.h"
 #include "mag.h"
 #include "arb.h"
 
@@ -23,7 +23,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         mag_t zb;
         slong prec, k;
@@ -77,6 +77,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

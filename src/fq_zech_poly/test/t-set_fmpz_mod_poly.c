@@ -9,13 +9,8 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
+#include "fmpz_mod_poly.h"
 #include "fq_zech_poly.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "ulong_extras.h"
-#include "long_extras.h"
 
 int
 main(void)
@@ -77,6 +72,6 @@ main(void)
 
     FLINT_TEST_CLEANUP(state);
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

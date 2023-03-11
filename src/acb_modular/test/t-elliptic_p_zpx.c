@@ -9,8 +9,8 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
-#include "acb_modular.h"
 #include "acb_poly.h"
+#include "acb_modular.h"
 
 int main()
 {
@@ -23,7 +23,7 @@ int main()
     flint_randinit(state);
 
     /* Test differential equation */
-    for (iter = 0; iter < 5000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 5000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t tau, z;
         acb_ptr g, wp, wp3, wpd, wpd2;
@@ -80,7 +80,7 @@ int main()
     }
 
     /* Consistency test */
-    for (iter = 0; iter < 5000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 5000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t tau, z;
         acb_ptr wp1, wp2;
@@ -125,6 +125,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

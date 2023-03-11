@@ -21,7 +21,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 500 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 500 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong m, n1, n2, bits1, bits2, bits3;
         int deflate;
@@ -116,6 +116,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

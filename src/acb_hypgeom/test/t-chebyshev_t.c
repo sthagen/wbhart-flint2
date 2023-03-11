@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "acb.h"
 #include "acb_hypgeom.h"
 
 int main()
@@ -21,7 +22,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 2000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 2000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t n, z, a, b, c, t, res1, res2;
         slong prec;
@@ -77,6 +78,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

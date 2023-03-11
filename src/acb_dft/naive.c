@@ -9,7 +9,6 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
-#include "acb_poly.h"
 #include "acb_dft.h"
 
 /* all roots are already computed, w != v */
@@ -23,7 +22,7 @@ _acb_dft_naive(acb_ptr w, acb_srcptr v, slong dv, acb_srcptr z, slong dz, slong 
     if (w == v)
     {
         flint_printf("\n_acb_dft_naive: does not accept aliasing\n");
-        abort();
+        flint_abort();
     }
  
     for (i = 0, wi = w; i < len; i++, wi++)

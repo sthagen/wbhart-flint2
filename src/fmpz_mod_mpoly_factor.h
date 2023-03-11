@@ -18,32 +18,13 @@
 #define FMPZ_MOD_MPOLY_FACTOR_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdio.h>
-#undef ulong
-#include <gmp.h>
-#define ulong mp_limb_t
-
-#include "n_poly.h"
-#include "nmod_mpoly_factor.h"
+#include "thread_pool.h"
+#include "fmpz_mod_poly.h"
 #include "fmpz_mod_mpoly.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
-
-/* type definitions **********************************************************/
-
-typedef struct {
-    fmpz_t constant;
-    fmpz_mod_mpoly_struct * poly;
-    fmpz * exp;
-    slong num;
-    slong alloc;
-} fmpz_mod_mpoly_factor_struct;
-
-typedef fmpz_mod_mpoly_factor_struct fmpz_mod_mpoly_factor_t[1];
 
 FMPZ_MOD_MPOLY_FACTOR_INLINE
 void fmpz_mod_mpoly_factor_init(fmpz_mod_mpoly_factor_t f,

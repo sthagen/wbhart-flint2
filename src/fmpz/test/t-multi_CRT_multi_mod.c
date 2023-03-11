@@ -9,6 +9,7 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
+#include "ulong_extras.h"
 #include "fmpz.h"
 #include "fmpz_vec.h"
 
@@ -23,7 +24,7 @@ main(void)
 
     /* test internal interface */
     {
-        fmpz_multi_crt_t P;
+        fmpz_multi_CRT_t P;
         fmpz * moduli, * inputs, * outputs;
         slong moduli_count = 1000;
 
@@ -61,7 +62,7 @@ main(void)
 
     for (i = 0; i < 30 * flint_test_multiplier(); i++)
     {
-        fmpz_multi_crt_t P;
+        fmpz_multi_CRT_t P;
         fmpz_multi_mod_t M;
         fmpz_t t, p;
         slong moduli_count;

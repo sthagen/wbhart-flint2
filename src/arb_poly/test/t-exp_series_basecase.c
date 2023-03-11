@@ -9,8 +9,8 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "fmpq_poly.h"
 #include "arb_poly.h"
-
 
 /* hack: avoid overflow since exp currently uses mpfr */
 void
@@ -37,7 +37,7 @@ int main()
     flint_randinit(state);
 
     /* compare with fmpq_poly */
-    for (iter = 0; iter < 10000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong m, n, qbits, rbits1, rbits2;
         fmpq_poly_t A, B;
@@ -85,7 +85,7 @@ int main()
     }
 
     /* test aliasing */
-    for (iter = 0; iter < 10000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong m, n, qbits, rbits1, rbits2;
         fmpq_poly_t A;
@@ -128,7 +128,7 @@ int main()
     }
 
     /* test that log(exp(f)) contains f */
-    for (iter = 0; iter < 10000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong m, n, qbits, rbits1, rbits2, rbits3;
         fmpq_poly_t A;
@@ -181,5 +181,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

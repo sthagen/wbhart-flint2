@@ -9,13 +9,9 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <gmp.h>
 #include <math.h>
 #include "profiler.h"
 #include "flint.h"
-#include "longlong.h"
 #include "mpn_extras.h"
 #include "ulong_extras.h"
 
@@ -51,10 +47,11 @@ void sample(void * arg, ulong count)
     mpz_t a, b, d, r2;
 
     gmp_randstate_t st;
-    FLINT_TEST_INIT(state);
 
     mp_ptr dinv;
     flint_bitcnt_t norm;
+
+    FLINT_TEST_INIT(state);
     
     mpz_init(a);
     mpz_init(b);

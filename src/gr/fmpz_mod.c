@@ -9,24 +9,21 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
-#include "fmpz_mod.h"
 #include "fmpz_mod_poly.h"
-#include "fmpz_mod_poly_factor.h"
 #include "fmpz_mod_mat.h"
 #include "gr.h"
 #include "gr_vec.h"
+#include "gr_poly.h"
 
 typedef struct
 {
-    fmpz_mod_ctx_struct ctx;
+    fmpz_mod_ctx_struct * ctx;
     truth_t is_prime;
 }
 fmpz_mod_ctx_extended_struct;
 
-
-
-#define FMPZ_MOD_CTX(ring_ctx) (&(((fmpz_mod_ctx_extended_struct *)(GR_CTX_DATA_AS_PTR(ring_ctx)))->ctx))
-#define FMPZ_MOD_IS_PRIME(ring_ctx) ((((fmpz_mod_ctx_extended_struct *)(GR_CTX_DATA_AS_PTR(ring_ctx)))->is_prime))
+#define FMPZ_MOD_CTX(ring_ctx) ((((fmpz_mod_ctx_extended_struct *)(ring_ctx))->ctx))
+#define FMPZ_MOD_IS_PRIME(ring_ctx) (((fmpz_mod_ctx_extended_struct *)(ring_ctx))->is_prime)
 
 int
 _gr_fmpz_mod_ctx_write(gr_stream_t out, gr_ctx_t ctx)
@@ -41,7 +38,7 @@ void
 _gr_fmpz_mod_ctx_clear(gr_ctx_t ctx)
 {
     fmpz_mod_ctx_clear(FMPZ_MOD_CTX(ctx));
-    flint_free(GR_CTX_DATA_AS_PTR(ctx));
+    flint_free(FMPZ_MOD_CTX(ctx));
 }
 
 truth_t
@@ -451,6 +448,31 @@ _gr_fmpz_mod_poly_mullow(fmpz * res,
     return GR_SUCCESS;
 }
 
+/* fixme: duplicates _fmpz_mod_poly_divrem for error handling */
+/* todo: better tuning */
+int
+_gr_fmpz_mod_poly_divrem(fmpz * Q, fmpz * R, const fmpz * A, slong lenA, 
+                                  const fmpz * B, slong lenB, gr_ctx_t ctx)
+{
+    if (lenB <= 30 || lenA - lenB <= 5)
+    {
+        fmpz_t invB;
+        int status;
+
+        fmpz_init(invB);
+        status = _gr_fmpz_mod_inv(invB, B + lenB - 1, ctx);
+        if (status == GR_SUCCESS)
+            _fmpz_mod_poly_divrem_basecase(Q, R, A, lenA, B, lenB, invB, FMPZ_MOD_CTX(ctx)->n);
+
+        fmpz_clear(invB);
+        return status;
+    }
+    else
+    {
+        return _gr_poly_divrem_newton(Q, R, A, lenA, B, lenB, ctx);
+    }
+}
+
 /* todo: also need the _other version ... ? */
 /* todo: implement generically */
 
@@ -596,6 +618,7 @@ gr_method_tab_input _fmpz_mod_methods_input[] =
     {GR_METHOD_VEC_DOT,         (gr_funcptr) _gr_fmpz_mod_vec_dot},
     {GR_METHOD_VEC_DOT_REV,     (gr_funcptr) _gr_fmpz_mod_vec_dot_rev},
     {GR_METHOD_POLY_MULLOW,     (gr_funcptr) _gr_fmpz_mod_poly_mullow},
+    {GR_METHOD_POLY_DIVREM,     (gr_funcptr) _gr_fmpz_mod_poly_divrem},
     {GR_METHOD_POLY_ROOTS,      (gr_funcptr) _gr_fmpz_mod_roots_gr_poly},
     {GR_METHOD_MAT_MUL,         (gr_funcptr) _gr_fmpz_mod_mat_mul},
     {0,                         (gr_funcptr) NULL},
@@ -607,8 +630,28 @@ gr_ctx_init_fmpz_mod(gr_ctx_t ctx, const fmpz_t n)
     ctx->which_ring = GR_CTX_FMPZ_MOD;
     ctx->sizeof_elem = sizeof(fmpz);
 
-    GR_CTX_DATA_AS_PTR(ctx) = flint_malloc(sizeof(fmpz_mod_ctx_extended_struct));
+    FMPZ_MOD_CTX(ctx) = flint_malloc(sizeof(fmpz_mod_ctx_struct));
     fmpz_mod_ctx_init(FMPZ_MOD_CTX(ctx), n);
+    FMPZ_MOD_IS_PRIME(ctx) = T_UNKNOWN;
+
+    ctx->size_limit = WORD_MAX;
+
+    ctx->methods = _fmpz_mod_methods;
+
+    if (!_fmpz_mod_methods_initialized)
+    {
+        gr_method_tab_init(_fmpz_mod_methods, _fmpz_mod_methods_input);
+        _fmpz_mod_methods_initialized = 1;
+    }
+}
+
+void
+_gr_ctx_init_fmpz_mod_from_ref(gr_ctx_t ctx, const void * fctx)
+{
+    ctx->which_ring = GR_CTX_FMPZ_MOD;
+    ctx->sizeof_elem = sizeof(fmpz);
+
+    FMPZ_MOD_CTX(ctx) = (fmpz_mod_ctx_struct *) fctx;
     FMPZ_MOD_IS_PRIME(ctx) = T_UNKNOWN;
 
     ctx->size_limit = WORD_MAX;

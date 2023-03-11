@@ -12,6 +12,13 @@
 #include "fmpz.h"
 #include "gr.h"
 
+#ifdef __GNUC__
+# define memcpy __builtin_memcpy
+# define strlen __builtin_strlen
+#else
+# include <math.h>
+#endif
+
 /* todo: error handling */
 
 void gr_stream_init_file(gr_stream_t out, FILE * fp)
@@ -45,7 +52,7 @@ void gr_stream_write(gr_stream_t out, const char * s)
         if (alloc > out->alloc)
         {
             alloc = FLINT_MAX(alloc, out->alloc * 2);
-            out->s = realloc(out->s, alloc);
+            out->s = flint_realloc(out->s, alloc);
             out->alloc = alloc;
         }
 

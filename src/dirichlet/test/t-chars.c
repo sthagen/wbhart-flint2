@@ -21,7 +21,7 @@ int main()
     fflush(stdout);
     flint_randinit(state);
 
-    for (iter = 0; iter < 3000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 3000 * 0.1 * flint_test_multiplier(); iter++)
     {
         dirichlet_group_t G;
         dirichlet_char_t x, y;
@@ -150,5 +150,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

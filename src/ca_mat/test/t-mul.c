@@ -21,7 +21,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 1000 * calcium_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         ca_ctx_t ctx;
         ca_mat_t A, B, C, AB, BC, X, Y;
@@ -78,7 +78,7 @@ int main()
         ca_ctx_clear(ctx);
     }
 
-    for (iter = 0; iter < 1000 * calcium_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         ca_ctx_t ctx;
         ca_mat_t A, B, C, AB, BC, X, Y;
@@ -138,6 +138,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

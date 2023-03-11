@@ -15,7 +15,6 @@
 
 ******************************************************************************/
 
-#include <stdio.h>
 #include "nf.h"
 
 int
@@ -30,7 +29,7 @@ main(void)
     flint_randinit(state);
 
     /* not necessarily monic */
-    for (i = 0; i < 500 * antic_test_multiplier(); i++)
+    for (i = 0; i < 500 * flint_test_multiplier(); i++)
     {
         nf_t nf;
         fmpq_poly_t pol;
@@ -51,7 +50,7 @@ main(void)
     }
 
     /* monic */
-    for (i = 0; i < 500 * antic_test_multiplier(); i++)
+    for (i = 0; i < 500 * flint_test_multiplier(); i++)
     {
         fmpq_poly_t pol;
         nf_t nf;
@@ -74,7 +73,7 @@ main(void)
     }
 
     /* random */
-    for (i = 0; i < 500 * antic_test_multiplier(); i++)
+    for (i = 0; i < 500 * flint_test_multiplier(); i++)
     {
         nf_t nf;
 

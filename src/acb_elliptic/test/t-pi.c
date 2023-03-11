@@ -9,8 +9,15 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "acb.h"
 #include "acb_elliptic.h"
 #include "acb_modular.h"
+
+#ifdef __GNUC__
+# define fabs __builtin_fabs
+#else
+# include <math.h>
+#endif
 
 static const double testdata_pi[17][6] = {
   {-2.0, 0.0, 0.0, 0.0, 0.9068996821171089253, 0.0},
@@ -43,7 +50,7 @@ int main()
     flint_randinit(state);
 
     /* Test self-consistency, and Pi(n,n) = E(n) / (1-n) */
-    for (iter = 0; iter < 500 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 500 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t n, m, r1, r2, t;
         slong prec1, prec2;
@@ -69,7 +76,7 @@ int main()
                 mag_set_d(arb_radref(acb_realref(r2)), 1e-14 * fabs(testdata_pi[k][4]));
                 mag_set_d(arb_radref(acb_imagref(r2)), 1e-14 * fabs(testdata_pi[k][5]));
 
-                for (prec1 = 32; prec1 <= (arb_test_multiplier() < 1.0 ? 64 : 256); prec1 *= 2)
+                for (prec1 = 32; prec1 <= (0.1 * flint_test_multiplier() < 1.0 ? 64 : 256); prec1 *= 2)
                 {
                     acb_elliptic_pi(r1, n, m, prec1 + 30);
 
@@ -143,6 +150,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

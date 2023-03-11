@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "acb.h"
 #include "acb_modular.h"
 
 int main()
@@ -21,7 +22,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 5000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 5000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t q, t2a, t2b, t3a, t3b, t4a, t4b;
         slong prec1, prec2, N;
@@ -76,6 +77,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

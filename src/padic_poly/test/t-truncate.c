@@ -9,14 +9,8 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <gmp.h>
-#include "flint.h"
-#include "fmpz.h"
-#include "fmpz_poly.h"
-#include "long_extras.h"
 #include "ulong_extras.h"
+#include "fmpq_poly.h"
 #include "padic_poly.h"
 
 int
@@ -125,6 +119,6 @@ main(void)
     FLINT_TEST_CLEANUP(state);
     
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

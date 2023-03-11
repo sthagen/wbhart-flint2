@@ -18,11 +18,8 @@
 #define MAG_INLINE static __inline__
 #endif
 
-#include <stdio.h>
-#include <math.h>
-#include "flint.h"
-#include "fmpz.h"
 #include "fmpz_extras.h"
+#include "arb_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -177,17 +174,6 @@ __mag_fixmul32(mp_limb_t x, mp_limb_t y)
         MAG_EXP(x) -= __t; \
     } while (0)
 
-
-typedef struct
-{
-    fmpz exp;
-    mp_limb_t man;
-}
-mag_struct;
-
-typedef mag_struct mag_t[1];
-typedef mag_struct * mag_ptr;
-typedef const mag_struct * mag_srcptr;
 
 MAG_INLINE void
 mag_init(mag_t x)
@@ -491,11 +477,6 @@ void mag_set_d_2exp_fmpz(mag_t z, double c, const fmpz_t exp);
 void mag_set_d_2exp_fmpz_lower(mag_t z, double c, const fmpz_t exp);
 
 void mag_set_fmpz_2exp_fmpz(mag_t z, const fmpz_t man, const fmpz_t exp);
-
-#ifdef FMPR_H
-void mag_set_fmpr(mag_t x, const fmpr_t y);
-void mag_get_fmpr(fmpr_t x, const mag_t r);
-#endif
 
 void mag_randtest_special(mag_t x, flint_rand_t state, slong expbits);
 

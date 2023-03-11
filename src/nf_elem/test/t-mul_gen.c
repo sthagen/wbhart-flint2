@@ -15,7 +15,6 @@
 
 ******************************************************************************/
 
-#include <stdio.h>
 #include "nf.h"
 #include "nf_elem.h"
 
@@ -31,7 +30,7 @@ main(void)
     flint_randinit(state);
 
     /* test mul_gen(b) = a * b, where a is the generator */
-    for (i = 0; i < 100 * antic_test_multiplier(); i++)
+    for (i = 0; i < 100 * flint_test_multiplier(); i++)
     {
         nf_t nf;
         nf_elem_t a, b, p1, p2;
@@ -59,7 +58,7 @@ main(void)
            printf("b = "); nf_elem_print_pretty(b, nf, "x"); printf("\n");
            printf("p1 = "); nf_elem_print_pretty(p1, nf, "x"); printf("\n");
            printf("p2 = "); nf_elem_print_pretty(p2, nf, "x"); printf("\n");
-           abort();
+           flint_abort();
         }
 
         nf_elem_clear(a, nf);
@@ -71,7 +70,7 @@ main(void)
     }
     
     /* test aliasing b and b */
-    for (i = 0; i < 100 * antic_test_multiplier(); i++)
+    for (i = 0; i < 100 * flint_test_multiplier(); i++)
     {
         nf_t nf;
         nf_elem_t b, c;
@@ -92,7 +91,7 @@ main(void)
         {
            printf("b = "); nf_elem_print_pretty(b, nf, "x"); printf("\n");
            printf("c = "); nf_elem_print_pretty(c, nf, "x"); printf("\n");
-           abort();
+           flint_abort();
         }
 
         nf_elem_clear(b, nf);

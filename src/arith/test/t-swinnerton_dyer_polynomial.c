@@ -9,15 +9,8 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <gmp.h>
-#include "flint.h"
+#include "fmpz_poly.h"
 #include "arith.h"
-#include "profiler.h"
-#include "fmpz.h"
-#include "fmpz_mat.h"
-#include "fmpq_poly.h"
 
 static const mp_limb_t known_values[] =
 {

@@ -9,7 +9,14 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "acb.h"
 #include "acb_modular.h"
+
+#ifdef __GNUC__
+# define fabs __builtin_fabs
+#else
+# include <math.h>
+#endif
 
 #define EPS 1e-13
 #define NUM_DERIVS 4
@@ -98,7 +105,7 @@ int main()
     }
 
     /* self-consistency test */
-    for (iter = 0; iter < 500 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 500 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_ptr m1, m2;
         acb_t z1, z2, t;
@@ -160,6 +167,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

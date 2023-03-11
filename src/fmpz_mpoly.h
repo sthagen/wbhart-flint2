@@ -19,53 +19,12 @@
 #define FMPZ_MPOLY_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdio.h>
-#undef ulong
-
-#include <gmp.h>
-#define ulong mp_limb_t
-
-#include "flint.h"
-#include "fmpz.h"
 #include "fmpz_vec.h"
-#include "fmpz_poly.h"
 #include "mpoly.h"
-#include "nmod_mpoly.h"
-#include "fmpz_mod.h"
-#include "n_poly.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
-
-/* Type definitions **********************************************************/
-
-/*
-    context object for fmpz_mpoly
-*/
-typedef struct
-{
-    mpoly_ctx_t minfo;
-} fmpz_mpoly_ctx_struct;
-
-typedef fmpz_mpoly_ctx_struct fmpz_mpoly_ctx_t[1];
-
-/*
-    fmpz_mpoly_t
-    sparse multivariates with fmpz coeffs
-*/
-typedef struct
-{
-   fmpz * coeffs; /* alloc fmpzs */
-   ulong * exps;
-   slong alloc;
-   slong length;
-   flint_bitcnt_t bits;     /* number of bits per exponent */
-} fmpz_mpoly_struct;
-
-typedef fmpz_mpoly_struct fmpz_mpoly_t[1];
 
 FMPZ_MPOLY_INLINE
 fmpz * fmpz_mpoly_term_coeff_ref(fmpz_mpoly_t A, slong i,
@@ -192,25 +151,8 @@ void fmpz_mpoly_truncate(fmpz_mpoly_t A, slong newlen,
     }  
 }
 
-FMPZ_MPOLY_INLINE
-void fmpz_mpoly_fit_bits(fmpz_mpoly_t A,
-                                  flint_bitcnt_t bits, const fmpz_mpoly_ctx_t ctx)
-{
-   if (A->bits < bits)
-   {
-      if (A->alloc != 0)
-      {
-         slong N = mpoly_words_per_exp(bits, ctx->minfo);
-         ulong * t = (ulong *) flint_malloc(N*A->alloc*sizeof(ulong));
-         mpoly_repack_monomials(t, bits, A->exps, A->bits, A->length, ctx->minfo);
-         flint_free(A->exps);
-         A->exps = t;
-      }
-
-      A->bits = bits;
-   }
-}
-
+FLINT_DLL void fmpz_mpoly_fit_bits(fmpz_mpoly_t A,
+                                  flint_bitcnt_t bits, const fmpz_mpoly_ctx_t ctx);
 
 /* Input/output **************************************************************/
 

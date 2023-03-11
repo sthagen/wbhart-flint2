@@ -12,9 +12,7 @@
 #ifndef ACB_ELLIPTIC_H
 #define ACB_ELLIPTIC_H
 
-#include <stdio.h>
-#include "acb.h"
-#include "acb_poly.h"
+#include "acb_types.h"
 
 #ifdef __cplusplus
 extern "C" {

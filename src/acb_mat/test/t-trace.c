@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "fmpq_mat.h"
 #include "acb_mat.h"
 
 int main()
@@ -22,7 +23,7 @@ int main()
     flint_randinit(state);
 
     /* check that the acb trace contains the fmpq trace */
-    for (iter = 0; iter < 10000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         fmpq_mat_t Q;
         fmpq_t Qtrace;
@@ -69,7 +70,7 @@ int main()
     }
 
     /* check trace(A*B) = trace(B*A) */
-    for (iter = 0; iter < 10000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong m, n, prec;
         acb_mat_t a, b, ab, ba;
@@ -125,5 +126,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

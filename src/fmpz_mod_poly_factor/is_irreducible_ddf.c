@@ -11,18 +11,17 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#undef ulong
-#define ulong ulongxx/* interferes with system includes */
+#include "ulong_extras.h"
+#include "fmpz_mat.h"
+#include "fmpz_mod_poly_factor.h"
 
-#include <math.h>
-
-#undef ulong
-
-#include <gmp.h>
-
-#define ulong mp_limb_t
-
-#include "fmpz_mod_poly.h"
+#ifdef __GNUC__
+# define ceil __builtin_ceil
+# define log __builtin_log
+# define pow __builtin_pow
+#else
+# include <math.h>
+#endif
 
 int fmpz_mod_poly_is_irreducible_ddf(const fmpz_mod_poly_t poly,
                                                       const fmpz_mod_ctx_t ctx)

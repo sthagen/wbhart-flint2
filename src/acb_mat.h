@@ -18,29 +18,13 @@
 #define ACB_MAT_INLINE static __inline__
 #endif
 
-#include <stdio.h>
-#include "fmpz_mat.h"
-#include "fmpq_mat.h"
-#include "arb.h"
-#include "acb.h"
+#include "fmpq_types.h"
 #include "arb_mat.h"
-#include "acb_poly.h"
+#include "acb.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
-typedef struct
-{
-    acb_ptr entries;
-    slong r;
-    slong c;
-    acb_ptr * rows;
-}
-acb_mat_struct;
-
-typedef acb_mat_struct acb_mat_t[1];
 
 #define acb_mat_entry(mat,i,j) ((mat)->rows[i] + (j))
 #define acb_mat_nrows(mat) ((mat)->r)

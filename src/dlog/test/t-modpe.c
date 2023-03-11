@@ -9,8 +9,9 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "nmod.h"
 #include "dlog.h"
-#include <math.h>
+
 #if FLINT_BITS == 64
 #define LIM UWORD(1000000000000)
 #else
@@ -83,5 +84,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

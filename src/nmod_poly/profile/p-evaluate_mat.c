@@ -9,9 +9,6 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <gmp.h>
 #include "flint.h"
 #include "nmod_poly.h"
 #include "ulong_extras.h"
@@ -28,14 +25,16 @@
 int
 main()
 {
-    FLINT_TEST_INIT(state);
     slong dim, len, i;
     int result;
     nmod_mat_t A, B, C;
     nmod_poly_t poly;
-    mp_limb_t n = n_randtest_not_zero(state);
+    mp_limb_t n;
     clock_t horner_begin, paterson_begin;
     double horner_time, paterson_time;
+    FLINT_TEST_INIT(state);
+
+    n = n_randtest_not_zero(state);
 
     printf
         ("#Dimension\tLength\t\tHoner's\t\t\tPaterson\t\tBetter(0 = Horner, 1 = Paterson)\n");

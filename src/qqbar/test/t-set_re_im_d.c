@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "double_extras.h"
 #include "qqbar.h"
 
 int main()
@@ -21,7 +22,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 10000 * calcium_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         double x, y;
         qqbar_t z;
@@ -72,6 +73,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

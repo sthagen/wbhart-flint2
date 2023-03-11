@@ -11,6 +11,12 @@
 
 #include "acb_dirichlet.h"
 
+#ifdef __GNUC__
+# define fabs __builtin_fabs
+#else
+# include <math.h>
+#endif
+
 /* Laurent expansions at s = 1 of first 10 principal L-functions */
 
 /* with mpmath:
@@ -111,7 +117,7 @@ int main()
     }
 
     /* test self-consistency */
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t s;
         dirichlet_group_t G;
@@ -196,6 +202,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

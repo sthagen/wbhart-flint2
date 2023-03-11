@@ -21,7 +21,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 5000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 5000 * 0.1 * flint_test_multiplier(); iter++)
     {
         arb_poly_t a, b, c, d;
         slong j, n, prec;
@@ -100,6 +100,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

@@ -12,26 +12,28 @@
 #ifndef FLINT_H
 #define FLINT_H
 
-#undef ulong
-#define ulong ulongxx /* ensure vendor doesn't typedef ulong */
 #if !defined(_MSC_VER)
 #include <sys/param.h> /* for BSD define */
 #endif
-#include <gmp.h>
-#include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h> /* for alloca on FreeBSD */
-#if (!defined(BSD) && !defined(__MINGW64__) && !defined(__MINGW32__) && !defined(_MSC_VER)) || defined(__GNU__)
-/* MinGW and FreeBSD have alloca, but not alloca.h */
-#include <alloca.h>
-#endif
-#if defined(__MINGW32__)
-#include <malloc.h> /* for alloca on MinGW */
-#endif
+#include <stdarg.h>
+#include <gmp.h>
 #include "limits.h"
 #include "longlong.h"
 #include "flint-config.h"
-#undef ulong
+
+#ifndef alloca
+# ifdef __GNUC__
+#  define alloca __builtin_alloca
+# else
+#  ifdef _MSC_VER
+#   include <malloc.h>
+#   define alloca _alloca
+#  else
+#   include <alloca.h> /* We assume then that you have alloca.h */
+#  endif
+# endif
+#endif
 
 #ifdef FLINT_INLINES_C
 #define FLINT_INLINE FLINT_DLL
@@ -99,8 +101,10 @@ FLINT_DLL void __flint_get_memory_functions(void *(**alloc_func) (size_t),
 
 #ifdef __GNUC__
 #define FLINT_NORETURN __attribute__ ((noreturn))
+#define FLINT_CONST __attribute__ ((const))
 #else
 #define FLINT_NORETURN
+#define FLINT_CONST
 #endif
 
 FLINT_DLL FLINT_NORETURN void flint_abort(void);
@@ -177,7 +181,7 @@ FLINT_DLL void flint_reset_num_workers(int max_workers);
 FLINT_DLL int flint_set_thread_affinity(int * cpus, slong length);
 FLINT_DLL int flint_restore_thread_affinity();
 
-double flint_test_multiplier(void);
+FLINT_CONST double flint_test_multiplier(void);
 
 typedef struct
 {
@@ -245,6 +249,11 @@ void flint_rand_free(flint_rand_s * state)
 {
     flint_free(state);
 }
+
+/* defined in ulong_extras, but used throughout the test code */
+FLINT_DLL ulong n_randint(flint_rand_t, ulong);
+FLINT_DLL ulong n_randtest(flint_rand_t);
+FLINT_DLL ulong n_randtest_not_zero(flint_rand_t);
 
 #if FLINT_USES_GC
 #define FLINT_GC_INIT() GC_init()
@@ -452,8 +461,17 @@ FLINT_INLINE slong flint_mul_sizes(slong x, slong y)
 
 #include "exception.h"
 
-/* defined ahead of fmpz.h and fmpq.h so that the types
-   are usable in prototypes without importing those headers */
+/* Defined ahead of nmod.h, fmpz.h and fmpq.h so that the types are usable in
+ * prototypes without importing those headers */
+
+typedef struct
+{
+   mp_limb_t n;
+   mp_limb_t ninv;
+   flint_bitcnt_t norm;
+}
+nmod_t;
+
 typedef slong fmpz;
 typedef fmpz fmpz_t[1];
 

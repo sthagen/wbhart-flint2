@@ -18,15 +18,7 @@
 #define NMOD_MPOLY_FACTOR_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdio.h>
-#undef ulong
-#include <gmp.h>
-#define ulong mp_limb_t
-
 #include "nmod_mpoly.h"
-#include "n_poly.h"
 
 #ifdef __cplusplus
  extern "C" {
@@ -59,16 +51,6 @@ FLINT_DLL int nmod_mat_is_reduced(const nmod_mat_t N);
 FLINT_DLL void nmod_mat_init_nullspace_tr(nmod_mat_t X, nmod_mat_t tmp);
 
 /*****************************************************************************/
-
-typedef struct {
-    mp_limb_t constant;
-    nmod_mpoly_struct * poly;
-    fmpz * exp;
-    slong num;
-    slong alloc;
-} nmod_mpoly_factor_struct;
-
-typedef nmod_mpoly_factor_struct nmod_mpoly_factor_t[1];
 
 NMOD_MPOLY_FACTOR_INLINE
 void nmod_mpoly_factor_init(nmod_mpoly_factor_t f, const nmod_mpoly_ctx_t ctx)

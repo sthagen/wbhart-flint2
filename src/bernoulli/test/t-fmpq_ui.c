@@ -9,9 +9,9 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "fmpz.h"
 #include "fmpz_vec.h"
+#include "arf.h"
 #include "arith.h"
 #include "bernoulli.h"
 
@@ -26,7 +26,7 @@ int main()
     flint_printf("fmpq_ui....");
     fflush(stdout);
 
-    N = 4000 * FLINT_MIN(1.0, arb_test_multiplier());
+    N = 4000 * FLINT_MIN(1.0, 0.1 * flint_test_multiplier());
 
     num1 = _fmpz_vec_init(N);
     den1 = _fmpz_vec_init(N);

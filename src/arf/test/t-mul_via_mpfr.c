@@ -9,37 +9,15 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
-#include "fmpr.h"
+#include "mpfr.h"
 #include "arf.h"
 
+/* todo: try some other code here also, e.g. fmpz roundtrip */
 int
 arf_mul_naive(arf_t z, const arf_t x, const arf_t y, slong prec, arf_rnd_t rnd)
 {
-    if (rnd == ARF_RND_NEAR)
-    {
-        arf_mul(z, x, y, ARF_PREC_EXACT, rnd);
-        return arf_set_round(z, z, prec, rnd);
-    }
-    else
-    {
-        fmpr_t a, b;
-        slong r;
-
-        fmpr_init(a);
-        fmpr_init(b);
-
-        arf_get_fmpr(a, x);
-        arf_get_fmpr(b, y);
-
-        r = fmpr_mul_naive(a, a, b, prec, rnd);
-
-        arf_set_fmpr(z, a);
-
-        fmpr_clear(a);
-        fmpr_clear(b);
-
-        return (r == FMPR_RESULT_EXACT) ? 0 : 1;
-    }
+    arf_mul(z, x, y, ARF_PREC_EXACT, rnd);
+    return arf_set_round(z, z, prec, rnd);
 }
 
 int main()
@@ -52,7 +30,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 10000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         arf_t x, y, z, v;
         slong prec, r1, r2;
@@ -170,5 +148,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

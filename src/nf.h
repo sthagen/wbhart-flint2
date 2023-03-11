@@ -17,9 +17,6 @@
 #ifndef NF_H
 #define NF_H
 
-#include "gmp.h"
-#include "flint.h"
-#include "fmpz.h"
 #include "fmpz_poly.h"
 #include "fmpq_poly.h"
 
@@ -38,8 +35,6 @@
                          __ANTIC_VERSION_PATCHLEVEL)
 
 #define ANTIC_DLL FLINT_DLL
-
-#define antic_test_multiplier flint_test_multiplier
 
 typedef struct {
    fmpq_poly_t pol;  /* defining polynomial */

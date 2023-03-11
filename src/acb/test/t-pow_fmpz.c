@@ -21,7 +21,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 5000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 5000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t a, b, c, d;
         fmpz_t e1, e2, e3;
@@ -86,5 +86,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

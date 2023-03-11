@@ -13,18 +13,9 @@
 #ifndef QSIEVE_H
 #define QSIEVE_H
 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdint.h>
-
-#include "flint.h"
-#include "fmpz.h"
-#include "ulong_extras.h"
-#include "fmpz_vec.h"
-#include "fmpz_factor.h"
-#include "thread_support.h"
+#include "thread_pool.h"
+#include "fmpz_types.h"
 
 #ifdef __cplusplus
  extern "C" {

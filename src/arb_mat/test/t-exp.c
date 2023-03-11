@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "fmpq_mat.h"
 #include "arb_mat.h"
 
 void
@@ -43,7 +44,7 @@ int main()
     flint_randinit(state);
 
     /* check exp(A)*exp(c*A) = exp((1+c)*A) */
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         arb_mat_t A, E, F, EF, G;
         fmpq_mat_t Q;
@@ -107,6 +108,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

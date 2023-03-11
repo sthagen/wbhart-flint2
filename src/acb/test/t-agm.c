@@ -319,7 +319,7 @@ int main()
     }
 
     /* self-consistency test */
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t m1, m2;
         acb_t x1, x2, y1, y2, t;
@@ -430,6 +430,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

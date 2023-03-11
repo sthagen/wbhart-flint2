@@ -18,26 +18,12 @@
 #define FMPQ_MAT_INLINE static __inline__
 #endif
 
-#include <gmp.h>
-#include "flint.h"
-#include "fmpz.h"
-#include "fmpz_mat.h"
-#include "fmpq_poly.h"
 #include "fmpq.h"
+#include "fmpq_types.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
-
-typedef struct
-{
-    fmpq * entries;
-    slong r;
-    slong c;
-    fmpq ** rows;
-} fmpq_mat_struct;
-
-typedef fmpq_mat_struct fmpq_mat_t[1];
 
 FMPQ_MAT_INLINE
 fmpq * fmpq_mat_entry(const fmpq_mat_t mat, slong i, slong j)

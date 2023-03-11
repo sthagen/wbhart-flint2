@@ -15,7 +15,6 @@
 
 ******************************************************************************/
 
-#include <stdio.h>
 #include "nf.h"
 #include "nf_elem.h"
 
@@ -30,7 +29,7 @@ main(void)
 
     flint_randinit(state);
 
-    for (i = 0; i < 1000 * antic_test_multiplier(); i++)
+    for (i = 0; i < 1000 * flint_test_multiplier(); i++)
     {
         nf_t nf;
         nf_elem_t a, b;
@@ -71,7 +70,7 @@ main(void)
             flint_printf("d = "); fmpz_print(d); printf("\n");
             flint_printf("newcoeff = "); fmpq_print(newcoeff); printf("\n");
             flint_printf("pol = "); fmpq_poly_print_pretty(nf->pol, "x"); printf("\n");
-            abort();
+            flint_abort();
         }
 
         nf_elem_clear(a, nf);

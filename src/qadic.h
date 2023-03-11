@@ -18,21 +18,6 @@
 #define QADIC_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdlib.h>
-#include <stdio.h>
-#undef ulong
-
-#include <gmp.h>
-#define ulong mp_limb_t
-
-#include "flint.h"
-#include "fmpz.h"
-#include "fmpq.h"
-#include "fmpz_vec.h"
-#include "ulong_extras.h"
-#include "padic.h"
 #include "padic_poly.h"
 
 #ifdef __cplusplus

@@ -18,16 +18,9 @@
 #define FMPZ_MPOLY_FACTOR_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdio.h>
-#undef ulong
-#include <gmp.h>
-#define ulong mp_limb_t
-
+#include "fmpq.h"
 #include "fmpz_mpoly.h"
-#include "fmpq_poly.h"
-#include "fmpz_poly_factor.h"
+#include "nmod_mpoly.h"
 
 #ifdef __cplusplus
  extern "C" {
@@ -42,17 +35,6 @@ FLINT_DLL void tuple_saturate(fmpz * alpha, slong n, slong m);
 FLINT_DLL void tuple_next(fmpz * alpha, slong n);
 
 /*****************************************************************************/
-
-typedef struct {
-    fmpz_t constant;
-    fmpz_t constant_den;        /* should be one after normal operations */
-    fmpz_mpoly_struct * poly;
-    fmpz * exp;
-    slong num;
-    slong alloc;
-} fmpz_mpoly_factor_struct;
-
-typedef fmpz_mpoly_factor_struct fmpz_mpoly_factor_t[1];
 
 FMPZ_MPOLY_FACTOR_INLINE
 void fmpz_mpoly_factor_init(fmpz_mpoly_factor_t f, const fmpz_mpoly_ctx_t ctx)

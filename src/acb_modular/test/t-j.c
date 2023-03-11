@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "acb.h"
 #include "acb_modular.h"
 
 int main()
@@ -22,7 +23,7 @@ int main()
     flint_randinit(state);
 
     /* Test SL2Z invariance */
-    for (iter = 0; iter < 10000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t tau1, tau2, z1, z2;
         slong e0, prec0, prec1, prec2;
@@ -81,7 +82,7 @@ int main()
     }
 
     /* Test special values */
-    for (iter = 0; iter < 100 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 100 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t tau, z;
         slong prec;
@@ -126,6 +127,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

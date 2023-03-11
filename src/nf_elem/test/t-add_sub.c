@@ -15,7 +15,6 @@
 
 ******************************************************************************/
 
-#include <stdio.h>
 #include "nf.h"
 #include "nf_elem.h"
 
@@ -31,7 +30,7 @@ main(void)
     flint_randinit(state);
 
     /* test b + c - c = b */
-    for (i = 0; i < 100 * antic_test_multiplier(); i++)
+    for (i = 0; i < 100 * flint_test_multiplier(); i++)
     {
         nf_t nf;
         nf_elem_t a, b, c, t;
@@ -56,7 +55,7 @@ main(void)
            printf("a = "); nf_elem_print_pretty(a, nf, "x"); printf("\n");
            printf("b = "); nf_elem_print_pretty(b, nf, "x"); printf("\n");
            printf("c = "); nf_elem_print_pretty(c, nf, "x"); printf("\n");
-           abort();
+           flint_abort();
         }
 
         nf_elem_clear(a, nf);
@@ -68,7 +67,7 @@ main(void)
     }
     
     /* test b + c - c = b : exercise common denominator path */
-    for (i = 0; i < 100 * antic_test_multiplier(); i++)
+    for (i = 0; i < 100 * flint_test_multiplier(); i++)
     {
         nf_t nf;
         nf_elem_t a, b, c, t;
@@ -96,7 +95,7 @@ main(void)
            printf("a = "); nf_elem_print_pretty(a, nf, "x"); printf("\n");
            printf("b = "); nf_elem_print_pretty(b, nf, "x"); printf("\n");
            printf("c = "); nf_elem_print_pretty(c, nf, "x"); printf("\n");
-           abort();
+           flint_abort();
         }
 
         nf_elem_clear(a, nf);
@@ -108,7 +107,7 @@ main(void)
     }
     
     /* test aliasing a and b */
-    for (i = 0; i < 100 * antic_test_multiplier(); i++)
+    for (i = 0; i < 100 * flint_test_multiplier(); i++)
     {
         nf_t nf;
         nf_elem_t a, b, c;
@@ -133,7 +132,7 @@ main(void)
            printf("a = "); nf_elem_print_pretty(a, nf, "x"); printf("\n");
            printf("b = "); nf_elem_print_pretty(b, nf, "x"); printf("\n");
            printf("c = "); nf_elem_print_pretty(c, nf, "x"); printf("\n");
-           abort();
+           flint_abort();
         }
 
         nf_elem_clear(a, nf);
@@ -144,7 +143,7 @@ main(void)
     }
 
     /* test aliasing a and c */
-    for (i = 0; i < 100 * antic_test_multiplier(); i++)
+    for (i = 0; i < 100 * flint_test_multiplier(); i++)
     {
         nf_t nf;
         nf_elem_t a, b, c;
@@ -169,7 +168,7 @@ main(void)
            printf("a = "); nf_elem_print_pretty(a, nf, "x"); printf("\n");
            printf("b = "); nf_elem_print_pretty(b, nf, "x"); printf("\n");
            printf("c = "); nf_elem_print_pretty(c, nf, "x"); printf("\n");
-           abort();
+           flint_abort();
         }
 
         nf_elem_clear(a, nf);

@@ -18,24 +18,12 @@
 #define ACB_POLY_INLINE static __inline__
 #endif
 
-#include <stdio.h>
+#include "fmpq_poly.h"
 #include "acb.h"
-#include "arb_poly.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct
-{
-    acb_ptr coeffs;
-    slong alloc;
-    slong length;
-}
-acb_poly_struct;
-
-typedef acb_poly_struct acb_poly_t[1];
-
 
 /* Memory management */
 

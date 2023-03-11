@@ -19,31 +19,14 @@
 #define FMPZ_MOD_POLY_FACTOR_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdio.h>
-#undef ulong
-#include <gmp.h>
-#define ulong mp_limb_t
-
-#include "flint.h"
-#include "fmpz.h"
+#include "thread_pool.h"
+#include "fmpz_mod_poly.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 /* Factoring  ****************************************************************/
-
-typedef struct
-{
-    fmpz_mod_poly_struct *poly;
-    slong *exp;
-    slong num;
-    slong alloc;
-} fmpz_mod_poly_factor_struct;
-
-typedef fmpz_mod_poly_factor_struct fmpz_mod_poly_factor_t[1];
 
 FLINT_DLL void fmpz_mod_poly_factor_init(fmpz_mod_poly_factor_t fac,
                                                      const fmpz_mod_ctx_t ctx);

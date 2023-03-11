@@ -18,17 +18,7 @@
 #define FMPZ_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx/* interferes with system includes */
-#include <stdlib.h>
-#include <stdio.h>
-#undef ulong
-
-#include <gmp.h>
-#define ulong mp_limb_t
-
-#include "flint.h"
-#include "nmod_vec.h"
+#include "fmpz_types.h"
 #include "fmpz-conversions.h"
 
 #if FLINT_USES_PTHREAD
@@ -362,18 +352,16 @@ FLINT_DLL int fmpz_fits_si(const fmpz_t f);
 FMPZ_INLINE
 void fmpz_zero(fmpz_t f)
 {
-   if (COEFF_IS_MPZ(*f))
-      _fmpz_clear_mpz(*f);
-   *f = WORD(0);
+    if (COEFF_IS_MPZ(*f))
+        _fmpz_clear_mpz(*f);
+    *f = WORD(0);
 }
 
 FMPZ_INLINE 
 void fmpz_one(fmpz_t f)
 {
     if (COEFF_IS_MPZ(*f)) 
-    {
         _fmpz_clear_mpz(*f);
-	}
     *f = WORD(1);
 }
 
@@ -422,12 +410,9 @@ FLINT_DLL char * fmpz_get_str(char * str, int b, const fmpz_t f);
 FMPZ_INLINE
 void fmpz_swap(fmpz_t f, fmpz_t g)
 {
-    if (f != g)  /* swapping required */
-    {
-        fmpz t = *f;
-        *f = *g;
-        *g = t;
-    }
+    fmpz t = *f;
+    *f = *g;
+    *g = t;
 }
 
 FLINT_DLL int fmpz_cmp(const fmpz_t f, const fmpz_t g);
@@ -444,26 +429,18 @@ FMPZ_INLINE
 int fmpz_is_even(const fmpz_t f)
 {
     if (!COEFF_IS_MPZ(*f))
-    {
         return !((*f) & WORD(1));
-    }
     else
-    {
         return mpz_even_p(COEFF_TO_PTR(*f));
-    }
 }
 
 FMPZ_INLINE
 int fmpz_is_odd(const fmpz_t f)
 {
     if (!COEFF_IS_MPZ(*f))
-    {
         return ((*f) & WORD(1));
-    }
     else
-    {
         return mpz_odd_p(COEFF_TO_PTR(*f));
-    }
 }
 
 FLINT_DLL mp_size_t fmpz_size(const fmpz_t f);
@@ -474,22 +451,7 @@ FLINT_DLL flint_bitcnt_t fmpz_bits(const fmpz_t f);
 
 FLINT_DLL flint_bitcnt_t fmpz_val2(const fmpz_t x);
 
-FMPZ_INLINE void
-fmpz_neg(fmpz_t f1, const fmpz_t f2)
-{
-    if (!COEFF_IS_MPZ(*f2))     /* coeff is small */
-    {
-        fmpz t = -*f2;          /* Need to save value in case of aliasing */
-        _fmpz_demote(f1);
-        *f1 = t;
-    }
-    else                        /* coeff is large */
-    {
-        /* No need to retain value in promotion, as if aliased, both already large */
-        __mpz_struct *mpz_res = _fmpz_promote(f1);
-        mpz_neg(mpz_res, COEFF_TO_PTR(*f2));
-    }
-}
+FLINT_DLL void fmpz_neg(fmpz_t f1, const fmpz_t f2);
 
 FLINT_DLL void fmpz_abs(fmpz_t f1, const fmpz_t f2);
 
@@ -834,61 +796,6 @@ FLINT_DLL void fmpz_multi_CRT_clear(fmpz_multi_CRT_t P);
 
 FLINT_DLL void _fmpz_multi_CRT_precomp(fmpz * outputs, const fmpz_multi_CRT_t P,
                                                 const fmpz * inputs, int sign);
-
-/* deprecated versions that assume sign = 1 **********************************/
-/*
-deprecated functions and types   new functions and types
-fmpz_multi_crt_t              => fmpz_multi_CRT_t
-fmpz_multi_crt_init           => fmpz_multi_CRT_init
-fmpz_multi_crt_precompute     => fmpz_multi_CRT_precompute
-fmpz_multi_crt_precompute_p   gone
-fmpz_multi_crt_precomp        => fmpz_multi_CRT_precomp now with sign option
-fmpz_multi_crt_precomp_p      gone
-fmpz_multi_crt                => fmpz_multi_CRT now with sign option
-fmpz_multi_crt_clear          => fmpz_multi_CRT_clear
-*/
-
-#define fmpz_multi_crt_struct fmpz_multi_CRT_struct
-#define fmpz_multi_crt_t fmpz_multi_CRT_t
-
-#define fmpz_multi_crt_init fmpz_deprecated_multi_crt_init
-#define fmpz_multi_crt_precompute fmpz_deprecated_multi_crt_precompute
-#define fmpz_multi_crt_precompute_p fmpz_deprecated_multi_crt_precompute_p
-#define fmpz_multi_crt_precomp fmpz_deprecated_multi_crt_precomp
-#define fmpz_multi_crt_precomp_p fmpz_deprecated_multi_crt_precomp_p
-#define fmpz_multi_crt fmpz_deprecated_multi_crt
-#define fmpz_multi_crt_clear fmpz_deprecated_multi_crt_clear
-#define _fmpz_multi_crt_local_size _fmpz_deprecated_multi_crt_local_size
-#define _fmpz_multi_crt_run _fmpz_deprecated_multi_crt_run
-#define _fmpz_multi_crt_run_p _fmpz_deprecated_multi_crt_run_p
-
-FLINT_DLL void fmpz_deprecated_multi_crt_init(fmpz_multi_crt_t CRT);
-
-FLINT_DLL int fmpz_deprecated_multi_crt_precompute(fmpz_multi_crt_t CRT,
-                                               const fmpz * moduli, slong len);
-
-FLINT_DLL int fmpz_deprecated_multi_crt_precompute_p(fmpz_multi_crt_t CRT,
-                                       const fmpz * const * moduli, slong len);
-
-FLINT_DLL void fmpz_deprecated_multi_crt_precomp(fmpz_t output, const fmpz_multi_crt_t P,
-                                                          const fmpz * inputs);
-
-FLINT_DLL void fmpz_deprecated_multi_crt_precomp_p(fmpz_t output,
-                        const fmpz_multi_crt_t P, const fmpz * const * inputs);
-
-FLINT_DLL int fmpz_deprecated_multi_crt(fmpz_t output, const fmpz * moduli,
-                                               const fmpz * values, slong len);
-
-FLINT_DLL void fmpz_deprecated_multi_crt_clear(fmpz_multi_crt_t P);
-
-FLINT_DLL slong _fmpz_deprecated_multi_crt_local_size(const fmpz_multi_crt_t CRT);
-
-FLINT_DLL void _fmpz_deprecated_multi_crt_run(fmpz * outputs, const fmpz_multi_crt_t CRT,
-                                                          const fmpz * inputs);
-
-FLINT_DLL void _fmpz_deprecated_multi_crt_run_p(fmpz * outputs,
-                      const fmpz_multi_crt_t CRT, const fmpz * const * inputs);
-
 
 /* multi mod *****************************************************************/
 

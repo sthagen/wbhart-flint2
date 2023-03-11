@@ -9,8 +9,6 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 #include "profiler.h"
 #include "flint.h"
@@ -30,11 +28,10 @@ void sample(void * arg, ulong count)
    int algo = info->algo;
    int scale = 200;
 
-   FLINT_TEST_INIT(state);
-   
-
    fmpz_t a, b, c, r;
    fmpz_preinvn_t inv;
+
+   FLINT_TEST_INIT(state);
    
    fmpz_init(a);
    fmpz_init(b);

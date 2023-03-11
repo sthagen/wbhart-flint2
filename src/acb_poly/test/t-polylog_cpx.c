@@ -11,6 +11,12 @@
 
 #include "acb_poly.h"
 
+#ifdef __GNUC__
+# define fabs __builtin_fabs
+#else
+# include <math.h>
+#endif
+
 #define EPS 1e-13
 #define NUM_DERIVS 3
 #define NUM_TESTS 56
@@ -308,7 +314,7 @@ int main()
         acb_clear(t);
     }
 
-    for (iter = 0; iter < 250 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 250 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t s, z;
         acb_ptr w1, w2;
@@ -393,6 +399,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

@@ -18,24 +18,12 @@
 #define ACB_INLINE static __inline__
 #endif
 
-#include <stdio.h>
-#include "arf.h"
 #include "arb.h"
+#include "acb_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct
-{
-    arb_struct real;
-    arb_struct imag;
-}
-acb_struct;
-
-typedef acb_struct acb_t[1];
-typedef acb_struct * acb_ptr;
-typedef const acb_struct * acb_srcptr;
 
 #define acb_realref(x) (&(x)->real)
 #define acb_imagref(x) (&(x)->imag)

@@ -18,16 +18,11 @@
 #define BOOL_MAT_INLINE static __inline__
 #endif
 
-#include <stdio.h>
-#include "flint.h"
-#include "fmpz_mat.h"
+#include "fmpz_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/* currently defined in the arb module, but global to the library */
-double arb_test_multiplier(void);
 
 typedef struct
 {

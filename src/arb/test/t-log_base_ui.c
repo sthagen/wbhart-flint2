@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "ulong_extras.h"
 #include "arb.h"
 
 int main()
@@ -21,7 +22,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 100000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 100000 * 0.1 * flint_test_multiplier(); iter++)
     {
         arb_t x, bx, lbx, lbx1;
         ulong n, b, b2, r;
@@ -113,6 +114,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

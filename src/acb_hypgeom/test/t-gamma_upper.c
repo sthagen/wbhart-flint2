@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "acb.h"
 #include "acb_hypgeom.h"
 
 int _mag_gt_norm_ui(const mag_t a, const mag_t b, const mag_t c, ulong n);
@@ -45,7 +46,7 @@ int main()
     flint_randinit(state);
 
     /* special accuracy test -- see nemo #38 */
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t a, z, res;
         slong prec, goal;
@@ -88,7 +89,7 @@ int main()
         acb_clear(res);
     }
 
-    for (iter = 0; iter < 2000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 2000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t a0, a1, b, z, w0, w1, t, u;
         slong prec0, prec1;
@@ -269,7 +270,7 @@ int main()
     }
 
     /* Norm comparison tests (compare a^n to b^n + c^n). */
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong prec;
         ulong n;
@@ -351,6 +352,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

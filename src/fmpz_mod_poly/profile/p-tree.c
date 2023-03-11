@@ -9,9 +9,6 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <gmp.h>
 #include <float.h>
 #include "flint.h"
 #include "fmpz.h"
@@ -72,4 +69,6 @@ main(void)
     fmpz_mod_ctx_clear(ctx);
     
     flint_randclear(state);
+
+    return 0;
 }

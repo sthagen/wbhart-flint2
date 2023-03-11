@@ -14,7 +14,6 @@
 
 ******************************************************************************/
 
-#include <stdio.h>
 #include "nf.h"
 #include "nf_elem.h"
 
@@ -29,7 +28,7 @@ main(void)
 
     flint_randinit(state);
 
-    for (i = 0; i < 10 * antic_test_multiplier(); i++)
+    for (i = 0; i < 10 * flint_test_multiplier(); i++)
     {
         fmpq_poly_t pol;
         fmpz_poly_t pol2;
@@ -92,7 +91,7 @@ main(void)
            printf("divisor found = "); fmpq_print(cnorm); printf("\n");
            printf("correct result = "); fmpq_print(anorm); printf("\n");
            flint_printf("bits bound: %wd\n", nbits);
-           abort();
+           flint_abort();
         }
 
         fmpq_clear(anorm);

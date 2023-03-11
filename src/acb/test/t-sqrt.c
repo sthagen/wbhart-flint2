@@ -22,7 +22,7 @@ int main()
     flint_randinit(state);
 
     /* check (a^(1/2))^2 = a */
-    for (iter = 0; iter < 10000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 10000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t a, b, c;
         slong prec;
@@ -65,6 +65,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

@@ -22,37 +22,18 @@
 #define NMOD_POLY_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdio.h>
-#undef ulong
-#include <gmp.h>
-#define ulong mp_limb_t
-
-#include "flint.h"
 #include "nmod_vec.h"
-#include "nmod_mat.h"
-#include "ulong_extras.h"
+#include "nmod_types.h"
 #include "fmpz.h"
-#include "thread_support.h"
+#include "thread_pool.h"
 
 #ifdef __cplusplus
-    extern "C" {
+extern "C" {
 #endif
 
 #define NMOD_POLY_HGCD_CUTOFF  100      /* HGCD: Basecase -> Recursion      */
 #define NMOD_POLY_GCD_CUTOFF  340       /* GCD:  Euclidean -> HGCD          */
 #define NMOD_POLY_SMALL_GCD_CUTOFF 200  /* GCD (small n): Euclidean -> HGCD */
-
-typedef struct
-{
-    mp_ptr coeffs;
-    slong alloc;
-    slong length;
-    nmod_t mod;
-} nmod_poly_struct;
-
-typedef nmod_poly_struct nmod_poly_t[1];
 
 typedef struct
 {
@@ -894,16 +875,15 @@ FLINT_DLL void _nmod_poly_compose_horner(mp_ptr res, mp_srcptr poly1,
 FLINT_DLL void nmod_poly_compose_horner(nmod_poly_t res, 
                              const nmod_poly_t poly1, const nmod_poly_t poly2);
 
-FLINT_DLL void _nmod_poly_compose_divconquer(mp_ptr res, mp_srcptr poly1, slong len1, 
-                                       mp_srcptr poly2, slong len2, nmod_t mod);
-FLINT_DLL void nmod_poly_compose_divconquer(nmod_poly_t res, 
-                             const nmod_poly_t poly1, const nmod_poly_t poly2);
-
 FLINT_DLL void _nmod_poly_compose(mp_ptr res, mp_srcptr poly1, slong len1, 
                                        mp_srcptr poly2, slong len2, nmod_t mod);
 
 FLINT_DLL void nmod_poly_compose(nmod_poly_t res, 
                              const nmod_poly_t poly1, const nmod_poly_t poly2);
+
+/* obsolete implementation */
+#define _nmod_poly_compose_divconquer _nmod_poly_compose
+#define nmod_poly_compose_divconquer nmod_poly_compose
 
 /* Taylor shift  *************************************************************/
 
@@ -1410,7 +1390,7 @@ NMOD_POLY_INLINE const nmod_poly_struct * nmod_berlekamp_massey_R_poly(
 }
 
 #ifdef __cplusplus
-    }
+}
 #endif
 
 #include "nmod_poly_factor.h"

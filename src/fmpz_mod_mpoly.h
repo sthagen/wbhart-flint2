@@ -18,49 +18,15 @@
 #define FMPZ_MOD_MPOLY_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdio.h>
-#undef ulong
-
-#include <gmp.h>
-#define ulong mp_limb_t
-
-#include "flint.h"
+#include "nmod_types.h"
 #include "fmpz_mod.h"
-#include "fmpz_mpoly.h"
 #include "mpoly.h"
-#include "n_poly.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 /* type definitions **********************************************************/
-
-typedef struct
-{
-    mpoly_ctx_t minfo;
-    fmpz_mod_ctx_t ffinfo;
-} fmpz_mod_mpoly_ctx_struct;
-
-typedef fmpz_mod_mpoly_ctx_struct fmpz_mod_mpoly_ctx_t[1];
-
-/*
-    fmpz_mod_mpoly_t
-    sparse multivariates with fmpz_mod coeffs
-*/
-typedef struct
-{
-    fmpz * coeffs;
-    ulong * exps;
-    slong length;
-    flint_bitcnt_t bits;    /* number of bits per exponent */
-    slong coeffs_alloc;     /* abs size in mp_limb_t units */
-    slong exps_alloc;       /* abs size in ulong units */
-} fmpz_mod_mpoly_struct;
-
-typedef fmpz_mod_mpoly_struct fmpz_mod_mpoly_t[1];
 
 /*
     fmpz_mod_mpoly_univar_t

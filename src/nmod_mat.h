@@ -20,37 +20,15 @@
 #define NMOD_MAT_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdlib.h>
-#undef ulong
-#include <gmp.h>
-#define ulong mp_limb_t
-
-#include "flint.h"
 #include "perm.h"
-#include "longlong.h"
 #include "ulong_extras.h"
 #include "nmod_vec.h"
 #include "fmpz.h"
-#include "thread_support.h"
+#include "thread_pool.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
-
-typedef struct
-{
-    mp_limb_t * entries;
-    slong r;
-    slong c;
-    mp_limb_t ** rows;
-    nmod_t mod;
-}
-nmod_mat_struct;
-
-/* nmod_mat_t allows reference-like semantics for nmod_mat_struct */
-typedef nmod_mat_struct nmod_mat_t[1];
 
 #define nmod_mat_entry(mat,i,j) ((mat)->rows[(i)][(j)])
 

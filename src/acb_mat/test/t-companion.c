@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "acb_poly.h"
 #include "acb_mat.h"
 
 int
@@ -22,7 +23,7 @@ main(void)
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 100 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 100 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_mat_t A;
         acb_poly_t f, g;

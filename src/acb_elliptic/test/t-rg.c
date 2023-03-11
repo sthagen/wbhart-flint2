@@ -9,7 +9,14 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "acb.h"
 #include "acb_elliptic.h"
+
+#ifdef __GNUC__
+# define fabs __builtin_fabs
+#else
+# include <math.h>
+#endif
 
 /* Test input from Carlson's paper and checked with mpmath. */
 
@@ -34,7 +41,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t x, y, z, r1, r2;
         slong prec1, prec2;
@@ -129,6 +136,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

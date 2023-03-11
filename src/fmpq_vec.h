@@ -18,12 +18,10 @@
 #define FMPQ_VEC_INLINE static __inline__
 #endif
 
-#include <gmp.h>
-#include "fmpq.h"
 #include "flint.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 /*  Memory management  *******************************************************/

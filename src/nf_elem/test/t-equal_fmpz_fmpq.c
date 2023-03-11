@@ -15,7 +15,6 @@
 
 ******************************************************************************/
 
-#include <stdio.h>
 #include "flint.h"
 #include "fmpq_poly.h"
 #include "nf.h"
@@ -31,7 +30,7 @@ int main(void)
 
     flint_randinit(state);
 
-    for (i = 0; i < 1000 * antic_test_multiplier(); i++)
+    for (i = 0; i < 1000 * flint_test_multiplier(); i++)
     {
         fmpz_t z;
         fmpq_t q;
@@ -60,7 +59,7 @@ int main(void)
                 flint_printf("f = "); fmpq_poly_print_pretty(f, "x"); flint_printf("\n");
                 flint_printf("a = "); nf_elem_print_pretty(a, nf, "x"); flint_printf("\n");
                 flint_printf("q = "); fmpq_print(q); flint_printf("\n");
-                abort();
+                flint_abort();
         }
 
         fmpz_set(z, fmpq_numref(q));
@@ -71,7 +70,7 @@ int main(void)
                 flint_printf("f = "); fmpq_poly_print_pretty(f, "x"); flint_printf("\n");
                 flint_printf("a = "); nf_elem_print_pretty(a, nf, "x"); flint_printf("\n");
                 flint_printf("z = "); fmpz_print(z); flint_printf("\n");
-                abort();
+                flint_abort();
         }
 
         fmpq_add_si(q, q, 1);
@@ -82,7 +81,7 @@ int main(void)
                 flint_printf("f = "); fmpq_poly_print_pretty(f, "x"); flint_printf("\n");
                 flint_printf("a = "); nf_elem_print_pretty(a, nf, "x"); flint_printf("\n");
                 flint_printf("q = "); fmpq_print(q); flint_printf("\n");
-                abort();
+                flint_abort();
         }
 
         fmpz_add_ui(z, z, 1);
@@ -93,7 +92,7 @@ int main(void)
                 flint_printf("f = "); fmpq_poly_print_pretty(f, "x"); flint_printf("\n");
                 flint_printf("a = "); nf_elem_print_pretty(a, nf, "x"); flint_printf("\n");
                 flint_printf("z = "); fmpz_print(z); flint_printf("\n");
-                abort();
+                flint_abort();
         }
 
         fmpq_poly_clear(f);

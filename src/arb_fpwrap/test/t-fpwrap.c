@@ -10,6 +10,7 @@
 */
 
 #include "double_extras.h"
+#include "arb.h"
 #include "arb_fpwrap.h"
 
 #define CHECK_DOUBLE(fcall) \
@@ -46,7 +47,7 @@ int main()
     flint_randinit(state);
 
     /* correct rounding test */
-    for (iter = 0; iter < 100000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 100000 * 0.1 * flint_test_multiplier(); iter++)
     {
         mpfr_t t;
         double x, y, z;
@@ -366,6 +367,9 @@ int main()
         CHECK_DOUBLE(arb_fpwrap_double_log_integral(&res, x, 0, flags));
         CHECK_CDOUBLE(arb_fpwrap_cdouble_log_integral(&cres, cx, 0, flags));
 
+        CHECK_DOUBLE(arb_fpwrap_double_dilog(&res, x, flags));
+        CHECK_CDOUBLE(arb_fpwrap_cdouble_dilog(&cres, cx, flags));
+
         CHECK_DOUBLE(arb_fpwrap_double_bessel_j(&res, y, x, flags));
         CHECK_CDOUBLE(arb_fpwrap_cdouble_bessel_j(&cres, cy, cx, flags));
 
@@ -484,6 +488,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

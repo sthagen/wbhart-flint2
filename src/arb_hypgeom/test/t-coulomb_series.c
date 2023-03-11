@@ -9,6 +9,8 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "ulong_extras.h"
+#include "arb_poly.h"
 #include "arb_hypgeom.h"
 
 int main()
@@ -21,7 +23,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         arb_poly_t F, G, F2, G2, z, w, t, u;
         arb_t c, l, eta, z0;
@@ -123,6 +125,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

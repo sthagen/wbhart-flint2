@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "fmpz_mat.h"
 #include "ca_mat.h"
 
 void perm(ca_mat_t A, slong * P)
@@ -103,7 +104,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 1000 * calcium_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         ca_ctx_t ctx;
         ca_mat_t A, LU;
@@ -160,5 +161,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

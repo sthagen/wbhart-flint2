@@ -9,8 +9,7 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "ulong_extras.h"
 #include "fmpz_mod_mpoly.h"
 
 void gcd_check(

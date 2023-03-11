@@ -12,10 +12,8 @@
 #ifndef ACB_MODULAR_H
 #define ACB_MODULAR_H
 
-#include <stdio.h>
-#include "fmpz_poly.h"
-#include "acb.h"
-#include "acb_poly.h"
+#include "fmpz.h"
+#include "acb_types.h"
 
 #ifdef __cplusplus
 extern "C" {

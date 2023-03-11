@@ -14,8 +14,7 @@
 
 ******************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "ulong_extras.h"
 #include "qfb.h"
 
 int main(void)
@@ -73,7 +72,7 @@ int main(void)
            printf("p = \n"); fmpz_print(p); printf("\n");
            printf("D = \n"); fmpz_print(D); printf("\n");
            printf("D2 = \n"); fmpz_print(D2); printf("\n");
-           abort();
+           flint_abort();
         }
            
         fmpz_clear(D);

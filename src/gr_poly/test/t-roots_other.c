@@ -9,6 +9,8 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "ulong_extras.h"
+#include "fmpz.h"
 #include "gr_vec.h"
 #include "gr_poly.h"
 
@@ -104,5 +106,5 @@ int main()
     flint_randclear(state);
     flint_cleanup_master();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

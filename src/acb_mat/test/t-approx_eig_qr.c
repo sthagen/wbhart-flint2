@@ -22,7 +22,7 @@ int main()
     flint_randinit(state);
 
     /* Test random & DFT matrices */
-    for (iter = 0; iter < 200 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 200 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_mat_t A, L, R;
         acb_ptr E;
@@ -190,5 +190,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

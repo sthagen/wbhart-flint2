@@ -18,17 +18,7 @@
 #define GR_INLINE static __inline__
 #endif
 
-#include <string.h>
-#include <assert.h>
 #include "flint.h"
-
-/*
-#include "fmpz.h"
-#include "fmpq.h"
-#include "fmpz_poly.h"
-#include "fmpq_poly.h"
-#include "fmpz_mpoly.h"
-*/
 
 #ifdef __cplusplus
  extern "C" {
@@ -742,7 +732,7 @@ typedef struct
 {
     char data[GR_CTX_STRUCT_DATA_BYTES];
     ulong which_ring;
-    ssize_t sizeof_elem;
+    slong sizeof_elem;
     gr_funcptr * methods;
     ulong size_limit;
 }
@@ -853,7 +843,6 @@ typedef int ((*gr_method_poly_binary_trunc_op)(gr_ptr, gr_srcptr, slong, gr_srcp
 
 
 /* Macros to retrieve methods (with correct call signature) from context object. */
-
 #define GR_CTX_OP(ctx, NAME) (((gr_method_ctx *) ctx->methods)[GR_METHOD_ ## NAME])
 #define GR_CTX_STREAM(ctx, NAME) (((gr_method_ctx_stream *) ctx->methods)[GR_METHOD_ ## NAME])
 #define GR_CTX_PREDICATE(ctx, NAME) (((gr_method_ctx_predicate *) ctx->methods)[GR_METHOD_ ## NAME])
@@ -1164,7 +1153,7 @@ int gr_get_str(char ** s, gr_srcptr x, gr_ctx_t ctx);
 #define GR_TMP_INIT_VEC(vec, len, ctx) \
     do { \
         gr_method_vec_init_clear_op vec_init = GR_VEC_INIT_CLEAR_OP(ctx, VEC_INIT); \
-        ssize_t _gr_elem_size = (ctx)->sizeof_elem; \
+        slong _gr_elem_size = (ctx)->sizeof_elem; \
         (vec) = (gr_ptr) GR_TMP_ALLOC((len) * _gr_elem_size); \
         vec_init((vec), (len), (ctx)); \
     } while (0)
@@ -1172,7 +1161,7 @@ int gr_get_str(char ** s, gr_srcptr x, gr_ctx_t ctx);
 #define GR_TMP_CLEAR_VEC(vec, len, ctx) \
     do { \
         gr_method_vec_init_clear_op vec_clear = GR_VEC_INIT_CLEAR_OP(ctx, VEC_CLEAR); \
-        ssize_t _gr_elem_size = (ctx)->sizeof_elem; \
+        slong _gr_elem_size = (ctx)->sizeof_elem; \
         vec_clear((vec), (len), (ctx)); \
         GR_TMP_FREE(vec, (len) * _gr_elem_size); \
     } while (0)
@@ -1180,7 +1169,7 @@ int gr_get_str(char ** s, gr_srcptr x, gr_ctx_t ctx);
 #define GR_TMP_INIT(x1, ctx) \
     do { \
         gr_method_init_clear_op init = GR_INIT_CLEAR_OP(ctx, INIT); \
-        ssize_t _gr_elem_size = (ctx)->sizeof_elem; \
+        slong _gr_elem_size = (ctx)->sizeof_elem; \
         x1 = (gr_ptr) GR_TMP_ALLOC_SMALL(1 * _gr_elem_size); \
         init(x1, (ctx)); \
     } while (0)
@@ -1188,7 +1177,7 @@ int gr_get_str(char ** s, gr_srcptr x, gr_ctx_t ctx);
 #define GR_TMP_INIT2(x1, x2, ctx) \
     do { \
         gr_method_init_clear_op init = GR_INIT_CLEAR_OP(ctx, INIT); \
-        ssize_t _gr_elem_size = (ctx)->sizeof_elem; \
+        slong _gr_elem_size = (ctx)->sizeof_elem; \
         x1 = (gr_ptr) GR_TMP_ALLOC_SMALL(2 * _gr_elem_size); \
         x2 = (gr_ptr) ((char *) x1 + _gr_elem_size); \
         init(x1, (ctx)); \
@@ -1198,7 +1187,7 @@ int gr_get_str(char ** s, gr_srcptr x, gr_ctx_t ctx);
 #define GR_TMP_INIT3(x1, x2, x3, ctx) \
     do { \
         gr_method_init_clear_op init = GR_INIT_CLEAR_OP(ctx, INIT); \
-        ssize_t _gr_elem_size = (ctx)->sizeof_elem; \
+        slong _gr_elem_size = (ctx)->sizeof_elem; \
         x1 = (gr_ptr) GR_TMP_ALLOC_SMALL(3 * _gr_elem_size); \
         x2 = (gr_ptr) ((char *) x1 + _gr_elem_size); \
         x3 = (gr_ptr) ((char *) x2 + _gr_elem_size); \
@@ -1210,7 +1199,7 @@ int gr_get_str(char ** s, gr_srcptr x, gr_ctx_t ctx);
 #define GR_TMP_INIT4(x1, x2, x3, x4, ctx) \
     do { \
         gr_method_init_clear_op init = GR_INIT_CLEAR_OP(ctx, INIT); \
-        ssize_t _gr_elem_size = (ctx)->sizeof_elem; \
+        slong _gr_elem_size = (ctx)->sizeof_elem; \
         x1 = (gr_ptr) GR_TMP_ALLOC_SMALL(4 * _gr_elem_size); \
         x2 = (gr_ptr) ((char *) x1 + _gr_elem_size); \
         x3 = (gr_ptr) ((char *) x2 + _gr_elem_size); \
@@ -1224,7 +1213,7 @@ int gr_get_str(char ** s, gr_srcptr x, gr_ctx_t ctx);
 #define GR_TMP_INIT5(x1, x2, x3, x4, x5, ctx) \
     do { \
         gr_method_init_clear_op init = GR_INIT_CLEAR_OP(ctx, INIT); \
-        ssize_t _gr_elem_size = (ctx)->sizeof_elem; \
+        slong _gr_elem_size = (ctx)->sizeof_elem; \
         x1 = (gr_ptr) GR_TMP_ALLOC_SMALL(5 * _gr_elem_size); \
         x2 = (gr_ptr) ((char *) x1 + _gr_elem_size); \
         x3 = (gr_ptr) ((char *) x2 + _gr_elem_size); \
@@ -1306,6 +1295,7 @@ void gr_ctx_init_fmpq(gr_ctx_t ctx);
 void gr_ctx_init_fmpzi(gr_ctx_t ctx);
 
 void gr_ctx_init_fmpz_mod(gr_ctx_t ctx, const fmpz_t n);
+void _gr_ctx_init_fmpz_mod_from_ref(gr_ctx_t ctx, const void * fmod_ctx);
 void gr_ctx_fmpz_mod_set_primality(gr_ctx_t ctx, truth_t is_prime);
 
 void gr_ctx_init_nmod(gr_ctx_t ctx, ulong n);

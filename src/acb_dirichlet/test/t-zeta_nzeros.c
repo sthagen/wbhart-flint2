@@ -21,7 +21,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 130 + 20 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 130 + 20 * 0.1 * flint_test_multiplier(); iter++)
     {
         arb_t x, y, t;
         arf_t f1, f2;
@@ -125,5 +125,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

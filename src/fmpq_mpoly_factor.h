@@ -18,29 +18,11 @@
 #define FMPQ_MPOLY_FACTOR_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdio.h>
-#undef ulong
-#include <gmp.h>
-#define ulong mp_limb_t
-
 #include "fmpq_mpoly.h"
-#include "fmpz_mpoly_factor.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
-
-typedef struct {
-    fmpq_t constant;
-    fmpq_mpoly_struct * poly;
-    fmpz * exp;
-    slong num;
-    slong alloc;
-} fmpq_mpoly_factor_struct;
-
-typedef fmpq_mpoly_factor_struct fmpq_mpoly_factor_t[1];
 
 FLINT_DLL void fmpq_mpoly_factor_init(fmpq_mpoly_factor_t f,
                                                    const fmpq_mpoly_ctx_t ctx);

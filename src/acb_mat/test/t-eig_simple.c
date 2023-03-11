@@ -9,6 +9,8 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "fmpq_mat.h"
+#include "acb_poly.h"
 #include "acb_mat.h"
 
 int main()
@@ -21,7 +23,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 5000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 5000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_mat_t A, L, R, LAR, D;
         acb_ptr E, F;
@@ -177,7 +179,7 @@ int main()
     }
 
     /* Test convergence, given companion matrices */
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_mat_t A, R, QC;
         acb_ptr E;
@@ -299,5 +301,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

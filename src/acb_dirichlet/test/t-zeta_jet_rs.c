@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "acb_poly.h"
 #include "acb_dirichlet.h"
 
 int main()
@@ -21,7 +22,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 200 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 200 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_t s1, s2, a;
         acb_ptr r1, r2;
@@ -108,6 +109,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

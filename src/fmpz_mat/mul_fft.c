@@ -9,9 +9,11 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
+#include "gmpcompat.h"
+#include "mpn_extras.h"
+#include "ulong_extras.h"
 #include "fmpz_mat.h"
 #include "fft.h"
-#include "fft_tuning.h"
 
 /*
     fft coeffs are mod m = 2^(FLINT_BITS*limbs) + 1.
@@ -112,7 +114,7 @@ static mp_size_t fft_split_bits_fmpz(
     mp_size_t limbs)
 {
     mp_size_t len;
-    int x_is_neg;
+    int x_is_neg = 0;
 
     if (COEFF_IS_MPZ(*x))
     {

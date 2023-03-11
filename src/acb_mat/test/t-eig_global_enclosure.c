@@ -21,7 +21,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 250 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 250 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_mat_t A, X;
         acb_ptr E, F, B;
@@ -106,5 +106,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

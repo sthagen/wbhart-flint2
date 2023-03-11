@@ -15,18 +15,11 @@
 #undef __STRICT_ANSI__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with standard libraries */
 #include <sys/types.h>
 #if (!defined (__WIN32) || defined(__CYGWIN__)) && !defined(_MSC_VER) 
 #include <unistd.h>
 #endif
-#include <stdio.h>
-#include <stdlib.h>
 
-#undef ulong
-#include <gmp.h>
-#define ulong mp_limb_t
 
 #include "flint.h"
 #include "fmpz.h"
@@ -101,7 +94,7 @@ int main(void)
             for (i = 0; i < n; ++i)
                 fmpz_clear(a + i);
             flint_free(a);
-            exit(0);
+            return 0;
         }
         else  /* Parent process */
         {
@@ -159,7 +152,7 @@ int main(void)
     FLINT_TEST_CLEANUP(state);
     
     printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 
 #else
@@ -169,7 +162,7 @@ int main(void)
     printf("out_raw/ inp_raw....");
     fflush(stdout);
     printf("SKIPPED\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 
 #endif

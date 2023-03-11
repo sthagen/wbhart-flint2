@@ -9,6 +9,8 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "perm.h"
+#include "fmpq_mat.h"
 #include "arb_mat.h"
 
 int fmpq_mat_is_invertible(const fmpq_mat_t A)
@@ -35,7 +37,7 @@ int main()
     /* Dummy test with rectangular matrices. Rectangular matrices are
        not actually supported (the output may be bogus), but the algorithm
        should at least not crash. */
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong m, n, prec;
         slong *perm;
@@ -66,7 +68,7 @@ int main()
         _perm_clear(perm);
     }
 
-    for (iter = 0; iter < 2000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 2000 * 0.1 * flint_test_multiplier(); iter++)
     {
         fmpq_mat_t Q;
         arb_mat_t A, LU, P, L, U, T;
@@ -173,5 +175,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

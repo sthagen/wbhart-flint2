@@ -22,12 +22,8 @@
 extern "C" {
 #endif
 
-#include <string.h>
-#include "flint.h"
-#include "fmpz.h"
-#include "fmpq.h"
+#include "mpoly_types.h"
 #include "calcium.h"
-#include "fmpz_mpoly_q.h"
 
 #define FEXPR_TYPE_SMALL_INT     UWORD(0)
 #define FEXPR_TYPE_SMALL_SYMBOL  UWORD(1)
@@ -197,11 +193,8 @@ ulong fexpr_hash(const fexpr_t expr);
 
 int fexpr_cmp_fast(const fexpr_t a, const fexpr_t b);
 
-FEXPR_INLINE void
-_fexpr_vec_sort_fast(fexpr_ptr vec, slong len)
-{
-    qsort(vec, len, sizeof(fexpr_struct), (int(*)(const void*,const void*)) fexpr_cmp_fast);
-}
+void
+_fexpr_vec_sort_fast(fexpr_ptr vec, slong len);
 
 FEXPR_INLINE int
 _fexpr_is_integer(const ulong * expr)

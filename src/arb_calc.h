@@ -12,10 +12,7 @@
 #ifndef ARB_CALC_H
 #define ARB_CALC_H
 
-#include <stdio.h>
 #include "arb.h"
-#include "arb_poly.h"
-#include "arb_mat.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,17 +28,6 @@ typedef int (*arb_calc_func_t)(arb_ptr out,
 #define ARB_CALC_NO_CONVERGENCE 2
 
 /* Root-finding */
-
-typedef struct
-{
-    arf_struct a;
-    arf_struct b;
-}
-arf_interval_struct;
-
-typedef arf_interval_struct arf_interval_t[1];
-typedef arf_interval_struct * arf_interval_ptr;
-typedef const arf_interval_struct * arf_interval_srcptr;
 
 static __inline__ void
 arf_interval_init(arf_interval_t v)

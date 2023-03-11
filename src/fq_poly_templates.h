@@ -671,7 +671,6 @@ FLINT_DLL slong _TEMPLATE(T, poly_gcd_euclidean)(TEMPLATE(T, struct)* G,
 FLINT_DLL slong _TEMPLATE(T, poly_gcd)(TEMPLATE(T, struct)* G,
                        const TEMPLATE(T, struct)* A, slong lenA,
                        const TEMPLATE(T, struct)* B, slong lenB,
-                       const TEMPLATE(T, t) invB,
                        const TEMPLATE(T, ctx_t) ctx);
 
 FLINT_DLL void TEMPLATE(T, poly_gcd)(TEMPLATE(T, poly_t) rop,
@@ -689,25 +688,6 @@ FLINT_DLL void TEMPLATE(T, poly_gcd_euclidean_f)(TEMPLATE(T, t) f, TEMPLATE(T, p
                                   const TEMPLATE(T, poly_t) B,
                                   const TEMPLATE(T, ctx_t) ctx);
 
-FLINT_DLL slong _TEMPLATE(T, poly_hgcd)(TEMPLATE(T, struct) **M, slong *lenM,
-                        TEMPLATE(T, struct)* A, slong *lenA,
-                        TEMPLATE(T, struct)* B, slong *lenB,
-                        const TEMPLATE(T, struct)* a, slong lena,
-                        const TEMPLATE(T, struct)* b, slong lenb,
-                        const TEMPLATE(T, ctx_t) ctx);
-
-
-FLINT_DLL slong _TEMPLATE(T, poly_gcd_hgcd)(TEMPLATE(T, struct)* G,
-                            const TEMPLATE(T, struct)* A, slong lenA,
-                            const TEMPLATE(T, struct)* B, slong lenB,
-                            const TEMPLATE(T, t) invB,
-                            const TEMPLATE(T, ctx_t) ctx);
-
-FLINT_DLL void TEMPLATE(T, poly_gcd_hgcd)(TEMPLATE(T, poly_t) G,
-                                const TEMPLATE(T, poly_t) A,
-                                const TEMPLATE(T, poly_t) B,
-                                const TEMPLATE(T, ctx_t) ctx);
-
 FLINT_DLL slong _TEMPLATE(T, poly_xgcd_euclidean_f)(TEMPLATE(T, t) f, TEMPLATE(T, struct) *G,
                                     TEMPLATE(T, struct) *S,
                                     TEMPLATE(T, struct) *T,
@@ -722,42 +702,18 @@ FLINT_DLL void TEMPLATE(T, poly_xgcd_euclidean_f)(TEMPLATE(T, t) f, TEMPLATE(T, 
                                    const TEMPLATE(T, poly_t) B,
                                    const TEMPLATE(T, ctx_t) ctx);
 
-FLINT_DLL slong _TEMPLATE(T, poly_xgcd_euclidean)(TEMPLATE(T, struct) *G,
+FLINT_DLL slong _TEMPLATE(T, poly_xgcd)(TEMPLATE(T, struct) *G,
                                   TEMPLATE(T, struct) *S,
                                   TEMPLATE(T, struct) *T,
                                   const TEMPLATE(T, struct) *A, slong lenA,
                                   const TEMPLATE(T, struct) *B, slong lenB,
-                                  const TEMPLATE(T, t) invB,
                                   const TEMPLATE(T, ctx_t) ctx);
 
-FLINT_DLL void TEMPLATE(T, poly_xgcd_euclidean)(TEMPLATE(T, poly_t) G,
+FLINT_DLL void TEMPLATE(T, poly_xgcd)(TEMPLATE(T, poly_t) G,
                                  TEMPLATE(T, poly_t) S, TEMPLATE(T, poly_t) T,
                                  const TEMPLATE(T, poly_t) A,
                                  const TEMPLATE(T, poly_t) B,
                                  const TEMPLATE(T, ctx_t) ctx);
-
-FQ_POLY_TEMPLATES_INLINE slong
-_TEMPLATE(T, poly_xgcd)(TEMPLATE(T, struct) *G,
-                        TEMPLATE(T, struct) *S, TEMPLATE(T, struct) *T,
-                        const TEMPLATE(T, struct) *A, slong lenA,
-                        const TEMPLATE(T, struct) *B, slong lenB,
-                        const TEMPLATE(T, t) invB,
-                        const TEMPLATE(T, ctx_t) ctx)
-{
-    return _TEMPLATE(T, poly_xgcd_euclidean)(G, S, T, A, lenA,
-                                             B, lenB, invB, ctx);
-}
-
-
-FQ_POLY_TEMPLATES_INLINE void
-TEMPLATE(T, poly_xgcd)(TEMPLATE(T, poly_t) G,
-                       TEMPLATE(T, poly_t) S, TEMPLATE(T, poly_t) T,
-                       const TEMPLATE(T, poly_t) A,
-                       const TEMPLATE(T, poly_t) B,
-                       const TEMPLATE(T, ctx_t) ctx)
-{
-    TEMPLATE(T, poly_xgcd_euclidean)(G, S, T, A, B, ctx);
-}
 
 
 /*  Euclidean division  ******************************************************/
@@ -766,68 +722,34 @@ FLINT_DLL ulong TEMPLATE(T, poly_remove)(TEMPLATE(T, poly_t) f,
                          const TEMPLATE(T, poly_t) g,
                          const TEMPLATE(T, ctx_t) ctx);
 
-FLINT_DLL void _TEMPLATE(T, poly_div_basecase)(TEMPLATE(T, struct) *Q, TEMPLATE(T, struct) *R,
+FLINT_DLL void _TEMPLATE(T, poly_div)(TEMPLATE(T, struct) *Q,
                                const TEMPLATE(T, struct) *A, slong lenA,
                                const TEMPLATE(T, struct) *B, slong lenB,
                                const TEMPLATE(T, t) invB,
                                const TEMPLATE(T, ctx_t) ctx);
 
+FLINT_DLL void TEMPLATE(T, poly_div)(TEMPLATE(T, poly_t) Q,
+                               const TEMPLATE(T, poly_t) A,
+                               const TEMPLATE(T, poly_t) B,
+                               const TEMPLATE(T, ctx_t) ctx);
+
+/* flint 2.x compatibility needed by Nemo */
 FLINT_DLL void TEMPLATE(T, poly_div_basecase)(TEMPLATE(T, poly_t) Q,
                                const TEMPLATE(T, poly_t) A,
                                const TEMPLATE(T, poly_t) B,
                                const TEMPLATE(T, ctx_t) ctx);
 
-FLINT_DLL void _TEMPLATE(T, poly_divrem_basecase)(TEMPLATE(T, struct) *Q,
+FLINT_DLL void _TEMPLATE(T, poly_divrem)(TEMPLATE(T, struct) *Q,
                                    TEMPLATE(T, struct) *R,
                                    const TEMPLATE(T, struct) *A, slong lenA,
                                    const TEMPLATE(T, struct) *B, slong lenB,
                                    const TEMPLATE(T, t) invB,
                                    const TEMPLATE(T, ctx_t) ctx);
 
-FLINT_DLL void TEMPLATE(T, poly_divrem_basecase)(TEMPLATE(T, poly_t) Q, TEMPLATE(T, poly_t) R,
+FLINT_DLL void TEMPLATE(T, poly_divrem)(TEMPLATE(T, poly_t) Q, TEMPLATE(T, poly_t) R,
                                   const TEMPLATE(T, poly_t) A,
                                   const TEMPLATE(T, poly_t) B,
                                   const TEMPLATE(T, ctx_t) ctx);
-
-FLINT_DLL void _TEMPLATE(T, poly_divrem_divconquer_recursive)(
-    TEMPLATE(T, struct) * Q, TEMPLATE(T, struct) * BQ,
-    TEMPLATE(T, struct) * W,
-    const TEMPLATE(T, struct) * A,
-    const TEMPLATE(T, struct) * B, slong lenB,
-    const TEMPLATE(T, t) invB,
-    const TEMPLATE(T, ctx_t) ctx);
-
-FLINT_DLL void _TEMPLATE(T, poly_divrem_divconquer)(
-    TEMPLATE(T, struct) *Q, TEMPLATE(T, struct) *R,
-    const TEMPLATE(T, struct) *A, slong lenA,
-    const TEMPLATE(T, struct) *B, slong lenB,
-    const TEMPLATE(T, t) invB,
-    const TEMPLATE(T, ctx_t) ctx);
-
-FLINT_DLL void TEMPLATE(T, poly_divrem_divconquer)(TEMPLATE(T, poly_t) Q,
-                                    TEMPLATE(T, poly_t) R,
-                                    const TEMPLATE(T, poly_t) A,
-                                    const TEMPLATE(T, poly_t) B,
-                                    const TEMPLATE(T, ctx_t) ctx);
-
-FQ_POLY_TEMPLATES_INLINE void
-_TEMPLATE(T, poly_divrem)(TEMPLATE(T, struct) *Q, TEMPLATE(T, struct) *R,
-                          const TEMPLATE(T, struct) *A, slong lenA,
-                          const TEMPLATE(T, struct) *B, slong lenB,
-                          const TEMPLATE(T, t) invB,
-                          const TEMPLATE(T, ctx_t) ctx)
-{
-    _TEMPLATE(T, poly_divrem_divconquer)(Q, R, A, lenA, B, lenB, invB, ctx);
-}
-
-FQ_POLY_TEMPLATES_INLINE void
-TEMPLATE(T, poly_divrem)(TEMPLATE(T, poly_t) Q, TEMPLATE(T, poly_t) R,
-                         const TEMPLATE(T, poly_t) A,
-                         const TEMPLATE(T, poly_t) B,
-                         const TEMPLATE(T, ctx_t) ctx)
-{
-    TEMPLATE(T, poly_divrem_divconquer)(Q, R, A, B, ctx);
-}
 
 FQ_POLY_TEMPLATES_INLINE void
 _TEMPLATE(T, poly_rem)(TEMPLATE(T, struct) *R,
@@ -846,15 +768,13 @@ _TEMPLATE(T, poly_rem)(TEMPLATE(T, struct) *R,
     else
     {
         TEMPLATE(T, struct) *T = _TEMPLATE(T, vec_init)(lenA, ctx);
-       _TEMPLATE(T, poly_divrem_divconquer)(Q, T, A, lenA, B, lenB, invB, ctx);
+       _TEMPLATE(T, poly_divrem)(Q, T, A, lenA, B, lenB, invB, ctx);
        _TEMPLATE(T, vec_set)(R, T, lenB - 1, ctx);
        _TEMPLATE(T, vec_clear)(T, lenA, ctx);
     }
 
     _TEMPLATE(T, vec_clear)(Q, lenA - lenB + 1, ctx);
 }
-
-
 
 FQ_POLY_TEMPLATES_INLINE void
 TEMPLATE(T, poly_rem)(TEMPLATE(T, poly_t) R,

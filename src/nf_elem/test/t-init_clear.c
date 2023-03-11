@@ -15,7 +15,6 @@
 
 ******************************************************************************/
 
-#include <stdio.h>
 #include "nf.h"
 #include "nf_elem.h"
 
@@ -30,7 +29,7 @@ main(void)
 
     flint_randinit(state);
 
-    for (i = 0; i < 100 * antic_test_multiplier(); i++)
+    for (i = 0; i < 100 * flint_test_multiplier(); i++)
     {
         nf_t nf;
         nf_elem_t a;
@@ -42,7 +41,7 @@ main(void)
         if (!nf_elem_is_zero(a, nf))
         {
             flint_printf("FAIL\n");
-            abort();
+            flint_abort();
         }
 
         nf_elem_randtest(a, state, 200, nf);

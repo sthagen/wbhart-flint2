@@ -9,6 +9,8 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "fmpq_poly.h"
+#include "arb_poly.h"
 #include "arb_hypgeom.h"
 #include "arith.h"
 
@@ -22,7 +24,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 100 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 100 * 0.1 * flint_test_multiplier(); iter++)
     {
         ulong n, k;
         slong prec;
@@ -90,7 +92,7 @@ int main()
         arb_clear(s);
     }
 
-    for (iter = 0; iter < 500 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 500 * 0.1 * flint_test_multiplier(); iter++)
     {
         arb_t x1, x2, w1, w2;
         ulong n, k;
@@ -156,6 +158,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

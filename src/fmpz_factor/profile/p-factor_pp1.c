@@ -9,12 +9,11 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "profiler.h"
 #include "flint.h"
 #include "fmpz.h"
 #include "fmpz_factor.h"
+#include "ulong_extras.h"
 
 int main(void)
 {
@@ -22,11 +21,10 @@ int main(void)
    ulong c;
    ulong B1;
    
+   FLINT_TEST_INIT(state);
+
    fmpz_init(n);
    fmpz_init(p);
-
-   FLINT_TEST_INIT(state);
-   
 
    while(1)
    {

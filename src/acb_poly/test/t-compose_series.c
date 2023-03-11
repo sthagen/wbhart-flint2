@@ -22,7 +22,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 3000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 3000 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong qbits1, qbits2, rbits1, rbits2, rbits3, n;
         fmpq_poly_t A, B, C;
@@ -100,5 +100,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

@@ -1,9 +1,6 @@
 /*
     Copyright (C) 2014 Fredrik Johansson
 
-    2x2 mul code taken from MPFR 2.3.0
-    (Copyright (C) 1991-2007 Free Software Foundation, Inc.)
-
     This file is part of Arb.
 
     Arb is free software: you can redistribute it and/or modify it under
@@ -21,12 +18,11 @@
 #define ARF_INLINE static __inline__
 #endif
 
-#include <stdio.h>
-#include <math.h>
-#include <mpfr.h>
 #include "flint.h"
+#include <mpfr.h>
 #include "fmpq.h"
 #include "mag.h"
+#include "arf_types.h"
 
 #if defined(_MSC_VER) && defined(ARB_BUILD_DLL)
 #define ARB_DLL __declspec(dllexport)
@@ -115,9 +111,6 @@ arf_rnd_to_mpfr(arf_rnd_t rnd)
 /* Assumes non-special value */
 #define ARF_NEG(x) (ARF_XSIZE(x) ^= 1)
 
-/* Note: may also be hardcoded in a few places. */
-#define ARF_NOPTR_LIMBS 2
-
 /* Direct access to the limb data. */
 #define ARF_NOPTR_D(x)   ((x)->d.noptr.d)
 #define ARF_PTR_D(x)     ((x)->d.ptr.d)
@@ -137,38 +130,6 @@ arf_rnd_to_mpfr(arf_rnd_t rnd)
         ARF_XSIZE(x) = 0;           \
     } while (0)
 
-
-typedef struct
-{
-    mp_limb_t d[ARF_NOPTR_LIMBS];
-}
-mantissa_noptr_struct;
-
-typedef struct
-{
-    mp_size_t alloc;
-    mp_ptr d;
-}
-mantissa_ptr_struct;
-
-typedef union
-{
-    mantissa_noptr_struct noptr;
-    mantissa_ptr_struct ptr;
-}
-mantissa_struct;
-
-typedef struct
-{
-    fmpz exp;
-    mp_size_t size;
-    mantissa_struct d;
-}
-arf_struct;
-
-typedef arf_struct arf_t[1];
-typedef arf_struct * arf_ptr;
-typedef const arf_struct * arf_srcptr;
 
 void _arf_promote(arf_t x, mp_size_t n);
 
@@ -374,38 +335,7 @@ arf_swap(arf_t y, arf_t x)
     }
 }
 
-ARF_INLINE void
-arf_set(arf_t y, const arf_t x)
-{
-    if (x != y)
-    {
-        /* Fast path */
-        if (!COEFF_IS_MPZ(ARF_EXP(x)) && !COEFF_IS_MPZ(ARF_EXP(y)))
-            ARF_EXP(y) = ARF_EXP(x);
-        else
-            fmpz_set(ARF_EXPREF(y), ARF_EXPREF(x));
-
-        /* Fast path */
-        if (!ARF_HAS_PTR(x))
-        {
-            ARF_DEMOTE(y);
-            (y)->d = (x)->d;
-        }
-        else
-        {
-            mp_ptr yptr;
-            mp_srcptr xptr;
-            mp_size_t n;
-
-            ARF_GET_MPN_READONLY(xptr, n, x);
-            ARF_GET_MPN_WRITE(yptr, n, y);
-            flint_mpn_copyi(yptr, xptr, n);
-        }
-
-        /* Important. */
-        ARF_XSIZE(y) = ARF_XSIZE(x);
-    }
-}
+void arf_set(arf_t y, const arf_t x);
 
 ARF_INLINE void
 arf_neg(arf_t y, const arf_t x)
@@ -605,14 +535,9 @@ int arf_set_round(arf_t y, const arf_t x, slong prec, arf_rnd_t rnd);
 
 int arf_neg_round(arf_t y, const arf_t x, slong prec, arf_rnd_t rnd);
 
-#ifdef FMPR_H
-void arf_get_fmpr(fmpr_t y, const arf_t x);
-void arf_set_fmpr(arf_t y, const fmpr_t x);
-#endif
-
 int arf_get_mpfr(mpfr_t x, const arf_t y, mpfr_rnd_t rnd);
-
 void arf_set_mpfr(arf_t x, const mpfr_t y);
+int _arf_call_mpfr_func(arf_ptr r1, arf_ptr r2, int (*func)(void), arf_srcptr x, arf_srcptr y, slong prec, arf_rnd_t rnd);
 
 int arf_equal(const arf_t x, const arf_t y);
 int arf_equal_si(const arf_t x, slong y);
@@ -809,75 +734,6 @@ void arf_urandom(arf_t x, flint_rand_t state, slong bits, arf_rnd_t rnd);
 
 #define MUL_MPFR_MIN_LIMBS 25
 #define MUL_MPFR_MAX_LIMBS 10000
-
-#define nn_mul_2x1(r2, r1, r0, a1, a0, b0)                  \
-    do {                                                    \
-        mp_limb_t t1;                                       \
-        umul_ppmm(r1, r0, a0, b0);                          \
-        umul_ppmm(r2, t1, a1, b0);                          \
-        add_ssaaaa(r2, r1, r2, r1, 0, t1);                  \
-    } while (0)
-
-#define nn_mul_2x2(r3, r2, r1, r0, a1, a0, b1, b0)          \
-    do {                                                    \
-        mp_limb_t t1, t2, t3;                               \
-        umul_ppmm(r1, r0, a0, b0);                          \
-        umul_ppmm(r2, t1, a1, b0);                          \
-        add_ssaaaa(r2, r1, r2, r1, 0, t1);                  \
-        umul_ppmm(t1, t2, a0, b1);                          \
-        umul_ppmm(r3, t3, a1, b1);                          \
-        add_ssaaaa(r3, t1, r3, t1, 0, t3);                  \
-        add_ssaaaa(r2, r1, r2, r1, t1, t2);                 \
-        r3 += r2 < t1;                                      \
-    } while (0)
-
-/* todo: use mpn_extras.h when available */
-#define ARF_USE_FFT_MUL(_xn) ((_xn) > 32000)
-
-/* from flint/fft.h */
-void flint_mpn_mul_fft_main(mp_ptr r1, mp_srcptr i1, mp_size_t n1, mp_srcptr i2, mp_size_t n2);
-
-#define ARF_MPN_MUL(_z, _x, _xn, _y, _yn) \
-    if ((_xn) == (_yn)) \
-    { \
-        if ((_xn) == 1) \
-        { \
-            umul_ppmm((_z)[1], (_z)[0], (_x)[0], (_y)[0]); \
-        } \
-        else if ((_xn) == 2) \
-        { \
-            mp_limb_t __arb_x1, __arb_x0, __arb_y1, __arb_y0; \
-            __arb_x0 = (_x)[0]; \
-            __arb_x1 = (_x)[1]; \
-            __arb_y0 = (_y)[0]; \
-            __arb_y1 = (_y)[1]; \
-            nn_mul_2x2((_z)[3], (_z)[2], (_z)[1], (_z)[0], __arb_x1, __arb_x0, __arb_y1, __arb_y0); \
-        } \
-        else if (ARF_USE_FFT_MUL(_xn)) \
-            flint_mpn_mul_fft_main((_z), (_x), (_xn), (_y), (_yn)); \
-        else if ((_x) == (_y)) \
-            mpn_sqr((_z), (_x), (_xn)); \
-        else \
-            mpn_mul_n((_z), (_x), (_y), (_xn)); \
-    } \
-    else if ((_xn) > (_yn)) \
-    { \
-        if ((_yn) == 1) \
-            (_z)[(_xn) + (_yn) - 1] = mpn_mul_1((_z), (_x), (_xn), (_y)[0]); \
-        else if (ARF_USE_FFT_MUL(_yn)) \
-            flint_mpn_mul_fft_main((_z), (_x), (_xn), (_y), (_yn)); \
-        else \
-            mpn_mul((_z), (_x), (_xn), (_y), (_yn)); \
-    } \
-    else \
-    { \
-        if ((_xn) == 1) \
-            (_z)[(_xn) + (_yn) - 1] = mpn_mul_1((_z), (_y), (_yn), (_x)[0]); \
-        else if (ARF_USE_FFT_MUL(_xn)) \
-            flint_mpn_mul_fft_main((_z), (_y), (_yn), (_x), (_xn)); \
-        else \
-            mpn_mul((_z), (_y), (_yn), (_x), (_xn)); \
-    }
 
 #define ARF_MUL_STACK_ALLOC 40
 #define ARF_MUL_TLS_ALLOC 1000
@@ -1172,7 +1028,7 @@ int arf_sqrt_fmpz(arf_t z, const fmpz_t x, slong prec, arf_rnd_t rnd);
 
 int arf_rsqrt(arf_ptr z, arf_srcptr x, slong prec, arf_rnd_t rnd);
 
-int arf_root(arf_t z, const arf_t x, ulong k, slong prec, arf_rnd_t rnd);
+int arf_root(arf_ptr z, arf_srcptr x, ulong k, slong prec, arf_rnd_t rnd);
 
 /* Magnitude bounds */
 

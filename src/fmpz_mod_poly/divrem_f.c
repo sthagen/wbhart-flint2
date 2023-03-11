@@ -9,7 +9,6 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdlib.h>
 #include "fmpz_vec.h"
 #include "fmpz_mod_poly.h"
 
@@ -85,7 +84,7 @@ void fmpz_mod_poly_divrem_f(fmpz_t f, fmpz_mod_poly_t Q, fmpz_mod_poly_t R,
         r = R->coeffs;
     }
 
-    _fmpz_mod_poly_divrem_divconquer(q, r, A->coeffs, lenA, 
+    _fmpz_mod_poly_divrem(q, r, A->coeffs, lenA, 
                              B->coeffs, lenB, invB, fmpz_mod_ctx_modulus(ctx));
 
     if (Q == A || Q == B)

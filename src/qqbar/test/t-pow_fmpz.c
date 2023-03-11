@@ -22,7 +22,7 @@ int main()
     flint_randinit(state);
 
     /* Check x^m x^n = x^(m+n) */
-    for (iter = 0; iter < 100 * calcium_test_multiplier(); iter++)
+    for (iter = 0; iter < 100 * 0.1 * flint_test_multiplier(); iter++)
     {
         qqbar_t x, xm, xn, xmxn, xmn;
         fmpz_t m, n, mn;
@@ -86,6 +86,6 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
 

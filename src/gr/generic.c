@@ -9,6 +9,8 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "fmpq.h"
+#include "arb.h"
 #include "arith.h"
 #include "bernoulli.h"
 #include "gr.h"
@@ -16,6 +18,12 @@
 #include "gr_mat.h"
 #include "gr_poly.h"
 #include "gr_special.h"
+
+#ifdef __GNUC__
+# define memcpy __builtin_memcpy
+#else
+# include <string.h>
+#endif
 
 #define DEBUG_RINGS 0
 
@@ -2995,7 +3003,7 @@ gr_method_tab_init(gr_funcptr * methods, gr_method_tab_input * tab)
             break;
 
         if (_gr_generic_methods[i].index >= GR_METHOD_TAB_SIZE)
-            abort();
+            flint_abort();
 
         methods[_gr_generic_methods[i].index] = _gr_generic_methods[i].function;
     }
@@ -3006,7 +3014,7 @@ gr_method_tab_init(gr_funcptr * methods, gr_method_tab_input * tab)
             break;
 
         if (tab[i].index >= GR_METHOD_TAB_SIZE)
-            abort();
+            flint_abort();
 
         methods[tab[i].index] = tab[i].function;
     }

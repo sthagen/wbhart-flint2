@@ -9,7 +9,15 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "ulong_extras.h"
 #include "arb_hypgeom.h"
+
+#ifdef __GNUC__
+# define fabs __builtin_fabs
+# define log __builtin_log
+#else
+# include <math.h>
+#endif
 
 static slong
 asymp_prec(slong k, double logdz, slong prec)
@@ -101,7 +109,7 @@ _arb_hypgeom_gamma_upper_sum_rs_1(arb_t res, ulong p, ulong q, const arb_t z, sl
         }
 
         if (jbot != jtop - jlen + 1)
-            abort();
+            flint_abort();
 
         /* Factors between jbot and jtop inclusive */
         if (jbot == 0)

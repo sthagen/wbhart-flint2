@@ -15,7 +15,6 @@
 
 ******************************************************************************/
 
-#include <stdio.h>
 #include "flint.h"
 #include "fmpq_poly.h"
 #include "nf.h"
@@ -31,7 +30,7 @@ int main(void)
 
     flint_randinit(state);
 
-    for (i = 0; i < 1000 * antic_test_multiplier(); i++)
+    for (i = 0; i < 1000 * flint_test_multiplier(); i++)
     {
         fmpq_poly_t f;
         ulong m, n;
@@ -66,7 +65,7 @@ int main(void)
             flint_printf("n = %wu\n", n);
             flint_printf("a = "); nf_elem_print_pretty(a, nf, "x"); printf("\n");
             flint_printf("b = "); nf_elem_print_pretty(b, nf, "x"); printf("\n");
-            abort();
+            flint_abort();
         }
 
         fmpq_poly_randtest(f, state, fmpq_poly_degree(nf->pol) - 1, 200);
@@ -86,7 +85,7 @@ int main(void)
             flint_printf("m = %wu\n", m);
             flint_printf("f = "); fmpq_poly_print_pretty(f, "x"); flint_printf("\n");
             flint_printf("a = "); nf_elem_print_pretty(a, nf, "x"); flint_printf("\n");
-            abort();
+            flint_abort();
         }
 
         /* with signed words */
@@ -107,7 +106,7 @@ int main(void)
             flint_printf("sn = %wd\n", sn);
             flint_printf("a = "); nf_elem_print_pretty(a, nf, "x"); flint_printf("\n");
             flint_printf("b = "); nf_elem_print_pretty(b, nf, "x"); flint_printf("\n");
-            abort();
+            flint_abort();
         }
 
         nf_elem_set_fmpq_poly(a, f, nf);
@@ -125,7 +124,7 @@ int main(void)
             flint_printf("sm = %wd\n", sm);
             flint_printf("f = "); fmpq_poly_print_pretty(f, "x"); flint_printf("\n");
             flint_printf("a = "); nf_elem_print_pretty(a, nf, "x"); flint_printf("\n");
-            abort();
+            flint_abort();
         }
 
         /* cleaning */

@@ -15,7 +15,6 @@
 
 ******************************************************************************/
 
-#include <stdio.h>
 #include "nf.h"
 #include "nf_elem.h"
 
@@ -31,7 +30,7 @@ main(void)
     flint_randinit(state);
 
     /* test trace(a + b) = trace(a) + trace(b) */
-    for (i = 0; i < 100 * antic_test_multiplier(); i++)
+    for (i = 0; i < 100 * flint_test_multiplier(); i++)
     {
         nf_t nf;
         nf_elem_t a, b, c;
@@ -69,7 +68,7 @@ main(void)
            printf("trace(b) = "); fmpq_print(btrace); printf("\n");
            printf("trace(a + b) = "); fmpq_print(ctrace); printf("\n");
            printf("trace(a) + trace(b) = "); fmpq_print(ctrace2); printf("\n");
-           abort();
+           flint_abort();
         }
 
         fmpq_clear(atrace);

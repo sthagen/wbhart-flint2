@@ -9,9 +9,9 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
-#include "bool_mat.h"
 #include "perm.h"
-
+#include "fmpz_mat.h"
+#include "bool_mat.h"
 
 int
 _is_superficially_ok_entrywise(const fmpz_mat_t A)
@@ -143,7 +143,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong m, degree;
         bool_mat_t A;
@@ -251,7 +251,7 @@ int main()
     }
 
     /* use powering to check small random examples */
-    for (iter = 0; iter < 1000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 1000 * 0.1 * flint_test_multiplier(); iter++)
     {
         slong m;
         bool_mat_t A;
@@ -361,5 +361,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

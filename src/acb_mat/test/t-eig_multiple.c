@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include "fmpq_mat.h"
 #include "acb_mat.h"
 
 int main()
@@ -21,7 +22,7 @@ int main()
 
     flint_randinit(state);
 
-    for (iter = 0; iter < 3000 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 3000 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_mat_t A, R;
         acb_ptr E, F;
@@ -143,7 +144,7 @@ int main()
     }
 
     /* Test convergence for DFT matrices */
-    for (iter = 0; iter < 50 * arb_test_multiplier(); iter++)
+    for (iter = 0; iter < 50 * 0.1 * flint_test_multiplier(); iter++)
     {
         acb_mat_t A, R, QC;
         acb_ptr E;
@@ -234,5 +235,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }

@@ -9,8 +9,6 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "profiler.h"
 #include "flint.h"
 #include "ulong_extras.h"
@@ -31,6 +29,7 @@ void sample(void * arg, ulong count)
    int fullword = info->fullword;
    mp_size_t j;
    slong i;
+   mp_ptr vec1, vec2, res;
    FLINT_TEST_INIT(state);
       
    n = n_randbits(state, bits);
@@ -38,9 +37,9 @@ void sample(void * arg, ulong count)
       
    nmod_init(&mod, n);
 
-   mp_ptr vec1 = _nmod_vec_init(1000);
-   mp_ptr vec2 = _nmod_vec_init(1000);
-   mp_ptr res = _nmod_vec_init(1000);
+   vec1 = _nmod_vec_init(1000);
+   vec2 = _nmod_vec_init(1000);
+   res = _nmod_vec_init(1000);
      
    for (j = 0; j < 1000; j++)
       vec1[j] = n_randint(state, n);

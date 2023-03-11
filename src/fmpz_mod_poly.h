@@ -19,39 +19,22 @@
 #define FMPZ_MOD_POLY_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdio.h>
-#undef ulong
-#include <gmp.h>
-#define ulong mp_limb_t
-
-#include "flint.h"
-#include "fmpz.h"
+#include "thread_pool.h"
+#include "fmpz_mod_types.h"
 #include "fmpz_poly.h"
 #include "fmpz_mod.h"
-#include "fmpz_mat.h"
-#include "fmpz_mod_mat.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 #define FMPZ_MOD_POLY_HGCD_CUTOFF  128      /* HGCD: Basecase -> Recursion      */
 #define FMPZ_MOD_POLY_GCD_CUTOFF  256       /* GCD:  Euclidean -> HGCD          */
 
 #define FMPZ_MOD_POLY_INV_NEWTON_CUTOFF  64 /* Inv series newton: Basecase -> Newton */
-#define FMPZ_MOD_POLY_DIV_DIVCONQUER_CUTOFF 
+#define FMPZ_MOD_POLY_DIV_DIVCONQUER_CUTOFF
+
 /*  Type definitions *********************************************************/
-
-typedef struct
-{
-    fmpz * coeffs;
-    slong alloc;
-    slong length;
-} fmpz_mod_poly_struct;
-
-typedef fmpz_mod_poly_struct fmpz_mod_poly_t[1];
 
 typedef struct
 {
@@ -634,31 +617,6 @@ FLINT_DLL void fmpz_mod_poly_divrem_basecase(fmpz_mod_poly_t Q, fmpz_mod_poly_t 
                              const fmpz_mod_poly_t A, const fmpz_mod_poly_t B,
                                                      const fmpz_mod_ctx_t ctx);
 
-FLINT_DLL void _fmpz_mod_poly_div_basecase(fmpz * Q, fmpz * R, 
-                        const fmpz * A, slong lenA, const fmpz * B, slong lenB, 
-                                            const fmpz_t invB, const fmpz_t p);
-
-FLINT_DLL void fmpz_mod_poly_div_basecase(fmpz_mod_poly_t Q, 
-                            const fmpz_mod_poly_t A, const fmpz_mod_poly_t B,
-                                                     const fmpz_mod_ctx_t ctx);
-
-FLINT_DLL void _fmpz_mod_poly_div_divconquer_recursive(fmpz * Q, fmpz * W,
-                                  const fmpz * A, const fmpz * B, slong lenB,
-                                             const fmpz_t invB, const fmpz_t p);
-
-FLINT_DLL void _fmpz_mod_poly_div_divconquer(fmpz * Q,
-  const fmpz * A, slong lenA, const fmpz * B, slong lenB, const fmpz_t invB,
-                                                                const fmpz_t p);
-
-FLINT_DLL void fmpz_mod_poly_div_divconquer(fmpz_mod_poly_t Q,
-    const fmpz_mod_poly_t A, const fmpz_mod_poly_t B, const fmpz_mod_ctx_t ctx);
-
-FLINT_DLL void _fmpz_mod_poly_div_newton(fmpz * Q, const fmpz * A, slong lenA,
-                                    const fmpz * B, slong lenB, const fmpz_t p);
-
-FLINT_DLL void fmpz_mod_poly_div_newton(fmpz_mod_poly_t Q,
-   const fmpz_mod_poly_t A, const fmpz_mod_poly_t B, const fmpz_mod_ctx_t ctx);
-
 FLINT_DLL void _fmpz_mod_poly_div_newton_n_preinv (fmpz* Q, const fmpz* A,
                       slong lenA, const fmpz* B, slong lenB, const fmpz* Binv,
                                     slong lenBinv, const fmpz_t mod);
@@ -678,64 +636,27 @@ FLINT_DLL void fmpz_mod_poly_divrem_newton_n_preinv(fmpz_mod_poly_t Q,
 FLINT_DLL ulong fmpz_mod_poly_remove(fmpz_mod_poly_t f,
                             const fmpz_mod_poly_t p, const fmpz_mod_ctx_t ctx);
 
-FLINT_DLL void _fmpz_mod_poly_rem_basecase(fmpz * R, 
+FLINT_DLL void _fmpz_mod_poly_rem_basecase(fmpz * R,
                         const fmpz * A, slong lenA, const fmpz * B, slong lenB, 
                                             const fmpz_t invB, const fmpz_t p);
 
-FLINT_DLL void fmpz_mod_poly_rem_basecase(fmpz_mod_poly_t R, 
+FLINT_DLL void fmpz_mod_poly_rem_basecase(fmpz_mod_poly_t R,
                             const fmpz_mod_poly_t A, const fmpz_mod_poly_t B,
                                                      const fmpz_mod_ctx_t ctx);
 
-FLINT_DLL void _fmpz_mod_poly_divrem_divconquer_recursive(fmpz * Q, fmpz * BQ, fmpz * W, 
-    const fmpz * A, const fmpz * B, slong lenB, 
-    const fmpz_t invB, const fmpz_t p);
-
-FLINT_DLL void _fmpz_mod_poly_divrem_divconquer(fmpz * Q, fmpz * R, 
-    const fmpz * A, slong lenA, const fmpz * B, slong lenB, 
-    const fmpz_t invB, const fmpz_t p);
-
-FLINT_DLL void fmpz_mod_poly_divrem_divconquer(fmpz_mod_poly_t Q,
-        fmpz_mod_poly_t R, const fmpz_mod_poly_t A, const fmpz_mod_poly_t B,
-                                                     const fmpz_mod_ctx_t ctx);
-
-FMPZ_MOD_POLY_INLINE
-void _fmpz_mod_poly_divrem(fmpz *Q, fmpz *R, 
-                           const fmpz *A, slong lenA, const fmpz *B, slong lenB, 
-                           const fmpz_t invB, const fmpz_t p)
-{
-    if (lenB < 8)
-	   _fmpz_mod_poly_divrem_basecase(Q, R, A, lenA, B, lenB, invB, p);
-	else
-	   _fmpz_mod_poly_divrem_divconquer(Q, R, A, lenA, B, lenB, invB, p);
-}
-
-FMPZ_MOD_POLY_INLINE 
-void fmpz_mod_poly_divrem(fmpz_mod_poly_t Q, fmpz_mod_poly_t R, 
-    const fmpz_mod_poly_t A, const fmpz_mod_poly_t B, const fmpz_mod_ctx_t ctx)
-{
-    fmpz_mod_poly_divrem_divconquer(Q, R, A, B, ctx);
-}
-
-FMPZ_MOD_POLY_INLINE
-void _fmpz_mod_poly_div(fmpz *Q,
+FLINT_DLL void _fmpz_mod_poly_divrem(fmpz *Q, fmpz *R,
                            const fmpz *A, slong lenA, const fmpz *B, slong lenB,
-                           const fmpz_t invB, const fmpz_t p)
-{
-    if (lenA - lenB + 1 < 8)
-    {
-       fmpz * R = _fmpz_vec_init(lenA);
-       _fmpz_mod_poly_div_basecase(Q, R, A, lenA, B, lenB, invB, p);
-       _fmpz_vec_clear(R, lenA);
-    } else
-       _fmpz_mod_poly_div_divconquer(Q, A, lenA, B, lenB, invB, p);
-}
+                           const fmpz_t invB, const fmpz_t p);
 
-FMPZ_MOD_POLY_INLINE
-void fmpz_mod_poly_div(fmpz_mod_poly_t Q, const fmpz_mod_poly_t A,
-                              const fmpz_mod_poly_t B, const fmpz_mod_ctx_t ctx)
-{
-    fmpz_mod_poly_div_divconquer(Q, A, B, ctx);
-}
+FLINT_DLL void fmpz_mod_poly_divrem(fmpz_mod_poly_t Q, fmpz_mod_poly_t R,
+    const fmpz_mod_poly_t A, const fmpz_mod_poly_t B, const fmpz_mod_ctx_t ctx);
+
+FLINT_DLL void _fmpz_mod_poly_div(fmpz *Q,
+                           const fmpz *A, slong lenA, const fmpz *B, slong lenB,
+                           const fmpz_t invB, const fmpz_mod_ctx_t ctx);
+
+FLINT_DLL void fmpz_mod_poly_div(fmpz_mod_poly_t Q, const fmpz_mod_poly_t A,
+                              const fmpz_mod_poly_t B, const fmpz_mod_ctx_t ctx);
 
 FLINT_DLL void _fmpz_mod_poly_divrem_f(fmpz_t f, fmpz *Q, fmpz *R, 
                              const fmpz *A, slong lenA, 
@@ -751,19 +672,7 @@ void _fmpz_mod_poly_rem(fmpz *R,
                         const fmpz_t invB, const fmpz_t p)
 {
     fmpz *Q = _fmpz_vec_init(lenA - lenB + 1);
-    fmpz *T = _fmpz_vec_init(lenA);
-
-    if (lenA < lenB)
-    {
-       _fmpz_vec_set(R, A, lenA);
-       _fmpz_vec_zero(R + lenA, lenB - 1 - lenA);
-    } else
-    {
-       _fmpz_mod_poly_divrem_divconquer(Q, T, A, lenA, B, lenB, invB, p);
-       _fmpz_vec_set(R, T, lenB - 1);
-    }
-
-    _fmpz_vec_clear(T, lenA);
+    _fmpz_mod_poly_divrem(Q, R, A, lenA, B, lenB, invB, p);
     _fmpz_vec_clear(Q, lenA - lenB + 1);
 }
 
@@ -772,7 +681,6 @@ void fmpz_mod_poly_rem(fmpz_mod_poly_t R, const fmpz_mod_poly_t A,
                              const fmpz_mod_poly_t B, const fmpz_mod_ctx_t ctx)
 {
     fmpz_mod_poly_t Q;
-
     fmpz_mod_poly_init(Q, ctx);
     fmpz_mod_poly_divrem(Q, R, A, B, ctx);
     fmpz_mod_poly_clear(Q, ctx);
@@ -783,7 +691,6 @@ void fmpz_mod_poly_rem_f(fmpz_t f, fmpz_mod_poly_t R, const fmpz_mod_poly_t A,
                              const fmpz_mod_poly_t B, const fmpz_mod_ctx_t ctx)
 {
     fmpz_mod_poly_t Q;
-
     fmpz_mod_poly_init(Q, ctx);
     fmpz_mod_poly_divrem_f(f, Q, R, A, B, ctx);
     fmpz_mod_poly_clear(Q, ctx);
@@ -853,11 +760,11 @@ FLINT_DLL void fmpz_mod_poly_make_monic(fmpz_mod_poly_t res,
 FLINT_DLL void fmpz_mod_poly_make_monic_f(fmpz_t f, fmpz_mod_poly_t res, 
                          const fmpz_mod_poly_t poly, const fmpz_mod_ctx_t ctx);
 
-FLINT_DLL slong _fmpz_mod_poly_gcd_euclidean(fmpz *G, const fmpz *A, slong lenA, 
+FLINT_DLL slong _fmpz_mod_poly_gcd(fmpz *G, const fmpz *A, slong lenA, 
                                            const fmpz *B, slong lenB, 
-                                           const fmpz_t invB, const fmpz_t p);
+                                           const fmpz_mod_ctx_t ctx);
 
-FLINT_DLL void fmpz_mod_poly_gcd_euclidean(fmpz_mod_poly_t G, 
+FLINT_DLL void fmpz_mod_poly_gcd(fmpz_mod_poly_t G, 
                              const fmpz_mod_poly_t A, const fmpz_mod_poly_t B,
                                                      const fmpz_mod_ctx_t ctx);
 
@@ -869,7 +776,7 @@ FLINT_DLL void fmpz_mod_poly_gcd_euclidean_f(fmpz_t f, fmpz_mod_poly_t G,
                              const fmpz_mod_poly_t A, const fmpz_mod_poly_t B,
                                                      const fmpz_mod_ctx_t ctx);
 
-FMPZ_MOD_POLY_INLINE 
+FMPZ_MOD_POLY_INLINE
 slong _fmpz_mod_poly_gcd_f(fmpz_t f, fmpz *G, 
                           const fmpz *A, slong lenA, 
                           const fmpz *B, slong lenB, const fmpz_t p)
@@ -884,82 +791,28 @@ void fmpz_mod_poly_gcd_f(fmpz_t f, fmpz_mod_poly_t G, const fmpz_mod_poly_t A,
     fmpz_mod_poly_gcd_euclidean_f(f, G, A, B, ctx);
 }
 
-FLINT_DLL slong _fmpz_mod_poly_hgcd_recursive(fmpz **M, slong *lenM, 
-    fmpz *A, slong *lenA, fmpz *B, slong *lenB, 
-    const fmpz *a, slong lena, const fmpz *b, slong lenb, 
-    fmpz *P, const fmpz_t mod, int flag, fmpz_mod_poly_res_t res);
-
 FLINT_DLL slong _fmpz_mod_poly_hgcd(fmpz **M, slong *lenM, 
                      fmpz *A, slong *lenA, fmpz *B, slong *lenB, 
                      const fmpz *a, slong lena, const fmpz *b, slong lenb, 
                      const fmpz_t mod);
-
-FLINT_DLL slong _fmpz_mod_poly_gcd_hgcd(fmpz *G, const fmpz *A, slong lenA, 
-                                  const fmpz *B, slong lenB, const fmpz_t mod);
-
-FLINT_DLL void fmpz_mod_poly_gcd_hgcd(fmpz_mod_poly_t G, 
-                             const fmpz_mod_poly_t A, const fmpz_mod_poly_t B,
-                                                     const fmpz_mod_ctx_t ctx);
-
-FMPZ_MOD_POLY_INLINE 
-slong _fmpz_mod_poly_gcd(fmpz *G, const fmpz *A, slong lenA, 
-                                 const fmpz *B, slong lenB, 
-                                 const fmpz_t invB, const fmpz_t p)
-{
-    if (FLINT_MIN(lenA, lenB) < FMPZ_MOD_POLY_GCD_CUTOFF)
-       return _fmpz_mod_poly_gcd_euclidean(G, A, lenA, B, lenB, invB, p);
-    else
-       return _fmpz_mod_poly_gcd_hgcd(G, A, lenA, B, lenB, p);
-}
-
-FMPZ_MOD_POLY_INLINE 
-void fmpz_mod_poly_gcd(fmpz_mod_poly_t G, const fmpz_mod_poly_t A,
-                             const fmpz_mod_poly_t B, const fmpz_mod_ctx_t ctx)
-{
-    if (FLINT_MIN(A->length, B->length) < FMPZ_MOD_POLY_GCD_CUTOFF)
-       fmpz_mod_poly_gcd_euclidean(G, A, B, ctx);
-    else
-       fmpz_mod_poly_gcd_hgcd(G, A, B, ctx);
-}
-
-FLINT_DLL slong _fmpz_mod_poly_xgcd_euclidean(fmpz *G, fmpz *S, fmpz *T, 
-                                   const fmpz *A, slong lenA, 
-                                   const fmpz *B, slong lenB, 
-                                   const fmpz_t invB, const fmpz_t p);
 
 FLINT_DLL slong _fmpz_mod_poly_xgcd_euclidean_f(fmpz_t f, fmpz *G, fmpz *S, fmpz *T, 
                                    const fmpz *A, slong lenA, 
                                    const fmpz *B, slong lenB, 
                                    const fmpz_t invB, const fmpz_t p);
 
-FLINT_DLL void fmpz_mod_poly_xgcd_euclidean(fmpz_mod_poly_t G, 
-                             fmpz_mod_poly_t S, fmpz_mod_poly_t T,
-                             const fmpz_mod_poly_t A, const fmpz_mod_poly_t B,
-                                                     const fmpz_mod_ctx_t ctx);
-
 FLINT_DLL void fmpz_mod_poly_xgcd_euclidean_f(fmpz_t f, fmpz_mod_poly_t G, 
                              fmpz_mod_poly_t S, fmpz_mod_poly_t T,
                              const fmpz_mod_poly_t A, const fmpz_mod_poly_t B,
                                                      const fmpz_mod_ctx_t ctx);
 
-FLINT_DLL slong _fmpz_mod_poly_xgcd_hgcd(fmpz *G, fmpz *S, fmpz *T, 
+FLINT_DLL slong _fmpz_mod_poly_xgcd(fmpz *G, fmpz *S, fmpz *T, 
                           const fmpz *A, slong lenA, const fmpz *B, slong lenB, 
-                          const fmpz_t mod);
+                          const fmpz_t invB, const fmpz_t mod);
 
-FLINT_DLL void fmpz_mod_poly_xgcd_hgcd(fmpz_mod_poly_t G, fmpz_mod_poly_t S, 
+FLINT_DLL void fmpz_mod_poly_xgcd(fmpz_mod_poly_t G, fmpz_mod_poly_t S, 
           fmpz_mod_poly_t T, const fmpz_mod_poly_t A, const fmpz_mod_poly_t B,
                                                      const fmpz_mod_ctx_t ctx);
-
-FMPZ_MOD_POLY_INLINE slong 
-_fmpz_mod_poly_xgcd(fmpz *G, fmpz *S, fmpz *T, 
-                    const fmpz *A, slong lenA, const fmpz *B, slong lenB, 
-                    const fmpz_t invB, const fmpz_t p)
-{
-    if (FLINT_MIN(lenA, lenB) < FMPZ_MOD_POLY_GCD_CUTOFF)
-       return _fmpz_mod_poly_xgcd_euclidean(G, S, T, A, lenA, B, lenB, invB, p);
-    else
-       return _fmpz_mod_poly_xgcd_hgcd(G, S, T, A, lenA, B, lenB, p);
-}
 
 FMPZ_MOD_POLY_INLINE slong 
 _fmpz_mod_poly_xgcd_f(fmpz_t f, fmpz *G, fmpz *S, fmpz *T, 
@@ -967,17 +820,6 @@ _fmpz_mod_poly_xgcd_f(fmpz_t f, fmpz *G, fmpz *S, fmpz *T,
                     const fmpz_t invB, const fmpz_t p)
 {
     return _fmpz_mod_poly_xgcd_euclidean_f(f, G, S, T, A, lenA, B, lenB, invB, p);
-}
-
-FMPZ_MOD_POLY_INLINE void 
-fmpz_mod_poly_xgcd(fmpz_mod_poly_t G, fmpz_mod_poly_t S, fmpz_mod_poly_t T,
-                             const fmpz_mod_poly_t A, const fmpz_mod_poly_t B,
-                                                      const fmpz_mod_ctx_t ctx)
-{
-    if (FLINT_MIN(A->length, B->length) < FMPZ_MOD_POLY_GCD_CUTOFF)
-       fmpz_mod_poly_xgcd_euclidean(G, S, T, A, B, ctx);
-    else
-       fmpz_mod_poly_xgcd_hgcd(G, S, T, A, B, ctx);
 }
 
 FMPZ_MOD_POLY_INLINE void 

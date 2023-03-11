@@ -9,9 +9,9 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <gmp.h>
 #include "profiler.h"
 #include "fmpz.h"
+#include "ulong_extras.h"
 
 #define ntests 2000
 

@@ -18,28 +18,11 @@
 #define FMPZ_POLY_Q_INLINE static __inline__
 #endif
 
-#undef ulong
-#define ulong ulongxx /* interferes with system includes */
-#include <stdlib.h>
-#undef ulong
-#include <gmp.h>
-#define ulong mp_limb_t
-
-#include "flint.h"
-#include "fmpz.h"
 #include "fmpz_poly.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
-
-typedef struct
-{
-    fmpz_poly_struct *num;
-    fmpz_poly_struct *den;
-} fmpz_poly_q_struct;
-
-typedef fmpz_poly_q_struct fmpz_poly_q_t[1];
 
 /* Accessing numerator and denominator ***************************************/
 

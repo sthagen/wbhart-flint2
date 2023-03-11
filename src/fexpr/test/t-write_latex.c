@@ -13,6 +13,12 @@
 #include "fexpr.h"
 #include "fexpr_builtin.h"
 
+#ifdef __GNUC__
+# define strlen __builtin_strlen
+#else
+# include <string.h>
+#endif
+
 void
 fexpr_randtest_atom(fexpr_t expr, flint_rand_t state)
 {
@@ -95,7 +101,7 @@ int main()
     flint_randinit(state);
 
     /* Generate gibberish and just check that we get valid strings */
-    for (iter = 0; iter < 100000 * calcium_test_multiplier(); iter++)
+    for (iter = 0; iter < 100000 * 0.1 * flint_test_multiplier(); iter++)
     {
         fexpr_t expr;
         char * s;
@@ -124,5 +130,5 @@ int main()
     flint_randclear(state);
     flint_cleanup();
     flint_printf("PASS\n");
-    return EXIT_SUCCESS;
+    return 0;
 }
