@@ -88,15 +88,16 @@ _gr_poly_log_series(gr_ptr res, gr_srcptr f, slong flen, slong len, gr_ctx_t ctx
 int
 gr_poly_log_series(gr_poly_t res, const gr_poly_t f, slong len, gr_ctx_t ctx)
 {
+    slong flen = f->length;
     int status = GR_SUCCESS;
 
     if (len == 0)
         return gr_poly_zero(res, ctx);
 
-    if (f->length == 0)
+    if (flen == 0)
         return GR_DOMAIN;
 
-    if (f->length == 1)
+    if (flen == 1)
         len = 1;
 
     gr_poly_fit_length(res, len, ctx);

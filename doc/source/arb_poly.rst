@@ -431,27 +431,16 @@ Composition
     The underscore methods do not support aliasing of the output
     with either input polynomial.
 
-.. function:: void _arb_poly_compose_series_horner(arb_ptr res, arb_srcptr poly1, slong len1, arb_srcptr poly2, slong len2, slong n, slong prec)
-
-.. function:: void arb_poly_compose_series_horner(arb_poly_t res, const arb_poly_t poly1, const arb_poly_t poly2, slong n, slong prec)
-
-.. function:: void _arb_poly_compose_series_brent_kung(arb_ptr res, arb_srcptr poly1, slong len1, arb_srcptr poly2, slong len2, slong n, slong prec)
-
-.. function:: void arb_poly_compose_series_brent_kung(arb_poly_t res, const arb_poly_t poly1, const arb_poly_t poly2, slong n, slong prec)
-
 .. function:: void _arb_poly_compose_series(arb_ptr res, arb_srcptr poly1, slong len1, arb_srcptr poly2, slong len2, slong n, slong prec)
-
-.. function:: void arb_poly_compose_series(arb_poly_t res, const arb_poly_t poly1, const arb_poly_t poly2, slong n, slong prec)
+              void arb_poly_compose_series(arb_poly_t res, const arb_poly_t poly1, const arb_poly_t poly2, slong n, slong prec)
 
     Sets *res* to the power series composition `h(x) = f(g(x))` truncated
-    to order `O(x^n)` where `f` is given by *poly1* and `g` is given by *poly2*,
-    respectively using Horner's rule, the Brent-Kung baby step-giant step
-    algorithm, and an automatic choice between the two algorithms.
-
-    The default algorithm also handles special-form input `g = ax^n` efficiently.
+    to order `O(x^n)` where `f` is given by *poly1* and `g` is given by *poly2*.
+    Wraps :func:`_gr_poly_compose_series` which chooses automatically
+    between various algorithms.
 
     We require that the constant term in `g(x)` is exactly zero.
-    The underscore methods do not support aliasing of the output
+    The underscore method does not support aliasing of the output
     with either input polynomial.
 
 .. function:: void _arb_poly_revert_series_lagrange(arb_ptr h, arb_srcptr f, slong flen, slong n, slong prec)
@@ -885,41 +874,12 @@ Powers and elementary functions
     The underscore methods support aliasing and allow the input to be
     shorter than the output, but require the lengths to be nonzero.
 
-.. function:: void _arb_poly_sin_cos_series_basecase(arb_ptr s, arb_ptr c, arb_srcptr h, slong hlen, slong n, slong prec, int times_pi)
-
-.. function:: void arb_poly_sin_cos_series_basecase(arb_poly_t s, arb_poly_t c, const arb_poly_t h, slong n, slong prec, int times_pi)
-
-.. function:: void _arb_poly_sin_cos_series_tangent(arb_ptr s, arb_ptr c, arb_srcptr h, slong hlen, slong n, slong prec, int times_pi)
-
-.. function:: void arb_poly_sin_cos_series_tangent(arb_poly_t s, arb_poly_t c, const arb_poly_t h, slong n, slong prec, int times_pi)
-
 .. function:: void _arb_poly_sin_cos_series(arb_ptr s, arb_ptr c, arb_srcptr h, slong hlen, slong n, slong prec)
-
-.. function:: void arb_poly_sin_cos_series(arb_poly_t s, arb_poly_t c, const arb_poly_t h, slong n, slong prec)
+              void arb_poly_sin_cos_series(arb_poly_t s, arb_poly_t c, const arb_poly_t h, slong n, slong prec)
 
     Sets *s* and *c* to the power series sine and cosine of *h*, computed
     simultaneously.
-
-    The *basecase* version uses a simple recurrence for the coefficients,
-    requiring `O(nm)` operations where `m` is the length of `h`.
-
-    The *tangent* version uses the tangent half-angle formulas to compute
-    the sine and cosine via :func:`_arb_poly_tan_series`. This
-    requires `O(M(n))` operations.
-    When `h = h_0 + h_1` where the constant term `h_0` is nonzero,
-    the evaluation is done as
-    `\sin(h_0 + h_1) = \cos(h_0) \sin(h_1) + \sin(h_0) \cos(h_1)`,
-    `\cos(h_0 + h_1) = \cos(h_0) \cos(h_1) - \sin(h_0) \sin(h_1)`,
-    to improve accuracy and avoid dividing by zero at the poles of
-    the tangent function.
-
-    The default version automatically selects between the *basecase* and
-    *tangent* algorithms depending on the input.
-
-    The *basecase* and *tangent* versions take a flag *times_pi*
-    specifying that the input is to be multiplied by `\pi`.
-
-    The underscore methods support aliasing and require the lengths to be nonzero.
+    The underscore method supports aliasing and requires the lengths to be nonzero.
 
 .. function:: void _arb_poly_sin_series(arb_ptr s, arb_srcptr h, slong hlen, slong n, slong prec)
 

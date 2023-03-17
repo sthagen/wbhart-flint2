@@ -107,7 +107,7 @@ int gr_generic_randtest_not_zero(gr_ptr x, flint_rand_t state, gr_ctx_t ctx)
         status |= gr_neg_one(x, ctx);
 
     /* unused */
-    status = status;
+    (void) status;
 
     is_zero = gr_is_zero(x, ctx);
     if (is_zero == T_FALSE)
@@ -1430,7 +1430,34 @@ gr_generic_cos(gr_ptr res, gr_srcptr x, gr_ctx_t ctx)
 }
 
 int
+gr_generic_sin_cos(gr_ptr res1, gr_ptr res2, gr_srcptr x, gr_ctx_t ctx)
+{
+    if (gr_is_zero(x, ctx) == T_TRUE)
+        return gr_zero(res1, ctx) | gr_one(res2, ctx);
+    else
+        return GR_UNABLE;
+}
+
+int
 gr_generic_tan(gr_ptr res, gr_srcptr x, gr_ctx_t ctx)
+{
+    if (gr_is_zero(x, ctx) == T_TRUE)
+        return gr_zero(res, ctx);
+
+    return GR_UNABLE;
+}
+
+int
+gr_generic_asin(gr_ptr res, gr_srcptr x, gr_ctx_t ctx)
+{
+    if (gr_is_zero(x, ctx) == T_TRUE)
+        return gr_zero(res, ctx);
+
+    return GR_UNABLE;
+}
+
+int
+gr_generic_asinh(gr_ptr res, gr_srcptr x, gr_ctx_t ctx)
 {
     if (gr_is_zero(x, ctx) == T_TRUE)
         return gr_zero(res, ctx);
@@ -1572,7 +1599,7 @@ gr_generic_bernoulli_vec(gr_ptr res, slong len, gr_ctx_t ctx)
             arb_clear(t);
             gr_ctx_clear(RR);
 
-            return GR_SUCCESS;
+            return status;
         }
     }
 
@@ -1714,7 +1741,7 @@ gr_generic_eulernum_vec(gr_ptr res, slong len, gr_ctx_t ctx)
             arb_clear(t);
             gr_ctx_clear(RR);
 
-            return GR_SUCCESS;
+            return status;
         }
     }
 
@@ -2799,8 +2826,11 @@ const gr_method_tab_input _gr_generic_methods[] =
     {GR_METHOD_LOG1P,                   (gr_funcptr) gr_generic_log1p},
     {GR_METHOD_SIN,                     (gr_funcptr) gr_generic_sin},
     {GR_METHOD_COS,                     (gr_funcptr) gr_generic_cos},
+    {GR_METHOD_SIN_COS,                 (gr_funcptr) gr_generic_sin_cos},
     {GR_METHOD_TAN,                     (gr_funcptr) gr_generic_tan},
+    {GR_METHOD_ASIN,                    (gr_funcptr) gr_generic_asin},
     {GR_METHOD_ATAN,                    (gr_funcptr) gr_generic_atan},
+    {GR_METHOD_ASINH,                   (gr_funcptr) gr_generic_asinh},
     {GR_METHOD_ATANH,                   (gr_funcptr) gr_generic_atanh},
 
     {GR_METHOD_FAC,                     (gr_funcptr) gr_generic_fac},

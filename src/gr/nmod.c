@@ -13,9 +13,11 @@
 #include "fmpq.h"
 #include "nmod_vec.h"
 #include "nmod_poly.h"
+#include "nmod_mat.h"
 #include "gr.h"
 #include "gr_vec.h"
 #include "gr_poly.h"
+#include "gr_mat.h"
 
 #define NMOD_CTX_REF(ring_ctx) (((nmod_t *)((ring_ctx))))
 #define NMOD_CTX(ring_ctx) (*NMOD_CTX_REF(ring_ctx))
@@ -647,6 +649,38 @@ _gr_nmod_vec_mul_scalar_2exp_si(ulong * res, const ulong * vec1, slong len, slon
 }
 
 int
+_gr_nmod_vec_addmul_scalar(ulong * res, const ulong * vec1, slong len, const ulong * c, gr_ctx_t ctx)
+{
+    nmod_t mod = NMOD_CTX(ctx);
+    _nmod_vec_scalar_addmul_nmod(res, vec1, len, c[0], mod);
+    return GR_SUCCESS;
+}
+
+int
+_gr_nmod_vec_submul_scalar(ulong * res, const ulong * vec1, slong len, const ulong * c, gr_ctx_t ctx)
+{
+    nmod_t mod = NMOD_CTX(ctx);
+    _nmod_vec_scalar_addmul_nmod(res, vec1, len, nmod_neg(c[0], mod), mod);
+    return GR_SUCCESS;
+}
+
+int
+_gr_nmod_vec_addmul_scalar_si(ulong * res, const ulong * vec1, slong len, slong c, gr_ctx_t ctx)
+{
+    nmod_t mod = NMOD_CTX(ctx);
+    _nmod_vec_scalar_addmul_nmod(res, vec1, len, nmod_set_si(c, mod), mod);
+    return GR_SUCCESS;
+}
+
+int
+_gr_nmod_vec_submul_scalar_si(ulong * res, const ulong * vec1, slong len, slong c, gr_ctx_t ctx)
+{
+    nmod_t mod = NMOD_CTX(ctx);
+    _nmod_vec_scalar_addmul_nmod(res, vec1, len, nmod_neg(nmod_set_si(c, mod), mod), mod);
+    return GR_SUCCESS;
+}
+
+int
 _gr_nmod_vec_sum(ulong * res, const ulong * vec, slong len, gr_ctx_t ctx)
 {
     ulong hi, lo;
@@ -736,20 +770,48 @@ __gr_nmod_vec_dot(ulong * res, const ulong * initial, int subtract, const ulong 
     int nlimbs;
     nmod_t mod;
 
-    if (len <= 0)
+    if (len <= 1)
     {
-        if (initial == NULL)
-            _gr_nmod_zero(res, ctx);
+        if (len == 2)   /* todo: fmma */
+        {
+            mod = NMOD_CTX(ctx);
+            s = nmod_mul(vec1[0], vec2[0], mod);
+            s = nmod_addmul(s, vec1[1], vec2[1], mod);
+        }
+        else if (len == 1)
+        {
+            mod = NMOD_CTX(ctx);
+            s = nmod_mul(vec1[0], vec2[0], mod);
+        }
         else
-            _gr_nmod_set(res, initial, ctx);
-        return GR_SUCCESS;
+        {
+            if (initial == NULL)
+                _gr_nmod_zero(res, ctx);
+            else
+                _gr_nmod_set(res, initial, ctx);
+            return GR_SUCCESS;
+        }
     }
+    else
+    {
+        mod = NMOD_CTX(ctx);
 
-    mod = NMOD_CTX(ctx);
+        if (len <= 16)
+        {
+            if (mod.n <= UWORD(1) << (FLINT_BITS / 2 - 2))
+                nlimbs = 1;
+            if (mod.n <= UWORD(1) << (FLINT_BITS - 2))
+                nlimbs = 2;
+            else
+                nlimbs = 3;
+        }
+        else
+        {
+            nlimbs = _nmod_vec_dot_bound_limbs(len, mod);
+        }
 
-    nlimbs = _nmod_vec_dot_bound_limbs(len, mod);
-
-    NMOD_VEC_DOT(s, i, len, vec1[i], vec2[i], mod, nlimbs);
+        NMOD_VEC_DOT(s, i, len, vec1[i], vec2[i], mod, nlimbs);
+    }
 
     if (initial == NULL)
     {
@@ -802,7 +864,21 @@ __gr_nmod_vec_dot_rev(ulong * res, const ulong * initial, int subtract, const ul
     else
     {
         mod = NMOD_CTX(ctx);
-        nlimbs = _nmod_vec_dot_bound_limbs(len, mod);
+
+        if (len <= 16)
+        {
+            if (mod.n <= UWORD(1) << (FLINT_BITS / 2 - 2))
+                nlimbs = 1;
+            if (mod.n <= UWORD(1) << (FLINT_BITS - 2))
+                nlimbs = 2;
+            else
+                nlimbs = 3;
+        }
+        else
+        {
+            nlimbs = _nmod_vec_dot_bound_limbs(len, mod);
+        }
+
         NMOD_VEC_DOT(s, i, len, vec1[i], vec2[len - 1 - i], mod, nlimbs);
     }
 
@@ -917,6 +993,57 @@ static const short inv_series_cutoff_tab[64] = {38, 36, 38, 36, 41, 48, 49, 54, 
   1381, 1418, 1513, 1540, 1598, 1692, 1846, 1883, 1942, 1963, 1803,
   1788, 1861, 1881, 1920, };
 
+#if 0
+
+static int
+_nmod_poly_inv_series_basecase_1(mp_ptr Qinv, mp_srcptr Q, slong Qlen, slong n, nmod_t mod)
+{
+    mp_limb_t q;
+
+    Qlen = FLINT_MIN(Qlen, n);
+
+    if (Q[0] == 1)
+        q = 1;
+    else if (n_gcdinv(&q, Q[0], mod.n) != 1)
+        return GR_DOMAIN;
+
+    Qinv[0] = q;
+
+    if (Qlen == 1)
+    {
+        _nmod_vec_zero(Qinv + 1, n - 1);
+    }
+    else
+    {
+        slong i, j, l;
+        int nlimbs;
+        mp_limb_t s;
+
+        nlimbs = _nmod_vec_dot_bound_limbs(FLINT_MIN(n, Qlen), mod);
+
+        for (i = 1; i < n; i++)
+        {
+            l = FLINT_MIN(i, Qlen - 1);
+            NMOD_VEC_DOT(s, j, l, Q[j + 1], Qinv[i - 1 - j], mod, nlimbs);
+
+            if (q == 1)
+                Qinv[i] = n_negmod(s, mod.n);
+            else
+                Qinv[i] = n_negmod(n_mulmod2_preinv(s, q, mod.n, mod.ninv), mod.n);
+        }
+    }
+
+    return GR_SUCCESS;
+}
+
+#define INV_SERIES_BASECASE _nmod_poly_inv_series_basecase_1(res, f, flen, n, NMOD_CTX(ctx))
+
+#else
+
+#define INV_SERIES_BASECASE _gr_poly_inv_series_basecase(res, f, flen, n, ctx)
+
+#endif
+
 int
 _gr_nmod_poly_inv_series(ulong * res,
     const ulong * f, slong flen, slong n, gr_ctx_t ctx)
@@ -928,7 +1055,7 @@ _gr_nmod_poly_inv_series(ulong * res,
     cutoff = inv_series_cutoff_tab[NMOD_BITS(NMOD_CTX(ctx)) - 1];
 
     if (flen < cutoff)
-        return _gr_poly_inv_series_basecase(res, f, flen, n, ctx);
+        return INV_SERIES_BASECASE;
     else
         return _gr_poly_inv_series_newton(res, f, flen, n, cutoff, ctx);
 }
@@ -1087,6 +1214,55 @@ _gr_nmod_roots_gr_poly(gr_vec_t roots, gr_vec_t mult, const gr_poly_t poly, int 
 
 }
 
+int
+_gr_nmod_mat_mul(gr_mat_t res, const gr_mat_t x, const gr_mat_t y, gr_ctx_t ctx)
+{
+    nmod_mat_t R, X, Y;
+    nmod_mat_struct *XX, *YY;
+
+    R->entries = res->entries;
+    R->rows = (mp_ptr *) res->rows;
+    R->r = res->r;
+    R->c = res->c;
+    R->mod = NMOD_CTX(ctx);
+
+    if (res == x)
+    {
+        XX = R;
+    }
+    else
+    {
+        X->entries = x->entries;
+        X->rows = (mp_ptr *) x->rows;
+        X->r = x->r;
+        X->c = x->c;
+        X->mod = NMOD_CTX(ctx);
+        XX = X;
+    }
+
+    if (res == y)
+    {
+        YY = R;
+    }
+    else if (x == y)
+    {
+        YY = XX;
+    }
+    else
+    {
+        Y->entries = y->entries;
+        Y->rows = (mp_ptr *) y->rows;
+        Y->r = y->r;
+        Y->c = y->c;
+        Y->mod = NMOD_CTX(ctx);
+        YY = Y;
+    }
+
+    nmod_mat_mul(R, XX, YY);
+
+    return GR_SUCCESS;
+}
+
 int __gr_nmod_methods_initialized = 0;
 
 gr_static_method_table __gr_nmod_methods;
@@ -1157,6 +1333,10 @@ gr_method_tab_input __gr_nmod_methods_input[] =
     {GR_METHOD_VEC_MUL_SCALAR_UI,   (gr_funcptr) _gr_nmod_vec_mul_scalar_ui},
     {GR_METHOD_VEC_MUL_SCALAR_FMPZ, (gr_funcptr) _gr_nmod_vec_mul_scalar_fmpz},
     {GR_METHOD_VEC_MUL_SCALAR_2EXP_SI,   (gr_funcptr) _gr_nmod_vec_mul_scalar_2exp_si},
+    {GR_METHOD_VEC_ADDMUL_SCALAR,        (gr_funcptr) _gr_nmod_vec_addmul_scalar},
+    {GR_METHOD_VEC_ADDMUL_SCALAR_SI,     (gr_funcptr) _gr_nmod_vec_addmul_scalar_si},
+    {GR_METHOD_VEC_SUBMUL_SCALAR,        (gr_funcptr) _gr_nmod_vec_submul_scalar},
+    {GR_METHOD_VEC_SUBMUL_SCALAR_SI,     (gr_funcptr) _gr_nmod_vec_submul_scalar_si},
     {GR_METHOD_VEC_SUB,         (gr_funcptr) _gr_nmod_vec_sub},
     {GR_METHOD_VEC_SUM,         (gr_funcptr) _gr_nmod_vec_sum},
     {GR_METHOD_VEC_PRODUCT,     (gr_funcptr) _gr_nmod_vec_product},
@@ -1171,6 +1351,8 @@ gr_method_tab_input __gr_nmod_methods_input[] =
     {GR_METHOD_POLY_SQRT_SERIES,  (gr_funcptr) _gr_nmod_poly_sqrt_series},
     {GR_METHOD_POLY_EXP_SERIES,  (gr_funcptr) _gr_nmod_poly_exp_series},
     {GR_METHOD_POLY_ROOTS,      (gr_funcptr) _gr_nmod_roots_gr_poly},
+    {GR_METHOD_MAT_MUL,         (gr_funcptr) _gr_nmod_mat_mul},
+
     {0,                         (gr_funcptr) NULL},
 };
 

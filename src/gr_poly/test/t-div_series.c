@@ -99,8 +99,7 @@ test_div_series(flint_rand_t state, int which)
     if (status == GR_SUCCESS)
     {
         status |= gr_poly_mullow(D, C, B, n, ctx);
-        status |= gr_poly_set(E, A, ctx);
-        status |= gr_poly_truncate(E, n, ctx);
+        status |= gr_poly_truncate(E, A, n, ctx);
 
         if (status == GR_SUCCESS && gr_poly_equal(D, E, ctx) == T_FALSE)
         {

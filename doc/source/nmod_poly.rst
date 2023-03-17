@@ -1912,70 +1912,6 @@ Power series composition
 Power series composition
 --------------------------------------------------------------------------------
 
-
-.. function:: void _nmod_poly_compose_series_horner(mp_ptr res, mp_srcptr poly1, slong len1, mp_srcptr poly2, slong len2, slong n)
-
-    Sets ``res`` to the composition of ``poly1`` and ``poly2``
-    modulo `x^n`, where the constant term of ``poly2`` is required
-    to be zero.
-
-    Assumes that ``len1, len2, n > 0``, that ``len1, len2 <= n``,
-    and that ``(len1-1) * (len2-1) + 1 <= n``, and that ``res`` has
-    space for ``n`` coefficients. Does not support aliasing between any
-    of the inputs and the output.
-
-    This implementation uses the Horner scheme.
-
-.. function:: void nmod_poly_compose_series_horner(nmod_poly_t res, const nmod_poly_t poly1, const nmod_poly_t poly2, slong n)
-
-    Sets ``res`` to the composition of ``poly1`` and ``poly2``
-    modulo `x^n`, where the constant term of ``poly2`` is required
-    to be zero.
-
-    This implementation uses the Horner scheme.
-
-.. function:: void _nmod_poly_compose_series_brent_kung(mp_ptr res, mp_srcptr poly1, slong len1, mp_srcptr poly2, slong len2, slong n)
-
-    Sets ``res`` to the composition of ``poly1`` and ``poly2``
-    modulo `x^n`, where the constant term of ``poly2`` is required
-    to be zero.
-
-    Assumes that ``len1, len2, n > 0``, that ``len1, len2 <= n``,
-    and that\\ ``(len1-1) * (len2-1) + 1 <= n``, and that ``res`` has
-    space for ``n`` coefficients. Does not support aliasing between any
-    of the inputs and the output.
-
-    This implementation uses Brent-Kung algorithm 2.1 [BrentKung1978]_.
-
-.. function:: void nmod_poly_compose_series_brent_kung(nmod_poly_t res, const nmod_poly_t poly1, const nmod_poly_t poly2, slong n)
-
-    Sets ``res`` to the composition of ``poly1`` and ``poly2``
-    modulo `x^n`, where the constant term of ``poly2`` is required
-    to be zero.
-
-    This implementation uses Brent-Kung algorithm 2.1 [BrentKung1978]_.
-
-.. function:: void _nmod_poly_compose_series_divconquer(mp_ptr res, mp_srcptr poly1, slong len1, mp_srcptr poly2, slong len2, slong N, nmod_t mod)
-
-    Composes ``poly1`` of length `\ell_1` with ``poly2`` of
-    length `\ell_2` modulo `x^N` and sets ``res`` to the result,
-    i.e.\ evaluates ``poly1`` at ``poly2``.
-
-    Writes `\min\{(\ell_1 - 1)(\ell_2 - 2) + 1, N\}` coefficients
-    to the vector ``res``.
-
-    The algorithm used is the divide and conquer algorithm.
-    It is assumed that `0 < \ell_1` and `0 < \ell_2 \leq N`.
-
-    Does not support aliasing between the inputs and the output.
-
-.. function:: void nmod_poly_compose_series_divconquer(nmod_poly_t res, const nmod_poly_t poly1, const nmod_poly_t poly2, slong N)
-
-    Composes ``poly1`` with ``poly2`` modulo `x^N` and sets ``res``
-    to the result, i.e.\ evaluates ``poly1`` at ``poly2``.
-
-    The algorithm used is the divide and conquer algorithm.
-
 .. function:: void _nmod_poly_compose_series(mp_ptr res, mp_srcptr poly1, slong len1, mp_srcptr poly2, slong len2, slong n)
 
     Sets ``res`` to the composition of ``poly1`` and ``poly2``
@@ -1987,17 +1923,14 @@ Power series composition
     space for ``n`` coefficients. Does not support aliasing between any
     of the inputs and the output.
 
-    This implementation automatically switches between the Horner scheme
-    and Brent-Kung algorithm 2.1 depending on the size of the inputs.
+    Wraps :func:`_gr_poly_compose_series` which chooses automatically
+    between various algorithms.
 
 .. function:: void nmod_poly_compose_series(nmod_poly_t res, const nmod_poly_t poly1, const nmod_poly_t poly2, slong n)
 
     Sets ``res`` to the composition of ``poly1`` and ``poly2``
     modulo `x^n`, where the constant term of ``poly2`` is required
     to be zero.
-
-    This implementation automatically switches between the Horner scheme
-    and Brent-Kung algorithm 2.1 depending on the size of the inputs.
 
 
 Power series reversion
@@ -2113,22 +2046,20 @@ by means of the generalised binomial theorem
 It is assumed that `h` has constant term `1` and that the coefficients
 `2^{-k}` exist in the coefficient ring (i.e. `2` must be invertible).
 
-.. function:: void _nmod_poly_invsqrt_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod)
+.. function:: void _nmod_poly_invsqrt_series(mp_ptr g, mp_srcptr h, slong hlen, slong n, nmod_t mod)
 
     Set the first `n` terms of `g` to the series expansion of `1/\sqrt{h}`.
-    It is assumed that `n > 0`, that `h` has constant term 1 and that `h`
-    is zero-padded as necessary to length `n`. Aliasing is not permitted.
+    It is assumed that `n > 0`, that `h` has constant term 1. Aliasing is not permitted.
 
 .. function:: void nmod_poly_invsqrt_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
     Set `g` to the series expansion of `1/\sqrt{h}` to order `O(x^n)`.
     It is assumed that `h` has constant term 1.
 
-.. function:: void _nmod_poly_sqrt_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod)
+.. function:: void _nmod_poly_sqrt_series(mp_ptr g, mp_srcptr h, slong hlen, slong n, nmod_t mod)
 
     Set the first `n` terms of `g` to the series expansion of `\sqrt{h}`.
-    It is assumed that `n > 0`, that `h` has constant term 1 and that `h`
-    is zero-padded as necessary to length `n`. Aliasing is not permitted.
+    It is assumed that `n > 0`, that `h` has constant term 1. Aliasing is not permitted.
 
 .. function:: void nmod_poly_sqrt_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
@@ -2244,16 +2175,6 @@ Except where otherwise noted, functions are implemented with optimal
 (up to constants) complexity `O(M(n))`, where `M(n)` is the cost
 of polynomial multiplication.
 
-.. function:: void _nmod_poly_log_series_monomial_ui(mp_ptr g, mp_limb_t c, ulong r, slong n, nmod_t mod)
-
-    Set `g = \log(1+cx^r) + O(x^n)`. Assumes `n > 0`, `r > 0`, and that
-    the coefficient is reduced by the modulus. Works efficiently in linear
-    time.
-
-.. function:: void nmod_poly_log_series_monomial_ui(nmod_poly_t g, mp_limb_t c, ulong r, slong n)
-
-    Set `g = \log(1+cx^r) + O(x^n)`. Works efficiently in linear time.
-
 .. function:: void _nmod_poly_log_series(mp_ptr g, mp_srcptr h, slong hlen, slong n, nmod_t mod)
 
     Set `g = \log(h) + O(x^n)`. Assumes `n > 0` and ``hlen > 0``.
@@ -2312,9 +2233,8 @@ of polynomial multiplication.
 
 .. function:: void _nmod_poly_atan_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod)
 
-    Set `g = \operatorname{atan}(h) + O(x^n)`. Assumes `n > 0` and that `h`
-    is zero-padded as necessary to length `n`. Aliasing of `g` and `h` is
-    allowed.
+    Set `g = \operatorname{atan}(h) + O(x^n)`. Assumes `n > 0`.
+    Aliasing of `g` and `h` is allowed.
 
 .. function:: void nmod_poly_atan_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
@@ -2322,109 +2242,93 @@ of polynomial multiplication.
 
 .. function:: void _nmod_poly_atanh_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod)
 
-    Set `g = \operatorname{atanh}(h) + O(x^n)`. Assumes `n > 0` and that `h`
-    is zero-padded as necessary to length `n`. Aliasing of `g` and `h` is
-    allowed.
+    Set `g = \operatorname{atanh}(h) + O(x^n)`. Assumes `n > 0`.
+    Aliasing of `g` and `h` is allowed.
 
 .. function:: void nmod_poly_atanh_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
     Set `g = \operatorname{atanh}(h) + O(x^n)`.
 
-.. function:: void _nmod_poly_asin_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod)
+.. function:: void _nmod_poly_asin_series(mp_ptr g, mp_srcptr h, slong hlen, slong n, nmod_t mod)
 
-    Set `g = \operatorname{asin}(h) + O(x^n)`. Assumes `n > 0` and that `h`
-    is zero-padded as necessary to length `n`. Aliasing of `g` and `h` is
-    allowed. The modulus must be less than `n` and not equal to `2`.
+    Set `g = \operatorname{asin}(h) + O(x^n)`. Assumes `n > 0`.
+    Aliasing of `g` and `h` is allowed.
 
 .. function:: void nmod_poly_asin_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
-    Set `g = \operatorname{asin}(h) + O(x^n)`. The modulus must be less than
-    `n` and not equal to `2`.
+    Set `g = \operatorname{asin}(h) + O(x^n)`.
 
-.. function:: void _nmod_poly_asinh_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod)
+.. function:: void _nmod_poly_asinh_series(mp_ptr g, mp_srcptr h, slong hlen, slong n, nmod_t mod)
 
-    Set `g = \operatorname{asinh}(h) + O(x^n)`. Assumes `n > 0` and that `h`
-    is zero-padded as necessary to length `n`. Aliasing of `g` and `h` is
-    allowed. The modulus must be less than `n` and not equal to `2`.
+    Set `g = \operatorname{asinh}(h) + O(x^n)`. Assumes `n > 0`.
+    Aliasing of `g` and `h` is allowed.
 
 .. function:: void nmod_poly_asinh_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
-    Set `g = \operatorname{asinh}(h) + O(x^n)`. The modulus must be less than
-    `n` and not equal to `2`.
+    Set `g = \operatorname{asinh}(h) + O(x^n)`.
 
 .. function:: void _nmod_poly_sin_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod)
 
     Set `g = \operatorname{sin}(h) + O(x^n)`. Assumes `n > 0` and that `h`
     is zero-padded as necessary to length `n`. Aliasing of `g` and `h` is
-    allowed. The modulus must be less than `n` and not equal to `2`.
-    The value is computed using the identity
+    allowed. The value is computed using the identity
     `\sin(x) = 2 \tan(x/2)) / (1 + \tan^2(x/2)).`
 
 .. function:: void nmod_poly_sin_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
-    Set `g = \operatorname{sin}(h) + O(x^n)`. The modulus must be less than
-    `n` and not equal to `2`.
+    Set `g = \operatorname{sin}(h) + O(x^n)`.
 
 .. function:: void _nmod_poly_cos_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod)
 
     Set `g = \operatorname{cos}(h) + O(x^n)`. Assumes `n > 0` and that `h`
     is zero-padded as necessary to length `n`. Aliasing of `g` and `h` is
-    allowed. The modulus must be less than `n` and not equal to `2`.
-    The value is computed using the identity
+    allowed. The value is computed using the identity
     `\cos(x) = (1-\tan^2(x/2)) / (1 + \tan^2(x/2)).`
 
 .. function:: void nmod_poly_cos_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
-    Set `g = \operatorname{cos}(h) + O(x^n)`. The modulus must be less than
-    `n` and not equal to `2`.
+    Set `g = \operatorname{cos}(h) + O(x^n)`.
 
 .. function:: void _nmod_poly_tan_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod)
 
     Set `g = \operatorname{tan}(h) + O(x^n)`. Assumes `n > 0` and that `h`
     is zero-padded as necessary to length `n`. Aliasing of `g` and `h` is
-    not allowed. The modulus must be less than `n`. Uses Newton iteration
-    to invert the atan function.
+    not allowed. Uses Newton iteration to invert the atan function.
 
 .. function:: void nmod_poly_tan_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
-    Set `g = \operatorname{tan}(h) + O(x^n)`. The modulus must be less than
-    `n`.
+    Set `g = \operatorname{tan}(h) + O(x^n)`.
 
 .. function:: void _nmod_poly_sinh_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod)
 
     Set `g = \operatorname{sinh}(h) + O(x^n)`. Assumes `n > 0` and that `h`
     is zero-padded as necessary to length `n`. Aliasing of `g` and `h` is
-    not allowed. The modulus must be less than `n` and not equal to `2`.
-    Uses the identity `\sinh(x) = (e^x - e^{-x})/2`.
+    not allowed. Uses the identity `\sinh(x) = (e^x - e^{-x})/2`.
 
 .. function:: void nmod_poly_sinh_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
-    Set `g = \operatorname{sinh}(h) + O(x^n)`. The modulus must be less than
-    `n` and not equal to `2`.
+    Set `g = \operatorname{sinh}(h) + O(x^n)`.
 
 .. function:: void _nmod_poly_cosh_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod)
 
     Set `g = \operatorname{cos}(h) + O(x^n)`. Assumes `n > 0` and that `h`
     is zero-padded as necessary to length `n`. Aliasing of `g` and `h` is
-    not allowed. The modulus must be less than `n` and not equal to `2`.
+    not allowed.
     Uses the identity `\cosh(x) = (e^x + e^{-x})/2`.
 
 .. function:: void nmod_poly_cosh_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
-    Set `g = \operatorname{cosh}(h) + O(x^n)`. The modulus must be less than
-    `n` and not equal to `2`.
+    Set `g = \operatorname{cosh}(h) + O(x^n)`.
 
 .. function:: void _nmod_poly_tanh_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod)
 
     Set `g = \operatorname{tanh}(h) + O(x^n)`. Assumes `n > 0` and that `h`
-    is zero-padded as necessary to length `n`. The modulus must be less than
-    `n` and not equal to `2`. Uses the identity
+    is zero-padded as necessary to length `n`. Uses the identity
     `\tanh(x) = (e^{2x}-1)/(e^{2x}+1)`.
 
 .. function:: void nmod_poly_tanh_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
-    Set `g = \operatorname{tanh}(h) + O(x^n)`. The modulus must be less than
-    `n` and not equal to `2`.
+    Set `g = \operatorname{tanh}(h) + O(x^n)`.
 
 
 Products

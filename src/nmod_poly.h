@@ -991,17 +991,6 @@ FLINT_DLL void nmod_poly_compose_mod(nmod_poly_t res,
 
 /* Power series composition and reversion ************************************/
 
-FLINT_DLL void _nmod_poly_compose_series_horner(mp_ptr res, mp_srcptr poly1, slong len1, 
-                            mp_srcptr poly2, slong len2, slong n, nmod_t mod);
-FLINT_DLL void nmod_poly_compose_series_horner(nmod_poly_t res, 
-                    const nmod_poly_t poly1, const nmod_poly_t poly2, slong n);
-
-FLINT_DLL void _nmod_poly_compose_series_brent_kung(mp_ptr res, mp_srcptr poly1, slong len1, 
-                            mp_srcptr poly2, slong len2, slong n, nmod_t mod);
-
-FLINT_DLL void nmod_poly_compose_series_brent_kung(nmod_poly_t res, 
-                    const nmod_poly_t poly1, const nmod_poly_t poly2, slong n);
-
 FLINT_DLL void _nmod_poly_compose_series(mp_ptr res, mp_srcptr poly1, slong len1, 
                             mp_srcptr poly2, slong len2, slong n, nmod_t mod);
 
@@ -1028,13 +1017,6 @@ FLINT_DLL void _nmod_poly_revert_series(mp_ptr Qinv, mp_srcptr Q, slong n, nmod_
 
 FLINT_DLL void nmod_poly_revert_series(nmod_poly_t Qinv,
                                  const nmod_poly_t Q, slong n);
-
-FLINT_DLL void _nmod_poly_compose_series_divconquer(mp_ptr res, mp_srcptr poly1, slong len1, 
-                                                 mp_srcptr poly2, slong len2, 
-                                                 slong N, nmod_t mod);
-
-FLINT_DLL void nmod_poly_compose_series_divconquer(nmod_poly_t res, 
-    const nmod_poly_t poly1, const nmod_poly_t poly2, slong N);
 
 /* norms *********************************************************************/
 
@@ -1139,11 +1121,11 @@ FLINT_DLL mp_limb_t nmod_poly_discriminant(const nmod_poly_t f);
 
 /* Square roots **************************************************************/
 
-FLINT_DLL void _nmod_poly_invsqrt_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod);
+FLINT_DLL void _nmod_poly_invsqrt_series(mp_ptr g, mp_srcptr h, slong hlen, slong n, nmod_t mod);
 
 FLINT_DLL void nmod_poly_invsqrt_series(nmod_poly_t g, const nmod_poly_t h, slong n);
 
-FLINT_DLL void _nmod_poly_sqrt_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod);
+FLINT_DLL void _nmod_poly_sqrt_series(mp_ptr g, mp_srcptr h, slong hlen, slong n, nmod_t mod);
 
 FLINT_DLL void nmod_poly_sqrt_series(nmod_poly_t g, const nmod_poly_t h, slong n);
 
@@ -1179,13 +1161,13 @@ FLINT_DLL void nmod_poly_power_sums_to_poly(nmod_poly_t res, const nmod_poly_t Q
 
 /* Transcendental functions **************************************************/
 
-FLINT_DLL void _nmod_poly_atan_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod);
+FLINT_DLL void _nmod_poly_atan_series(mp_ptr g, mp_srcptr h, slong hlen, slong n, nmod_t mod);
 FLINT_DLL void nmod_poly_atan_series(nmod_poly_t g, const nmod_poly_t h, slong n);
 
-FLINT_DLL void _nmod_poly_tan_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod);
+FLINT_DLL void _nmod_poly_tan_series(mp_ptr g, mp_srcptr h, slong hlen, slong n, nmod_t mod);
 FLINT_DLL void nmod_poly_tan_series(nmod_poly_t g, const nmod_poly_t h, slong n);
 
-FLINT_DLL void _nmod_poly_asin_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod);
+FLINT_DLL void _nmod_poly_asin_series(mp_ptr g, mp_srcptr h, slong hlen, slong n, nmod_t mod);
 FLINT_DLL void nmod_poly_asin_series(nmod_poly_t g, const nmod_poly_t h, slong n);
 
 FLINT_DLL void _nmod_poly_sin_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod);
@@ -1194,10 +1176,10 @@ FLINT_DLL void nmod_poly_sin_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 FLINT_DLL void _nmod_poly_cos_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod);
 FLINT_DLL void nmod_poly_cos_series(nmod_poly_t g, const nmod_poly_t h, slong n);
 
-FLINT_DLL void _nmod_poly_asinh_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod);
+FLINT_DLL void _nmod_poly_asinh_series(mp_ptr g, mp_srcptr h, slong hlen, slong n, nmod_t mod);
 FLINT_DLL void nmod_poly_asinh_series(nmod_poly_t g, const nmod_poly_t h, slong n);
 
-FLINT_DLL void _nmod_poly_atanh_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod);
+FLINT_DLL void _nmod_poly_atanh_series(mp_ptr g, mp_srcptr h, slong hlen, slong n, nmod_t mod);
 FLINT_DLL void nmod_poly_atanh_series(nmod_poly_t g, const nmod_poly_t h, slong n);
 
 FLINT_DLL void _nmod_poly_sinh_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod);
@@ -1208,11 +1190,6 @@ FLINT_DLL void nmod_poly_cosh_series(nmod_poly_t g, const nmod_poly_t h, slong n
 
 FLINT_DLL void _nmod_poly_tanh_series(mp_ptr g, mp_srcptr h, slong n, nmod_t mod);
 FLINT_DLL void nmod_poly_tanh_series(nmod_poly_t g, const nmod_poly_t h, slong n);
-
-FLINT_DLL void _nmod_poly_log_series_monomial_ui(mp_ptr res, mp_limb_t coeff,
-                ulong power, slong n, nmod_t mod);
-FLINT_DLL void nmod_poly_log_series_monomial_ui(nmod_poly_t res, mp_limb_t coeff,
-                ulong power, slong n);
 
 FLINT_DLL void _nmod_poly_log_series(mp_ptr res, mp_srcptr f, slong flen, slong n, nmod_t mod);
 FLINT_DLL void nmod_poly_log_series(nmod_poly_t res, const nmod_poly_t f, slong n);

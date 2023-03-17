@@ -18,7 +18,7 @@
 #define ACB_POLY_INLINE static __inline__
 #endif
 
-#include "fmpq_poly.h"
+#include "fmpq_types.h"
 #include "acb.h"
 
 #ifdef __cplusplus
@@ -410,20 +410,6 @@ void _acb_poly_compose_divconquer(acb_ptr res,
 void acb_poly_compose_divconquer(acb_poly_t res,
               const acb_poly_t poly1, const acb_poly_t poly2, slong prec);
 
-void _acb_poly_compose_series_horner(acb_ptr res, acb_srcptr poly1, slong len1,
-                            acb_srcptr poly2, slong len2, slong n, slong prec);
-
-void acb_poly_compose_series_horner(acb_poly_t res,
-                    const acb_poly_t poly1,
-                    const acb_poly_t poly2, slong n, slong prec);
-
-void _acb_poly_compose_series_brent_kung(acb_ptr res, acb_srcptr poly1, slong len1,
-                            acb_srcptr poly2, slong len2, slong n, slong prec);
-
-void acb_poly_compose_series_brent_kung(acb_poly_t res,
-                    const acb_poly_t poly1,
-                    const acb_poly_t poly2, slong n, slong prec);
-
 void _acb_poly_compose_series(acb_ptr res, acb_srcptr poly1, slong len1,
                             acb_srcptr poly2, slong len2, slong n, slong prec);
 
@@ -590,24 +576,8 @@ void acb_poly_sinh_series(acb_poly_t s, const acb_poly_t h, slong n, slong prec)
 void _acb_poly_cosh_series(acb_ptr c, acb_srcptr h, slong hlen, slong n, slong prec);
 void acb_poly_cosh_series(acb_poly_t c, const acb_poly_t h, slong n, slong prec);
 
-
-void _acb_poly_sin_cos_series_basecase(acb_ptr s,
-                                    acb_ptr c, acb_srcptr h, slong hlen, slong n, slong prec, int times_pi);
-
-void acb_poly_sin_cos_series_basecase(acb_poly_t s, acb_poly_t c,
-        const acb_poly_t h, slong n, slong prec, int times_pi);
-
-void _acb_poly_sin_cos_series_tangent(acb_ptr s, acb_ptr c,
-                        const acb_srcptr h, slong hlen, slong len, slong prec, int times_pi);
-
-void acb_poly_sin_cos_series_tangent(acb_poly_t s, acb_poly_t c,
-                                    const acb_poly_t h, slong n, slong prec, int times_pi);
-
-void _acb_poly_sin_cos_series(acb_ptr s, acb_ptr c,
-                        const acb_srcptr h, slong hlen, slong len, slong prec);
-
-void acb_poly_sin_cos_series(acb_poly_t s, acb_poly_t c,
-                                    const acb_poly_t h, slong n, slong prec);
+void _acb_poly_sin_cos_series(acb_ptr s, acb_ptr c, const acb_srcptr h, slong hlen, slong len, slong prec);
+void acb_poly_sin_cos_series(acb_poly_t s, acb_poly_t c, const acb_poly_t h, slong n, slong prec);
 
 void _acb_poly_sin_series(acb_ptr g, acb_srcptr h, slong hlen, slong n, slong prec);
 
@@ -617,11 +587,8 @@ void _acb_poly_cos_series(acb_ptr g, acb_srcptr h, slong hlen, slong n, slong pr
 
 void acb_poly_cos_series(acb_poly_t g, const acb_poly_t h, slong n, slong prec);
 
-void _acb_poly_sin_cos_pi_series(acb_ptr s, acb_ptr c,
-                        const acb_srcptr h, slong hlen, slong len, slong prec);
-
-void acb_poly_sin_cos_pi_series(acb_poly_t s, acb_poly_t c,
-                                    const acb_poly_t h, slong n, slong prec);
+void _acb_poly_sin_cos_pi_series(acb_ptr s, acb_ptr c, const acb_srcptr h, slong hlen, slong len, slong prec);
+void acb_poly_sin_cos_pi_series(acb_poly_t s, acb_poly_t c, const acb_poly_t h, slong n, slong prec);
 
 void _acb_poly_sin_pi_series(acb_ptr g, acb_srcptr h, slong hlen, slong n, slong prec);
 
