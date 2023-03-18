@@ -160,7 +160,7 @@ _gr_arb_set_d(arb_t res, double x, const gr_ctx_t ctx)
     return GR_SUCCESS;
 }
 
-int 
+int
 _gr_ca_get_arb_with_prec(arb_t res, gr_srcptr x, gr_ctx_t x_ctx, slong prec);
 
 int
@@ -1610,7 +1610,7 @@ arb_agm1(arb_t res, const arb_t x, slong prec)
 {
     arb_t t;
     arb_init(t);
-    arb_one(t); 
+    arb_one(t);
     arb_agm(res, t, x, prec);
     arb_clear(t);
 }
@@ -1639,6 +1639,8 @@ _gr_arb_poly_mullow(arb_ptr res,
     _arb_poly_mullow(res, poly1, len1, poly2, len2, n, ARB_CTX_PREC(ctx));
     return GR_SUCCESS;
 }
+
+int _gr_arb_poly_taylor_shift(arb_ptr res, arb_srcptr poly, slong len, const arb_t c, gr_ctx_t ctx);
 
 /* hidden feature: also works with arb ctx */
 int
@@ -1956,6 +1958,7 @@ gr_method_tab_input _arb_methods_input[] =
     {GR_METHOD_VEC_DOT,         (gr_funcptr) _gr_arb_vec_dot},
     {GR_METHOD_VEC_DOT_REV,     (gr_funcptr) _gr_arb_vec_dot_rev},
     {GR_METHOD_POLY_MULLOW,     (gr_funcptr) _gr_arb_poly_mullow},
+    {GR_METHOD_POLY_TAYLOR_SHIFT,   (gr_funcptr) _gr_arb_poly_taylor_shift},
     {GR_METHOD_POLY_ROOTS,      (gr_funcptr) _gr_arb_poly_roots},
     {GR_METHOD_POLY_ROOTS_OTHER,(gr_funcptr) _gr_arb_poly_roots_other},
     {GR_METHOD_MAT_MUL,         (gr_funcptr) _gr_arb_mat_mul},

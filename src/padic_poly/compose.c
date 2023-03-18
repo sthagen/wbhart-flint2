@@ -39,9 +39,9 @@ static void __padic_reduce(fmpz_t u, slong *v, slong N, const padic_ctx_t ctx)
 
 /* Assumes that len1 > 0. */
 
-void _padic_poly_compose(fmpz *rop, slong *rval, slong N, 
-                         const fmpz *op1, slong val1, slong len1, 
-                         const fmpz *op2, slong val2, slong len2, 
+void _padic_poly_compose(fmpz *rop, slong *rval, slong N,
+                         const fmpz *op1, slong val1, slong len1,
+                         const fmpz *op2, slong val2, slong len2,
                          const padic_ctx_t ctx)
 {
     const slong lenr = (len1 - 1) * (len2 - 1) + 1;
@@ -62,11 +62,12 @@ void _padic_poly_compose(fmpz *rop, slong *rval, slong N,
         }
         else
         {
-            fmpz *vec2;
+            fmpz *vec1, *vec2;
             fmpz_t f;
             fmpz_t pow;
             int alloc;
 
+            vec1 = _fmpz_vec_init(len1);
             vec2 = _fmpz_vec_init(len2);
             fmpz_init(f);
 
@@ -75,12 +76,15 @@ void _padic_poly_compose(fmpz *rop, slong *rval, slong N,
 
             alloc = _padic_ctx_pow_ui(pow, N - val1, ctx);
 
+            _fmpz_vec_scalar_mod_fmpz(vec1, op1, len1, pow);
+            _fmpz_vec_scalar_mod_fmpz(vec2, vec2, len2, pow);
             _fmpz_mod_poly_compose(rop, op1, len1, vec2, len2, pow);
             *rval= val1;
 
             _padic_poly_canonicalise(rop, rval, lenr, ctx->p);
 
             _fmpz_vec_clear(vec2, len2);
+            _fmpz_vec_clear(vec1, len1);
             fmpz_clear(f);
             if (alloc)
                 fmpz_clear(pow);
@@ -99,11 +103,12 @@ void _padic_poly_compose(fmpz *rop, slong *rval, slong N,
         {
             fmpz_t pow;
             int alloc;
-            fmpz *vec1;
+            fmpz *vec1, *vec2;
             fmpz_t s, t;
             slong i;
 
             vec1 = _fmpz_vec_init(len1);
+            vec2 = _fmpz_vec_init(len2);
             fmpz_init(s);
             fmpz_init(t);
 
@@ -118,12 +123,15 @@ void _padic_poly_compose(fmpz *rop, slong *rval, slong N,
                 fmpz_mul(vec1 + i, op1 + i, t);
             }
 
-            _fmpz_mod_poly_compose(rop, vec1, len1, op2, len2, pow);
+            _fmpz_vec_scalar_mod_fmpz(vec1, vec1, len1, pow);
+            _fmpz_vec_scalar_mod_fmpz(vec2, op2, len2, pow);
+            _fmpz_mod_poly_compose(rop, vec1, len1, vec2, len2, pow);
             *rval = val1 + n*val2;
 
             _padic_poly_canonicalise(rop, rval, lenr, ctx->p);
 
             _fmpz_vec_clear(vec1, len1);
+            _fmpz_vec_clear(vec2, len2);
             fmpz_clear(s);
             fmpz_clear(t);
             if (alloc)
@@ -132,8 +140,8 @@ void _padic_poly_compose(fmpz *rop, slong *rval, slong N,
     }
 }
 
-void padic_poly_compose(padic_poly_t rop, 
-                        const padic_poly_t op1, const padic_poly_t op2, 
+void padic_poly_compose(padic_poly_t rop,
+                        const padic_poly_t op1, const padic_poly_t op2,
                         const padic_ctx_t ctx)
 {
     const slong len1 = op1->length, len2 = op2->length;
@@ -158,8 +166,8 @@ void padic_poly_compose(padic_poly_t rop,
         if (rop != op1 && rop != op2)
         {
             padic_poly_fit_length(rop, lenr);
-            _padic_poly_compose(rop->coeffs, &(rop->val), rop->N, 
-                                op1->coeffs, op1->val, op1->length, 
+            _padic_poly_compose(rop->coeffs, &(rop->val), rop->N,
+                                op1->coeffs, op1->val, op1->length,
                                 op2->coeffs, op2->val, op2->length, ctx);
             _padic_poly_set_length(rop, lenr);
         }
@@ -167,8 +175,8 @@ void padic_poly_compose(padic_poly_t rop,
         {
             fmpz *t = _fmpz_vec_init(lenr);
 
-            _padic_poly_compose(t, &(rop->val), rop->N, 
-                                op1->coeffs, op1->val, op1->length, 
+            _padic_poly_compose(t, &(rop->val), rop->N,
+                                op1->coeffs, op1->val, op1->length,
                                 op2->coeffs, op2->val, op2->length, ctx);
             _fmpz_vec_clear(rop->coeffs, rop->alloc);
             rop->coeffs = t;

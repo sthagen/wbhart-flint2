@@ -34,8 +34,6 @@
                          __ANTIC_VERSION_MINOR * 100 + \
                          __ANTIC_VERSION_PATCHLEVEL)
 
-#define ANTIC_DLL FLINT_DLL
-
 typedef struct {
    fmpq_poly_t pol;  /* defining polynomial */
    union {
@@ -43,7 +41,7 @@ typedef struct {
       fmpz_preinvn_t qq; /* precomputed inverse for leading coeff of num(pol), QQ case */
    } pinv;
    union { /* powers of the generator mod pol */
-      fmpq_poly_powers_precomp_t qq; 
+      fmpq_poly_powers_precomp_t qq;
       fmpz_poly_powers_precomp_t zz;
    } powers;
    fmpq_poly_t traces; /* S_k = sum_i \theta_i^k for k = 0, 1, 2, ..., (n-1) */
@@ -66,13 +64,13 @@ typedef nf_struct nf_t[1];
 
 ******************************************************************************/
 
-ANTIC_DLL void nf_init(nf_t nf, const fmpq_poly_t pol);
+void nf_init(nf_t nf, const fmpq_poly_t pol);
 
-ANTIC_DLL void nf_init_randtest(nf_t nf, flint_rand_t state, slong len,  mp_bitcnt_t bits_in);
+void nf_init_randtest(nf_t nf, flint_rand_t state, slong len,  mp_bitcnt_t bits_in);
 
-ANTIC_DLL void nf_clear(nf_t nf);
+void nf_clear(nf_t nf);
 
-ANTIC_DLL void nf_print(const nf_t nf);
+void nf_print(const nf_t nf);
 
 #ifdef __cplusplus
 }
