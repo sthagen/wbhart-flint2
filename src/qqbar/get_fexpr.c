@@ -9,6 +9,7 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include <stdio.h>
 #include "fmpq_poly.h"
 #include "arb_fmpz_poly.h"
 #include "acb_poly.h"
@@ -260,7 +261,7 @@ qqbar_get_decimal_root_nearest(char ** re_s, char ** im_s, const qqbar_t x, slon
         prec = digits * 3.333 + 10;
 
         if (digits != 6 && 0)
-            printf("digits %ld\n", digits);
+            printf("digits " WORD_FMT "d\n", digits);
 
         if (acb_rel_accuracy_bits(z) < prec)
         {

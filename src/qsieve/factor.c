@@ -11,28 +11,25 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-/* try to get fdopen, mkstemp declared */
-#if defined __STRICT_ANSI__
-#undef __STRICT_ANSI__
-#endif
-
-#include <stdlib.h>
-#include "thread_support.h"
-#include "fmpz.h"
-#include "fmpz_vec.h"
-#include "qsieve.h"
-
 #define _STDC_FORMAT_MACROS
-
-#if (defined(__WIN32) && !defined(__CYGWIN__)) || defined(__MINGW32__) || defined(__MINGW64__) || defined(_MSC_VER)
-# include <windows.h>
-#endif
 
 #ifdef __GNUC__
 # define strcpy __builtin_strcpy
 #else
 # include <math.h>
 #endif
+
+/* try to get fdopen, mkstemp declared */
+#if defined __STRICT_ANSI__
+#undef __STRICT_ANSI__
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "thread_support.h"
+#include "fmpz.h"
+#include "fmpz_vec.h"
+#include "qsieve.h"
 
 int compare_facs(const void * a, const void * b)
 {
@@ -60,8 +57,8 @@ void qsieve_factor(fmpz_factor_t factors, const fmpz_t n)
     fmpz_t temp, temp2, X, Y;
     slong num_facs;
     fmpz * facs;
-#if (defined(__WIN32) && !defined(__CYGWIN__)) || defined(__MINGW32__) || defined(__MINGW64__) || defined(_MSC_VER)
-    char temp_path[MAX_PATH];
+#if (defined(__WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__) && !defined(__MINGW64__)) || defined(_MSC_VER)
+    const char * tmpnam_ret;
 #else
     int fd;
 #endif
@@ -211,23 +208,22 @@ void qsieve_factor(fmpz_factor_t factors, const fmpz_t n)
     pthread_mutex_init(&qs_inf->mutex, NULL);
 #endif
 
-#if (defined(__WIN32) && !defined(__CYGWIN__)) || defined(__MINGW32__) || defined(__MINGW64__) || defined(_MSC_VER)
-    if (GetTempPathA(MAX_PATH, temp_path) == 0)
-        flint_throw(FLINT_ERROR, "GetTempPathA failed\n");
+#if (defined(__WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__) && !defined(__MINGW64__)) || defined(_MSC_VER)
+    tmpnam_ret = tmpnam(NULL);
+    if (tmpnam_ret == NULL)
+        flint_throw(FLINT_ERROR, "tmpnam failed\n");
 
-    if (GetTempFileNameA(temp_path, "siqs", /*uUnique*/ TRUE, qs_inf->fname) == 0)
-        flint_throw(FLINT_ERROR, "GetTempFileNameA failed\n");
-
+    strcpy(qs_inf->fname, tmpnam_ret);
     qs_inf->siqs = fopen(qs_inf->fname, "w");
     if (qs_inf->siqs == NULL)
         flint_throw(FLINT_ERROR, "fopen failed\n");
 #else
-    strcpy(qs_inf->fname, "/tmp/siqsXXXXXX"); /* must be shorter than fname_alloc_size in init.c */
+    strcpy(qs_inf->fname, FLINT_TMPPATH "/siqsXXXXXX");
     fd = mkstemp(qs_inf->fname);
     if (fd == -1)
         flint_throw(FLINT_ERROR, "mkstemp failed\n");
 
-    qs_inf->siqs = fdopen(fd, "w");
+    qs_inf->siqs = (FLINT_FILE *) fdopen(fd, "w");
     if (qs_inf->siqs == NULL)
         flint_throw(FLINT_ERROR, "fdopen failed\n");
 #endif
@@ -272,7 +268,7 @@ void qsieve_factor(fmpz_factor_t factors, const fmpz_t n)
             {
                 int ok;
 
-                if (fclose(qs_inf->siqs))
+                if (fclose((FILE *) qs_inf->siqs))
                     flint_throw(FLINT_ERROR, "fclose fail\n");
                 qs_inf->siqs = NULL;
 
@@ -388,7 +384,7 @@ void qsieve_factor(fmpz_factor_t factors, const fmpz_t n)
 
                     _fmpz_vec_clear(facs, 100);
 
-                    qs_inf->siqs = fopen(qs_inf->fname, "w");
+                    qs_inf->siqs = (FLINT_FILE *) fopen(qs_inf->fname, "w");
                     if (qs_inf->siqs == NULL)
                         flint_throw(FLINT_ERROR, "fopen fail\n");
                     qs_inf->num_primes = num_primes; /* linear algebra adjusts this */

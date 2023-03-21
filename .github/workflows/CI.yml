@@ -49,7 +49,7 @@ jobs:
 
       - if: failure()
         name: "If failure, stop all other jobs"
-        uses: andymckay/cancel-action@0.2
+        uses: andymckay/cancel-action@0.3
 
 
 
@@ -95,10 +95,9 @@ jobs:
           export FLINT_TEST_MULTIPLIER=2
           $MAKE check
 
-          # FIXME: Enable when this won't fail
-      # - if: failure()
-      #   name: "If failure, stop all other jobs"
-      #   uses: andymckay/cancel-action@0.2
+      - if: failure()
+        name: "If failure, stop all other jobs"
+        uses: andymckay/cancel-action@0.3
 
 
 
@@ -149,7 +148,7 @@ jobs:
 
       - if: failure()
         name: "If failure, stop all other jobs"
-        uses: andymckay/cancel-action@0.2
+        uses: andymckay/cancel-action@0.3
 
 
 
@@ -159,7 +158,7 @@ jobs:
   freebsd-gcc:
     name: FreeBSD Clang (x0.5)
 
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -171,6 +170,7 @@ jobs:
           version: '13.1'
           shell: bash
           run: |
+            yes | sudo pkg install pkgconf
             yes | sudo pkg install gmake
             yes | sudo pkg install gmp
             yes | sudo pkg install mpfr
@@ -183,13 +183,17 @@ jobs:
             libtool --version
             export FLINT_TEST_MULTIPLIER=0.5
             ./bootstrap.sh
-            ./configure CC=clang CFLAGS="-Wall" --disable-static --enable-shared
+            ./configure CC=clang CFLAGS="-Wall" --disable-static --enable-shared  \
+                --with-gmp-include=$(pkgconf --variable=includedir gmp)           \
+                --with-gmp-lib=$(pkgconf --variable=libdir gmp)                   \
+                --with-mpfr-include=$(pkgconf --variable=includedir mpfr)         \
+                --with-mpfr-lib=$(pkgconf --variable=libdir mpfr)
             gmake -j
             gmake -j check
 
       - if: failure()
         name: "If failure, stop all other jobs"
-        uses: andymckay/cancel-action@0.2
+        uses: andymckay/cancel-action@0.3
 
 
 
@@ -248,7 +252,7 @@ jobs:
 
       - if: failure()
         name: "If failure, stop all other jobs"
-        uses: andymckay/cancel-action@0.2
+        uses: andymckay/cancel-action@0.3
 
 
 
@@ -299,7 +303,7 @@ jobs:
 
       - if: failure()
         name: "If failure, stop all other jobs"
-        uses: andymckay/cancel-action@0.2
+        uses: andymckay/cancel-action@0.3
 
 
 
@@ -344,7 +348,7 @@ jobs:
 
       - if: failure()
         name: "If failure, stop all other jobs"
-        uses: andymckay/cancel-action@0.2
+        uses: andymckay/cancel-action@0.3
 
 
 
@@ -386,7 +390,9 @@ jobs:
       - name: "Configure"
         run: |
           ./bootstrap.sh
-          ./configure CC=${CC} CFLAGS="${CFLAGS}" ${EXTRA_OPTIONS}
+          # We need to specify TMPPATH as we do not have write access to the
+          # CI's /tmp directory.
+          ./configure CC=${CC} CFLAGS="${CFLAGS}" TMPPATH="." ${EXTRA_OPTIONS}
 
       - name: "Compile"
         run: |
@@ -399,7 +405,62 @@ jobs:
 
       - if: failure()
         name: "If failure, stop all other jobs"
-        uses: andymckay/cancel-action@0.2
+        uses: andymckay/cancel-action@0.3
+
+
+
+  ##############################################################################
+  # msvc
+  ##############################################################################
+  msvc:
+    name: MSVC
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: "Setup Conda"
+        uses: conda-incubator/setup-miniconda@v2.2.0
+        with:
+          miniconda-version: "latest"
+          channels: conda-forge
+
+      - name: "Install dependencies"
+        run: |
+          conda install --yes -c conda-forge mpfr
+          conda install --yes -c conda-forge pthreads-win32
+          conda info
+          conda list
+
+      - name: "Setup MSVC"
+        uses: ilammy/msvc-dev-cmd@v1.12.1
+        with:
+          arch: x86_64
+
+      - name: "Configure"
+        run: |
+          mkdir build
+          cd build
+          set "LIB=C:\Miniconda3\Library\lib;%LIB%"
+          set "CPATH=C:\Miniconda3\Library\include;%CPATH%"
+          cmake -G "Ninja" -DCMAKE_C_FLAGS="/wd4018 /wd4146 /wd4244 /wd4267 /wd4305 /wd4996" -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release ..
+
+      - name: "Build"
+        run: |
+          cd build
+          cmake --build . -- -j4
+
+      - name: "Test"
+        run: |
+          cd build
+          set "FLINT_TEST_MULTIPLIER=1"
+          ctest -j4 --output-on-failure --timeout 180
+
+        # FIXME: Enable me when possible
+      # - if: failure()
+        # name: "If failure, stop all other jobs"
+        # uses: andymckay/cancel-action@0.3
 
 
 
@@ -472,4 +533,4 @@ jobs:
 
       - if: failure()
         name: "If failure, stop all other jobs"
-        uses: andymckay/cancel-action@0.2
+        uses: andymckay/cancel-action@0.3
