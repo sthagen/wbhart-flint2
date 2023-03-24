@@ -9,6 +9,8 @@
     (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 */
 
+#include <mpfr.h>
+#include "fmpq.h"
 #include "arb.h"
 
 int main()

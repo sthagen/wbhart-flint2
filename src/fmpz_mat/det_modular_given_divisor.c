@@ -11,6 +11,7 @@
 
 #include "ulong_extras.h"
 #include "nmod_mat.h"
+#include "fmpz.h"
 #include "fmpz_mat.h"
 
 /* Enable to exercise corner cases */
@@ -78,7 +79,7 @@ fmpz_mat_det_modular_given_divisor(fmpz_t det, const fmpz_mat_t A,
     while (fmpz_cmp(prod, bound) <= 0)
     {
         p = next_good_prime(d, p);
-        _nmod_mat_set_mod(Amod, p);
+        nmod_mat_set_mod(Amod, p);
         fmpz_mat_get_nmod_mat(Amod, A);
 
         /* Compute x = det(A) / d mod p */

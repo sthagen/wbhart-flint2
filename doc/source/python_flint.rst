@@ -13,8 +13,13 @@ Examples::
     >>> from flint2 import *
     >>> QQ.bernoulli(50)
     495057205241079648212477525/66
-    >>> _.factor()
-    (1, [5, 417202699, 47464429777438199, 2, 3, 11], [2, 1, 1, -1, -1, -1])
+    >>> sign, primes, exponents = _.factor()
+    >>> sign
+    1
+    >>> primes
+    [5, 417202699, 47464429777438199, 2, 3, 11]
+    >>> exponents
+    [2, 1, 1, -1, -1, -1]
     >>> sign * (primes ** exponents).product()
     495057205241079648212477525/66
 
@@ -57,17 +62,24 @@ API documentation
 -------------------------------------------------------------------------------
 
 ..
-    automodsumm:: flint_ctypes
+   automodsumm:: flint_ctypes
 
-.. autoclass:: flint_ctypes.FlintDomainError
+..
+   autoclass:: flint_ctypes.FlintDomainError
 
-.. autoclass:: flint_ctypes.FlintUnableError
+..
+   autoclass:: flint_ctypes.FlintUnableError
 
-.. automodule:: flint_ctypes
-  :members:
-  :undoc-members:
-  :special-members: __init__ , __bool__
-  :member-order: bysource
+..
+   automodule:: flint_ctypes
+..
+   :members:
+..
+   :undoc-members:
+..
+   :special-members: __init__ , __bool__
+..
+   :member-order: bysource
 
 
 
