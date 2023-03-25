@@ -10,16 +10,13 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-
-
-
-#include <pthread.h>
-
-
-#include "flint.h"
-#include "fmpz_mod_poly.h"
-#include "ulong_extras.h"
 #include "thread_support.h"
+#include "ulong_extras.h"
+#include "fmpz.h"
+#include "fmpz_vec.h"
+#include "fmpz_mod.h"
+#include "fmpz_mod_poly.h"
+#include "fmpz_mod_poly_factor.h"
 
 int
 main(void)

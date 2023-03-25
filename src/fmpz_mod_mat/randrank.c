@@ -11,6 +11,8 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
+#include "fmpz.h"
+#include "fmpz_vec.h"
 #include "fmpz_mod_mat.h"
 
 void fmpz_mod_mat_randrank(fmpz_mod_mat_t mat, flint_rand_t state, slong rank)

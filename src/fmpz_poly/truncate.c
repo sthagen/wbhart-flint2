@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2017 Tommy Hofmann
+    Copyright (C) 2023 Albin Ahlbäck
 
     This file is part of FLINT.
 
@@ -9,13 +9,17 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#define FMPZ_FACTOR_INLINES_C
-
-#include "flint.h"
 #include "fmpz.h"
+#include "fmpz_poly.h"
 
-void fmpz_factor_get_fmpz(fmpz_t z, const fmpz_factor_t factor, slong i)
+void fmpz_poly_truncate(fmpz_poly_t poly, slong newlen)
 {
-    fmpz_set(z, factor->p + i);
+    if (poly->length > newlen)
+    {
+        slong i;
+        for (i = newlen; i < poly->length; i++)
+            _fmpz_demote(poly->coeffs + i);
+        poly->length = newlen;
+        _fmpz_poly_normalise(poly);
+    }
 }
-

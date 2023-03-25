@@ -9,6 +9,7 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
+#include "fmpz_vec.h"
 #include "nmod_mpoly.h"
 #include "fmpz_mod_mpoly_factor.h"
 #include "n_poly.h"
@@ -581,7 +582,7 @@ int fmpz_mod_mpolyl_gcd_zippel2_smprime(
     fmpz_init(c);
     fmpz_init(start_alpha);
 
-#if FLINT_WANT_ASSERT
+#ifdef FLINT_WANT_ASSERT
     {
         slong * tmp_degs = FLINT_ARRAY_ALLOC(nvars, slong);
 

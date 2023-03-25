@@ -9,6 +9,7 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
+#include "fmpz_vec.h"
 #include "fmpz_mod_mpoly_factor.h"
 
 /*
@@ -325,7 +326,7 @@ cleanup:
     fmpz_mod_mpoly_clear(m, ctx);
     fmpz_mod_mpoly_clear(mpow, ctx);
 
-#if FLINT_WANT_ASSERT
+#ifdef FLINT_WANT_ASSERT
     if (success)
     {
         fmpz_mod_mpoly_t prod;

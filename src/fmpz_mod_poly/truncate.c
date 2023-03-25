@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010 Sebastian Pancratz
+    Copyright (C) 2023 Albin Ahlbäck
 
     This file is part of FLINT.
 
@@ -9,19 +9,18 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include "flint.h"
 #include "fmpz.h"
-#include "fmpz_poly.h"
+#include "fmpz_mod_poly.h"
 
-void
-fmpz_poly_set_mpz(fmpz_poly_t poly, const mpz_t c)
+void fmpz_mod_poly_truncate(fmpz_mod_poly_t poly, slong len, const fmpz_mod_ctx_t ctx)
 {
-    if (mpz_sgn(c) == 0)
-        fmpz_poly_zero(poly);
-    else
+    if (poly->length > len)
     {
-        fmpz_poly_fit_length(poly, 1);
-        fmpz_set_mpz(poly->coeffs, c);
-        _fmpz_poly_set_length(poly, 1);
+        slong i;
+
+        for (i = len; i < poly->length; i++)
+            _fmpz_demote(poly->coeffs + i);
+        poly->length = len;
+        _fmpz_mod_poly_normalise(poly);
     }
 }
