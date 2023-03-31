@@ -213,6 +213,8 @@ SINGLE_HEADERS :=                                                           \
         limb_types.h                    mpoly_types.h                       \
         fmpz_types.h                    fmpq_types.h                        \
         nmod_types.h                    fmpz_mod_types.h                    \
+        fq_types.h                      fq_nmod_types.h                     \
+        fq_zech_types.h                                                     \
         arf_types.h                     acf_types.h                         \
         arb_types.h                     acb_types.h
 ifneq ($(WANT_NTL), 0)
@@ -371,6 +373,7 @@ ifeq ($(findstring $(HOST_OS),mingw32 mingw64 cygwin msys),)
 	$(RM_F) "$(FLINT_LIBNAME).$(FLINT_MAJOR_SO)"
 	$(LN_S) "$(FLINT_LIB)" "$(FLINT_LIBNAME)"
 	$(LN_S) "$(FLINT_LIB)" "$(FLINT_LIBNAME).$(FLINT_MAJOR_SO)"
+endif
 endif
 
 ifneq ($(STATIC), 0)
@@ -736,7 +739,6 @@ endif
 endif
 ifneq ($(STATIC), 0)
 	$(CP) $(FLINT_DIR)/$(FLINT_LIB_STATIC) $(LIBDIR)
-endif
 endif
 	$(CP) $(HEADERS) $(INCLUDEDIR)/flint
 	$(CP) $(SRC_DIR)/flintxx/*.h $(INCLUDEDIR)/flint/flintxx

@@ -9,6 +9,8 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
+#include "ulong_extras.h"
+#include "nmod_poly.h"
 #include "fmpz.h"
 #include "fmpz_vec.h"
 #include "fmpz_mat.h"
@@ -133,7 +135,7 @@ paley_construction(mp_limb_t * q, mp_limb_t n)
 {
     int i, v;
 
-    count_trailing_zeros(v, n);
+    v = flint_ctz(n);
 
     if (UWORD(1) << v == n)
         return 3;
