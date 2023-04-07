@@ -4,17 +4,7 @@ import sys
 
 libflint_path = ctypes.util.find_library('flint')
 libflint = ctypes.CDLL(libflint_path)
-
 libcalcium = libarb = libgr = libflint
-
-#libcalcium_path = ctypes.util.find_library('calcium')
-#libcalcium = ctypes.CDLL(libcalcium_path)
-
-#libarb_path = ctypes.util.find_library('arb')
-#libarb = ctypes.CDLL(libarb_path)
-
-#libgr_path = ctypes.util.find_library('genericrings')
-#libgr = ctypes.CDLL(libgr_path)
 
 T_TRUE = 0
 T_FALSE = 1
@@ -273,6 +263,7 @@ libgr.gr_set_d.argtypes = (ctypes.c_void_p, ctypes.c_double, ctypes.POINTER(gr_c
 
 libgr.gr_set_str.argtypes = (ctypes.c_void_p, ctypes.c_char_p, ctypes.POINTER(gr_ctx_struct))
 libgr.gr_get_str.argtypes = (ctypes.POINTER(ctypes.c_char_p), ctypes.c_void_p, ctypes.POINTER(gr_ctx_struct))
+libgr.gr_get_str_n.argtypes = (ctypes.POINTER(ctypes.c_char_p), ctypes.c_void_p, c_slong, ctypes.POINTER(gr_ctx_struct))
 libgr.gr_cmp.argtypes = (ctypes.POINTER(ctypes.c_int), ctypes.c_void_p, ctypes.c_void_p, ctypes.POINTER(gr_ctx_struct))
 libgr.gr_cmpabs.argtypes = (ctypes.POINTER(ctypes.c_int), ctypes.c_void_p, ctypes.c_void_p, ctypes.POINTER(gr_ctx_struct))
 
@@ -286,6 +277,474 @@ _sub_methods = [libgr.gr_sub, libgr.gr_sub_si, libgr.gr_sub_fmpz, libgr.gr_sub_o
 _mul_methods = [libgr.gr_mul, libgr.gr_mul_si, libgr.gr_mul_fmpz, libgr.gr_mul_other, libgr.gr_other_mul]
 _div_methods = [libgr.gr_div, libgr.gr_div_si, libgr.gr_div_fmpz, libgr.gr_div_other, libgr.gr_other_div]
 _pow_methods = [libgr.gr_pow, libgr.gr_pow_si, libgr.gr_pow_fmpz, libgr.gr_pow_other, libgr.gr_other_pow]
+
+
+
+
+class fexpr:
+
+    @staticmethod
+    def inject(vars=False):
+        """
+        Inject all builtin symbol names into the calling namespace.
+        For interactive use only!
+
+            >>> fexpr.inject()
+            >>> n = fexpr("n")
+            >>> Sum(Sin(Pi*n/3)/Factorial(n), For(n,0,Infinity))
+            Sum(Div(Sin(Div(Mul(Pi, n), 3)), Factorial(n)), For(n, 0, Infinity))
+
+        """
+        from inspect import currentframe
+        frame = currentframe().f_back
+        num = libflint.fexpr_builtin_length()
+        for i in range(num):
+            # memory leak
+            symbol_name = libflint.fexpr_builtin_name(i)
+            symbol_name = symbol_name.decode('ascii')
+            if not symbol_name[0].islower():
+                frame.f_globals[symbol_name] = fexpr(symbol_name)
+        if vars:
+            def inject_vars(string):
+                for s in string.split():
+                    for symbol_name in [s, s + "_"]:
+                        frame.f_globals[symbol_name] = fexpr(symbol_name)
+            inject_vars("""a b c d e f g h i j k l m n o p q r s t u v w x y z""")
+            inject_vars("""A B C D E F G H I J K L M N O P Q R S T U V W X Y Z""")
+            inject_vars("""alpha beta gamma delta epsilon zeta eta theta iota kappa lamda mu nu xi pi rho sigma tau phi chi psi omega ell varphi vartheta""")
+            inject_vars("""Alpha Beta GreekGamma Delta Epsilon Zeta Eta Theta Iota Kappa Lamda Mu Nu Xi GreekPi Rho Sigma Tau Phi Chi Psi Omega""")
+        del frame
+
+    def builtins():
+        num = libflint.fexpr_builtin_length()
+        names = []
+        for i in range(num):
+            # memory leak
+            symbol_name = libflint.fexpr_builtin_name(i)
+            symbol_name = symbol_name.decode('ascii')
+            names.append(symbol_name)
+        return names
+
+    def __init__(self, val=None):
+        self._data = fexpr_struct()
+        self._ref = ctypes.byref(self._data)
+        libflint.fexpr_init(self)
+        if val is not None:
+            typ = type(val)
+            if typ is int:
+                b = sys.maxsize
+                if -b <= val <= b:
+                    libflint.fexpr_set_si(self, val)
+                else:
+                    n = _fmpz_struct()
+                    nref = ctypes.byref(n)
+                    libflint.fmpz_init(nref)
+                    libflint.fmpz_set_str(nref, ctypes.c_char_p(str(val).encode('ascii')), 10)
+                    libflint.fexpr_set_fmpz(self, nref)
+                    libflint.fmpz_clear(nref)
+            elif typ is str:
+                if val[0] == "'" or val[0] == '"':
+                    libflint.fexpr_set_string(self, val[1:-1].encode('ascii'))
+                else:
+                    libflint.fexpr_set_symbol_str(self, val.encode('ascii'))
+            elif typ is float:
+                libflint.fexpr_set_d(self, val)
+            elif typ is complex:
+                libflint.fexpr_set_re_im_d(self, val.real, val.imag)
+            elif typ is bool:
+                if val:
+                    libflint.fexpr_set_symbol_str(self, ("True").encode('ascii'))
+                else:
+                    libflint.fexpr_set_symbol_str(self, ("False").encode('ascii'))
+            elif typ is qqbar:
+                #libflint.qqbar_get_fexpr_repr(self, val, val._ctx)
+                tmp = val.fexpr()
+                libflint.fexpr_set(self, tmp)
+            elif typ is ca:
+                libflint.ca_get_fexpr(self, val, 0, val._ctx)
+            elif typ is ca_mat:
+                libflint.ca_mat_get_fexpr(self, val, 0, val._ctx)
+            elif typ is ca_poly:
+                libflint.ca_poly_get_fexpr(self, val, 0, val._ctx)
+            elif typ is tuple:
+                tmp = fexpr("Tuple")(*val)         # todo: create without copying
+                libflint.fexpr_set(self, tmp)
+            elif typ is list:
+                tmp = fexpr("List")(*val)
+                libflint.fexpr_set(self, tmp)
+            elif typ is set:
+                tmp = fexpr("Set")(*val)
+                libflint.fexpr_set(self, tmp)
+            else:
+                raise TypeError
+
+    def __del__(self):
+        libflint.fexpr_clear(self)
+
+    @property
+    def _as_parameter_(self):
+        return self._ref
+
+    @staticmethod
+    def from_param(arg):
+        return arg
+
+    def __repr__(self):
+        ptr = libflint.fexpr_get_str(self)
+        try:
+            return ctypes.cast(ptr, ctypes.c_char_p).value.decode("ascii")
+        finally:
+            libflint.flint_free(ptr)
+
+    def latex(self):
+        ptr = libflint.fexpr_get_str_latex(self, 0)
+        try:
+            return ctypes.cast(ptr, ctypes.c_char_p).value.decode()
+        finally:
+            libflint.flint_free(ptr)
+
+    def _repr_latex_(self):
+        return "$$" + self.latex() + "$$"
+
+    def nwords(self):
+        return libflint.fexpr_size(self)
+
+    def size_bytes(self):
+        return libflint.fexpr_size_bytes(self)
+
+    def allocated_bytes(self):
+        return libflint.fexpr_allocated_bytes(self)
+
+    def num_leaves(self):
+        return libflint.fexpr_num_leaves(self)
+
+    def depth(self):
+        return libflint.fexpr_depth(self)
+
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+        if libflint.fexpr_equal(self, other):
+            return True
+        return False
+
+    def is_atom(self):
+        return bool(libflint.fexpr_is_atom(self))
+
+    def is_atom_integer(self):
+        return bool(libflint.fexpr_is_integer(self))
+
+    def is_symbol(self):
+        return bool(libflint.fexpr_is_symbol(self))
+
+    def head(self):
+        if libflint.fexpr_is_atom(self):
+            return None
+        res = fexpr()
+        libflint.fexpr_func(res, self)
+        return res
+
+    def nargs(self):
+        # todo: long
+        if self.is_atom():
+            return None
+        return libflint.fexpr_nargs(self)
+
+    def args(self):
+        if libflint.fexpr_is_atom(self):
+            return None
+        n = self.nargs()
+        args = [fexpr() for i in range(n)]
+        for i in range(n):
+            libflint.fexpr_arg(args[i], self, i)
+        return tuple(args)
+
+    def __hash__(self):
+        return libflint.fexpr_hash(self)
+
+    def __call__(self, *args):
+        args2 = []
+        for arg in args:
+            tp = type(arg)
+            if tp is not fexpr:
+                if tp is str:
+                    arg = "'" + arg + "'"
+                arg = fexpr(arg)
+            args2.append(arg)
+        n = len(args2)
+        res = fexpr()
+        if n == 0:
+            libflint.fexpr_call0(res, self)
+        elif n == 1:
+            libflint.fexpr_call1(res, self, args2[0])
+        elif n == 2:
+            libflint.fexpr_call2(res, self, args2[0], args2[1])
+        elif n == 3:
+            libflint.fexpr_call3(res, self, args2[0], args2[1], args2[2])
+        elif n == 4:
+            libflint.fexpr_call4(res, self, args2[0], args2[1], args2[2], args2[3])
+        else:
+            vec = libflint.flint_malloc(n * ctypes.sizeof(fexpr_struct))
+            vec = ctypes.cast(vec, ctypes.POINTER(fexpr_struct))
+            for i in range(n):
+                vec[i] = args2[i]._data
+            libflint.fexpr_call_vec(res, self, vec, n)
+            libflint.flint_free(vec)
+        return res
+
+    def contains(self, x):
+        """
+        Check if *x* appears exactly as a subexpression in *self*.
+
+            >>> f = fexpr("f"); x = fexpr("x"); y = fexpr("y")
+            >>> (f(x+1).contains(f), f(x+1).contains(x), f(x+1).contains(y))
+            (True, True, False)
+            >>> (f(x+1).contains(1), f(x+1).contains(2))
+            (True, False)
+            >>> (f(x+1).contains(x+1), f(x+1).contains(f(x+1)))
+            (True, True)
+        """
+        if type(x) is not fexpr:
+            x = fexpr(x)
+        if libflint.fexpr_contains(self, x):
+            return True
+        return False
+
+    def replace(self, old, new=None):
+        """
+        Replace subexpression.
+
+            >>> f = fexpr("f"); x = fexpr("x"); y = fexpr("y")
+            >>> f(x+1, x-1).replace(x, y)
+            f(Add(y, 1), Sub(y, 1))
+            >>> f(x+1, x-1).replace(x+1, y-1)
+            f(Sub(y, 1), Sub(x, 1))
+            >>> f(x+1, x-1).replace(f, f+1)
+            Add(f, 1)(Add(x, 1), Sub(x, 1))
+            >>> f(x+1, x-1).replace(x+2, y)
+            f(Add(x, 1), Sub(x, 1))
+        """
+        # todo: dict replacement
+        if type(old) is not fexpr:
+            old = fexpr(old)
+        if type(new) is not fexpr:
+            new = fexpr(new)
+        res = fexpr()
+        libflint.fexpr_replace(res, self, old, new)
+        return res
+
+    def __add__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_add(res, self, other)
+        return res
+
+    def __radd__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_add(res, other, self)
+        return res
+
+    def __sub__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_sub(res, self, other)
+        return res
+
+    def __rsub__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_sub(res, other, self)
+        return res
+
+    def __mul__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_mul(res, self, other)
+        return res
+
+    def __rmul__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_mul(res, other, self)
+        return res
+
+    def __truediv__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_div(res, self, other)
+        return res
+
+    def __rtruediv__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_div(res, other, self)
+        return res
+
+    def __pow__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_pow(res, self, other)
+        return res
+
+    def __rpow__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_pow(res, other, self)
+        return res
+
+    # def __floordiv__(self, other):
+    #     return (self / other).floor()
+    # def __rfloordiv__(self, other):
+    #     return (other / self).floor()
+
+    def __bool__(self):
+        return True
+
+    def __abs__(self):
+        return fexpr("Abs")(self)
+
+    def __neg__(self):
+        res = fexpr()
+        libflint.fexpr_neg(res, self)
+        return res
+
+    def __pos__(self):
+        return fexpr("Pos")(self)
+
+    def expanded_normal_form(self):
+        """
+        Converts this expression to expanded normal form as
+        a formal rational function of its non-arithmetic subexpressions.
+
+            >>> x = fexpr("x"); y = fexpr("y")
+            >>> (x / x**2).expanded_normal_form()
+            Div(1, x)
+            >>> (((x ** 0) + 3) ** 5).expanded_normal_form()
+            1024
+            >>> ((x+y+1)**3 - (y+1)**3 - (x+y)**3 - (x+1)**3).expanded_normal_form()
+            Add(Mul(-1, Pow(x, 3)), Mul(6, x, y), Mul(-1, Pow(y, 3)), -1)
+            >>> (1/((1/y + 1/x))).expanded_normal_form()
+            Div(Mul(x, y), Add(x, y))
+            >>> (((x+y)**5 * (x-y)) / (x**2 - y**2)).expanded_normal_form()
+            Add(Pow(x, 4), Mul(4, Pow(x, 3), y), Mul(6, Pow(x, 2), Pow(y, 2)), Mul(4, x, Pow(y, 3)), Pow(y, 4))
+            >>> (1 / (x - x)).expanded_normal_form()
+            Traceback (most recent call last):
+              ...
+            ValueError: expanded_normal_form: overflow, formal division by zero or unsupported expression
+        """
+        res = fexpr()
+        if not libflint.fexpr_expanded_normal_form(res, self, 0):
+            raise ValueError("expanded_normal_form: overflow, formal division by zero or unsupported expression")
+        return res
+
+    def nstr(self, n=16):
+        """
+        Evaluates this expression numerically using Arb, returning
+        a decimal string correct within 1 ulp in the last output digit.
+        Attempts to obtain *n* digits (but the actual output accuracy
+        may be lower).
+
+            >>> Exp = fexpr("Exp"); Exp(1).nstr()
+            '2.718281828459045'
+            >>> Pi = fexpr("Pi"); Pi.nstr(30)
+            '3.14159265358979323846264338328'
+            >>> Log = fexpr("Log"); Log(-2).nstr()
+            '0.6931471805599453 + 3.141592653589793*I'
+            >>> Im = fexpr("Im")
+            >>> Im(Log(2)).nstr()   # exact zero
+            '0'
+
+        Here the imaginary part is zero, but Arb is not able to
+        compute so exactly. The output ``0e-N``
+        indicates only that the absolute value is bounded by ``1e-N``:
+
+            >>> Exp(Log(-2)).nstr()
+            '-2.000000000000000 + 0e-22*I'
+            >>> Im(Exp(Log(-2))).nstr()
+            '0e-731'
+
+        The algorithm fails if the expression or any subexpression
+        is not a finite complex number:
+
+            >>> Log(0).nstr()
+            Traceback (most recent call last):
+              ...
+            ValueError: nstr: unable to evaluate to a number
+
+        Expressions must be constant:
+
+            >>> fexpr("x").nstr()
+            Traceback (most recent call last):
+              ...
+            ValueError: nstr: unable to evaluate to a number
+
+        """
+        ptr = libflint.fexpr_get_decimal_str(self, n, 0)
+        try:
+            s = ctypes.cast(ptr, ctypes.c_char_p).value.decode("ascii")
+            if s == "?":
+                raise ValueError("nstr: unable to evaluate to a number")
+            return s
+        finally:
+            libflint.flint_free(ptr)
+
+
+libflint.fexpr_builtin_name.restype = ctypes.c_char_p
+libflint.fexpr_set_symbol_str.argtypes = ctypes.c_void_p, ctypes.c_char_p
+libflint.fexpr_get_str.restype = ctypes.c_void_p
+libflint.fexpr_get_str_latex.restype = ctypes.c_void_p
+libflint.fexpr_set_si.argtypes = fexpr, ctypes.c_long
+libflint.fexpr_set_d.argtypes = fexpr, ctypes.c_double
+libflint.fexpr_set_re_im_d.argtypes = fexpr, ctypes.c_double, ctypes.c_double
+libflint.fexpr_get_decimal_str.restype = ctypes.c_void_p
+
+
+
+
+
+
+
 
 _gr_logic = 0
 
@@ -353,6 +812,14 @@ def set_logic(which_logic):
 
 
 class gr_ctx:
+
+    @property
+    def _as_parameter_(self):
+        return self._ref
+
+    @staticmethod
+    def from_param(arg):
+        return arg
 
     def __init__(self):
         self._data = gr_ctx_struct()
@@ -499,9 +966,13 @@ class gr_ctx:
                 x = ZZ(x)
                 status = op_fmpz(res._ref, x._ref, ctx._ref)
             elif type_x in (fmpz, int) and op_ui is not None:
-                x = ctx._as_ui(x)
-                op_ui.argtypes = (ctypes.c_void_p, c_ulong, ctypes.c_void_p)
-                status = op_ui(res._ref, x, ctx._ref)
+                try:
+                    x = ctx._as_ui(x)
+                    op_ui.argtypes = (ctypes.c_void_p, c_ulong, ctypes.c_void_p)
+                    status = op_ui(res._ref, x, ctx._ref)
+                except:
+                    x = ctx(x)
+                    status = op(res._ref, x._ref, ctx._ref)
             else:
                 x = ctx(x)
                 status = op(res._ref, x._ref, ctx._ref)
@@ -563,7 +1034,7 @@ class gr_ctx:
         status = op(res1._ref, res2._ref, x._ref, y._ref, ctx._ref)
         if status:
             _handle_error(ctx, status, rstr, x, y)
-        return res
+        return res1, res2
 
     def _binary_op_with_flag(ctx, x, y, flag, op, rstr):
         x = ctx._as_elem(x)
@@ -891,6 +1362,44 @@ class gr_ctx:
         return ctx._binary_op_fmpz(x, y, libgr.gr_mul_2exp_fmpz, "mul_2exp($x, $y)")
 
     def exp(ctx, x):
+        """
+        Exponential function.
+
+            >>> RR.exp(1)
+            [2.718281828459045 +/- 5.41e-16]
+            >>> RR(1).exp()
+            [2.718281828459045 +/- 5.41e-16]
+
+        Matrix exponentials:
+
+            >>> MatRR.exp([[1,2],[3,4]])
+            [[[51.96895619870500 +/- 8.39e-15], [74.7365645670032 +/- 1.48e-14]],
+            [[112.1048468505048 +/- 2.77e-14], [164.0738030492098 +/- 2.90e-14]]]
+            >>> MatCC.exp([[1,2+1j],[3,4]])
+            [[([44.75490138773069 +/- 7.60e-15] + [36.14044247515163 +/- 7.33e-15]*I), ([58.81526453925295 +/- 7.84e-15] + [61.26937858302805 +/- 7.52e-15]*I)],
+            [([107.3399445969204 +/- 3.89e-14] + [38.23409557608189 +/- 8.58e-15]*I), ([152.0948459846510 +/- 7.30e-14] + [74.3745380512335 +/- 2.88e-14]*I)]]
+            >>> Mat(CC_ca)([[1,2],[0,3]]).exp()
+            [[2.71828 {a where a = 2.71828 [Exp(1)]}, 17.3673 {b^3-b where a = 20.0855 [Exp(3)], b = 2.71828 [Exp(1)]}],
+            [0, 20.0855 {a where a = 20.0855 [Exp(3)]}]]
+            >>> Mat(CC_ca)([[1,2],[3,4]]).exp()[0,0]
+            51.9690 {(-a*c+11*a+b*c+11*b)/22 where a = 215.354 [Exp(5.37228 {(c+5)/2})], b = 0.689160 [Exp(-0.372281 {(-c+5)/2})], c = 5.74456 [c^2-33=0]}
+            >>> Mat(CC_ca)([[0,0,1],[1,0,0],[0,1,0]]).exp().det()
+            1
+            >>> Mat(CC_ca)([[0,1,0,0,0],[0,0,2,0,0],[0,0,0,3,0],[0,0,0,0,4],[0,0,0,0,0]]).exp()
+            [[1, 1, 1, 1, 1],
+            [0, 1, 2, 3, 4],
+            [0, 0, 1, 3, 6],
+            [0, 0, 0, 1, 4],
+            [0, 0, 0, 0, 1]]
+            >>> MatQQ([[0,1,0,0,0],[0,0,2,0,0],[0,0,0,3,0],[0,0,0,0,4],[0,0,0,0,0]]).exp()
+            [[1, 1, 1, 1, 1],
+            [0, 1, 2, 3, 4],
+            [0, 0, 1, 3, 6],
+            [0, 0, 0, 1, 4],
+            [0, 0, 0, 0, 1]]
+
+
+        """
         return ctx._unary_op(x, libgr.gr_exp, "exp($x)")
 
     def exp2(ctx, x):
@@ -900,27 +1409,129 @@ class gr_ctx:
         return ctx._unary_op(x, libgr.gr_exp10, "exp10($x)")
 
     def expm1(ctx, x):
+        """
+            >>> RR.expm1(1)
+            [1.718281828459045 +/- 3.19e-16]
+        """
         return ctx._unary_op(x, libgr.gr_expm1, "expm1($x)")
 
     def exp_pi_i(ctx, x):
+        """
+            >>> QQbar.exp_pi_i(QQ(1) / 3)
+            Root a = 0.500000 + 0.866025*I of a^2-a+1
+            >>> CC.exp_pi_i(QQ(1) / 3)
+            ([0.500000000000000 +/- 3.94e-16] + [0.866025403784439 +/- 6.79e-16]*I)
+        """
         return ctx._unary_op(x, libgr.gr_exp_pi_i, "exp_pi_i($x)")
 
     def log(ctx, x):
+        """
+        Natural logarithm:
+
+            >>> QQ.log(1)
+            0
+            >>> QQ.log(2)
+            Traceback (most recent call last):
+              ...
+            FlintUnableError: failed to compute log(x) in {Rational field (fmpq)} for {x = 2}
+            >>> RR.log(2)
+            [0.693147180559945 +/- 4.12e-16]
+            >>> CC.log(1j)
+            [1.570796326794897 +/- 5.54e-16]*I
+
+        Matrix logarithms:
+
+            >>> Mat(CC_ca)([[4,2],[2,4]]).log().det() == CC_ca.log(2)*CC_ca.log(6)
+            True
+            >>> Mat(QQ)([[1,1],[0,1]]).log()
+            [[0, 1],
+            [0, 0]]
+            >>> Mat(QQ)([[0,1],[0,0]]).log()
+            Traceback (most recent call last):
+              ...
+            FlintDomainError: log(x) is not an element of {Matrices (any shape) over Rational field (fmpq)} for {x = [[0, 1],
+            [0, 0]]}
+            >>> Mat(CC_ca)([[0,1],[0,0]]).log()
+            Traceback (most recent call last):
+              ...
+            FlintDomainError: log(x) is not an element of {Matrices (any shape) over Complex numbers (ca)} for {x = [[0, 1],
+            [0, 0]]}
+            >>> Mat(CC_ca)([[0,0,1],[0,1,0],[1,0,0]]).log() / (CC_ca.pi() * CC_ca.i())
+            [[0.500000 {1/2}, 0, -0.500000 {-1/2}],
+            [0, 0, 0],
+            [-0.500000 {-1/2}, 0, 0.500000 {1/2}]]
+            >>> Mat(CC_ca)([[0,0,1],[0,1,0],[1,0,0]]).log().exp()
+            [[0, 0, 1],
+            [0, 1, 0],
+            [1, 0, 0]]
+
+        """
         return ctx._unary_op(x, libgr.gr_log, "log($x)")
 
     def log1p(ctx, x):
+        """
+            >>> RR.log1p(1)
+            [0.693147180559945 +/- 4.12e-16]
+            >>> CC.log1p(1j)
+            ([0.346573590279973 +/- 4.20e-16] + [0.7853981633974483 +/- 7.66e-17]*I)
+        """
         return ctx._unary_op(x, libgr.gr_log1p, "log1p($x)")
 
     def log_pi_i(ctx, x):
+        """
+            >>> QQbar.log_pi_i(-1j)
+            -1/2
+            >>> CC.log_pi_i(1j)
+            [0.5000000000000000 +/- 7.07e-17]
+
+        """
         return ctx._unary_op(x, libgr.gr_log_pi_i, "log_pi_i($x)")
 
+    def log2(ctx, x):
+        """
+            >>> RR.log2(16)
+            [4.00000000000000 +/- 1.45e-15]
+        """
+        return ctx._unary_op(x, libgr.gr_log2, "log2($x)")
+
+    def log10(ctx, x):
+        """
+            >>> RR.log10(100)
+            [2.000000000000000 +/- 7.72e-16]
+        """
+        return ctx._unary_op(x, libgr.gr_log10, "log10($x)")
+
     def sin(ctx, x):
+        """
+            >>> QQ.sin(0)
+            0
+            >>> QQ.sin(1)
+            Traceback (most recent call last):
+              ...
+            FlintUnableError: failed to compute sin(x) in {Rational field (fmpq)} for {x = 1}
+            >>> RR.sin(1)
+            [0.841470984807897 +/- 6.08e-16]
+        """
         return ctx._unary_op(x, libgr.gr_sin, "sin($x)")
 
     def cos(ctx, x):
+        """
+            >>> QQ.cos(0)
+            1
+            >>> QQ.cos(1)
+            Traceback (most recent call last):
+              ...
+            FlintUnableError: failed to compute cos(x) in {Rational field (fmpq)} for {x = 1}
+            >>> RR.cos(1)
+            [0.540302305868140 +/- 4.59e-16]
+        """
         return ctx._unary_op(x, libgr.gr_cos, "cos($x)")
 
     def sin_cos(ctx, x):
+        """
+            >>> RR.sin_cos(1)
+            ([0.841470984807897 +/- 6.08e-16], [0.540302305868140 +/- 4.59e-16])
+        """
         return ctx._unary_unary_op(x, libgr.gr_sin_cos, "sin_cos($x)")
 
     def tan(ctx, x):
@@ -935,39 +1546,87 @@ class gr_ctx:
         return ctx._unary_op(x, libgr.gr_tan, "tan($x)")
 
     def cot(ctx, x):
+        """
+            >>> RR.cot(1)
+            [0.642092615934331 +/- 4.79e-16]
+        """
         return ctx._unary_op(x, libgr.gr_cot, "cot($x)")
 
     def sec(ctx, x):
+        """
+            >>> RR.sec(1)
+            [1.850815717680925 +/- 7.00e-16]
+        """
         return ctx._unary_op(x, libgr.gr_sec, "sec($x)")
 
     def csc(ctx, x):
+        """
+            >>> RR.csc(1)
+            [1.188395105778121 +/- 2.52e-16]
+        """
         return ctx._unary_op(x, libgr.gr_csc, "csc($x)")
 
     def sin_pi(ctx, x):
+        """
+            >>> QQbar.sin_pi(QQ(1) / 3)
+            Root a = 0.866025 of 4*a^2-3
+        """
         return ctx._unary_op(x, libgr.gr_sin_pi, "sin_pi($x)")
 
     def cos_pi(ctx, x):
+        """
+            >>> QQbar.cos_pi(QQ(1) / 3)
+            1/2
+        """
         return ctx._unary_op(x, libgr.gr_cos_pi, "cos_pi($x)")
 
     def sin_cos_pi(ctx, x):
         return ctx._unary_unary_op(x, libgr.gr_sin_cos_pi, "sin_cos_pi($x)")
 
     def tan_pi(ctx, x):
+        """
+            >>> QQbar.tan_pi(QQ(1) / 3)
+            Root a = 1.73205 of a^2-3
+        """
         return ctx._unary_op(x, libgr.gr_tan_pi, "tan_pi($x)")
 
     def cot_pi(ctx, x):
+        """
+            >>> QQbar.cot_pi(QQ(1) / 3)
+            Root a = 0.577350 of 3*a^2-1
+        """
         return ctx._unary_op(x, libgr.gr_cot_pi, "cot_pi($x)")
 
     def sec_pi(ctx, x):
+        """
+            >>> QQbar.sec_pi(QQ(1) / 3)
+            2
+        """
         return ctx._unary_op(x, libgr.gr_sec_pi, "sec_pi($x)")
 
     def csc_pi(ctx, x):
+        """
+            >>> QQbar.csc_pi(QQ(1) / 3)
+            Root a = 1.15470 of 3*a^2-4
+        """
         return ctx._unary_op(x, libgr.gr_csc_pi, "csc_pi($x)")
 
     def sinc(ctx, x):
+        """
+            >>> RR.sinc(2)
+            [0.4546487134128408 +/- 7.07e-17]
+            >>> CC.sinc(1j)
+            [1.175201193643801 +/- 6.61e-16]
+        """
         return ctx._unary_op(x, libgr.gr_sinc, "sinc($x)")
 
     def sinc_pi(ctx, x):
+        """
+            >>> RR.sinc_pi(0.5)
+            [0.636619772367581 +/- 4.04e-16]
+            >>> CC.sinc_pi(1j)
+            [3.67607791037498 +/- 3.11e-15]
+        """
         return ctx._unary_op(x, libgr.gr_sinc_pi, "sinc_pi($x)")
 
     def sinh(ctx, x):
@@ -1110,21 +1769,45 @@ class gr_ctx:
         return ctx._unary_op(x, libgr.gr_acsc, "acsc($x)")
 
     def asin_pi(ctx, x):
+        """
+            >>> QQbar.asin_pi(QQ(1) / 2)
+            1/6
+        """
         return ctx._unary_op(x, libgr.gr_asin_pi, "asin_pi($x)")
 
     def acos_pi(ctx, x):
+        """
+            >>> QQbar.acos_pi(QQ(1) / 2)
+            1/3
+        """
         return ctx._unary_op(x, libgr.gr_acos_pi, "acos_pi($x)")
 
     def atan_pi(ctx, x):
+        """
+            >>> QQbar.atan_pi(QQbar(2).sqrt() - 1)
+            1/8
+        """
         return ctx._unary_op(x, libgr.gr_atan_pi, "atan_pi($x)")
 
     def acot_pi(ctx, x):
+        """
+            >>> QQbar.acot_pi(QQbar(2).sqrt() - 1)
+            3/8
+        """
         return ctx._unary_op(x, libgr.gr_acot_pi, "acot_pi($x)")
 
     def asec_pi(ctx, x):
+        """
+            >>> QQbar.asec_pi(2)
+            1/3
+        """
         return ctx._unary_op(x, libgr.gr_asec_pi, "asec_pi($x)")
 
     def acsc_pi(ctx, x):
+        """
+            >>> QQbar.acsc_pi(2)
+            1/6
+        """
         return ctx._unary_op(x, libgr.gr_acsc_pi, "acsc_pi($x)")
 
     def asinh(ctx, x):
@@ -1381,32 +2064,48 @@ class gr_ctx:
             return ctx._binary_op(x, y, libgr.gr_bessel_k, "bessel_k($n, $x)")
 
     def bessel_j_y(ctx, x, y):
-        return ctx._binary_binary_op(x, y, libgr.gr_bessel_k, "bessel_j_y($n, $x)")
+        """
+            >>> RR.bessel_j_y(1, 1)
+            ([0.4400505857449335 +/- 5.91e-17], [-0.78121282130029 +/- 4.55e-15])
+            >>> CC.bessel_j_y(1, 1j)
+            ([0.565159103992485 +/- 1.89e-16]*I, ([-0.56515910399248 +/- 8.81e-15] + [0.38318604387456 +/- 8.19e-15]*I))
+        """
+        return ctx._binary_binary_op(x, y, libgr.gr_bessel_j_y, "bessel_j_y($n, $x)")
 
     def airy(ctx, x):
+        """
+            >>> RR.airy(1)
+            ([0.1352924163128814 +/- 4.17e-17], [-0.1591474412967932 +/- 2.95e-17], [1.207423594952871 +/- 3.27e-16], [0.932435933392776 +/- 5.83e-16])
+            >>> CC.airy(1)
+            ([0.1352924163128814 +/- 4.17e-17], [-0.1591474412967932 +/- 2.95e-17], [1.207423594952871 +/- 3.27e-16], [0.932435933392776 +/- 5.83e-16])
+        """
         return ctx._quaternary_unary_op(x, libgr.gr_airy, "airy($x)")
 
     def airy_ai(ctx, x):
         """
+            >>> RR.airy_ai(1)
             [0.1352924163128814 +/- 4.17e-17]
         """
         return ctx._unary_op(x, libgr.gr_airy_ai, "airy_ai($x)")
 
     def airy_bi(ctx, x):
         """
-            [-0.1591474412967932 +/- 2.95e-17]
+            >>> RR.airy_bi(1)
+            [1.207423594952871 +/- 3.27e-16]
         """
         return ctx._unary_op(x, libgr.gr_airy_bi, "airy_bi($x)")
 
 
     def airy_ai_prime(ctx, x):
         """
-            [1.207423594952871 +/- 3.27e-16]
+            >>> RR.airy_ai_prime(1)
+            [-0.1591474412967932 +/- 2.95e-17]
         """
         return ctx._unary_op(x, libgr.gr_airy_ai_prime, "airy_ai_prime($x)")
 
     def airy_bi_prime(ctx, x):
         """
+            >>> RR.airy_bi_prime(1)
             [0.932435933392776 +/- 5.83e-16]
         """
         return ctx._unary_op(x, libgr.gr_airy_bi_prime, "airy_bi_prime($x)")
@@ -1534,13 +2233,29 @@ class gr_ctx:
     def legendre_p(ctx, n, m, x, typ=0):
         """
         Associated Legendre function of the first kind.
+
+            >>> RR.legendre_p(3, 1, 0.5)
+            [-0.324759526419164 +/- 5.23e-16]
+            >>> CC.legendre_p(3, 1, 0.5)
+            [-0.324759526419164 +/- 5.23e-16]
+            >>> CC.legendre_p(3, 1, 0.5, 1)
+            [0.324759526419164 +/- 5.52e-16]*I
         """
+        assert typ in (0, 1)
         return ctx._ternary_op_with_flag(n, m, x, typ, libgr.gr_legendre_p, rstr="legendre_p($n, $m, $x, $typ)")
 
     def legendre_q(ctx, n, m, x, typ=0):
         """
         Associated Legendre function of the second kind.
+
+            >>> RR.legendre_q(3, 1, 0.5)
+            [2.4918525917090 +/- 5.45e-14]
+            >>> CC.legendre_q(3, 1, 0.5)
+            [2.4918525917090 +/- 5.45e-14]
+            >>> CC.legendre_q(3, 1, 0.5, 1)
+            ([0.51013107119087 +/- 4.02e-15] + [-2.4918525917090 +/- 5.73e-14]*I)
         """
+        assert typ in (0, 1)
         return ctx._ternary_op_with_flag(n, m, x, typ, libgr.gr_legendre_q, rstr="legendre_q($n, $m, $x, $typ)")
 
     def spherical_y(ctx, n, m, theta, phi):
@@ -1689,6 +2404,14 @@ class gr_ctx:
 
             >>> ZZmod(10**7 + 19).fac(10**7)
             2343096
+
+        More tests:
+
+            >>> RF.fac(10**6)
+            8.263931688331239e+5565708
+            >>> RF.fac(10**20)
+            1.932849514310098e+1956570551809674817245
+
         """
         return ctx._unary_op_with_fmpz_fmpq_overloads(x, libgr.gr_fac, op_fmpz=libgr.gr_fac_fmpz, rstr="fac($x)")
 
@@ -1766,6 +2489,9 @@ class gr_ctx:
             24*x - 50*x^2 + 35*x^3 - 10*x^4 + x^5
             >>> RR.log(RR.falling(RR.pi(), 10**7))
             [151180898.7174084 +/- 9.72e-8]
+            >>> RR.falling(10.5, 3.5)
+            [2360.99664364330 +/- 4.00e-12]
+
         """
         return ctx._binary_op_with_overloads(x, n, libgr.gr_falling, op_ui=libgr.gr_falling_ui, rstr="falling($x, $n)")
 
@@ -1783,6 +2509,9 @@ class gr_ctx:
             5763493550349629692
             >>> ZZp64.bin(10**30, 2)
             998763921924463582
+            >>> RR.bin(1.5, 0.75)
+            [1.57378746535479 +/- 5.62e-15]
+
         """
         try:
             x = ctx._as_ui(x)
@@ -1807,7 +2536,12 @@ class gr_ctx:
             [1, 4, 6, 4, 1, 0, 0, 0]
             >>> QQ.bin_vec(QQ(1)/2, 5)
             [1, 1/2, -1/8, 1/16, -5/128]
-
+            >>> ZZmod(7).bin_vec(10)
+            [1, 3, 3, 1, 0, 0, 0, 1, 3, 3, 1]
+            >>> ZZmod(7).bin_vec(3)
+            [1, 3, 3, 1]
+            >>> ZZmod(7).bin_vec(10, 1)
+            [1]
         """
         try:
             n = ctx._as_ui(n)
@@ -1817,17 +2551,44 @@ class gr_ctx:
             length = n + 1
         return ctx._op_vec_ui_len(n, length, libgr.gr_bin_ui_vec, "bin_vec($n, $length)")
 
-
     def gamma(ctx, x):
+        """
+            >>> RR.gamma(10)
+            362880.0000000000
+            >>> RR.gamma(0.5)
+            [1.772453850905516 +/- 3.41e-16]
+            >>> RR.gamma(QQ(1) / 3)
+            [2.678938534707747 +/- 8.99e-16]
+            >>> CC.gamma(1+1j) / CC.gamma(1j)
+            ([+/- 6.32e-16] + [1.0000000000000 +/- 1.03e-15]*I)
+        """
         return ctx._unary_op_with_fmpz_fmpq_overloads(x, libgr.gr_gamma, op_fmpz=libgr.gr_gamma_fmpz, op_fmpq=libgr.gr_gamma_fmpq, rstr="gamma($x)")
 
     def lgamma(ctx, x):
+        """
+            >>> RR.lgamma(10)
+            [12.80182748008147 +/- 2.69e-15]
+            >>> CC.lgamma(10j)
+            ([-15.94031728124131 +/- 6.90e-15] + [12.23211664743500 +/- 4.89e-15]*I)
+        """
         return ctx._unary_op(x, libgr.gr_lgamma, "lgamma($x)")
 
     def rgamma(ctx, x):
+        """
+            >>> RR.rgamma(10)
+            [2.755731922398589e-6 +/- 5.96e-22]
+            >>> CC.rgamma(10+1j)
+            ([-1.83246026966323e-6 +/- 5.08e-21] + [-2.25314671311995e-6 +/- 5.78e-21]*I)
+        """
         return ctx._unary_op(x, libgr.gr_rgamma, "lgamma($x)")
 
     def digamma(ctx, x):
+        """
+            >>> RR.digamma(2)
+            [0.4227843350984671 +/- 4.84e-17]
+            >>> CC.digamma(2j)
+            ([0.714591515373977 +/- 6.06e-16] + [1.820807282642230 +/- 3.65e-16]*I)
+        """
         return ctx._unary_op(x, libgr.gr_digamma, "digamma($x)")
 
     def doublefac(ctx, x):
@@ -1853,6 +2614,10 @@ class gr_ctx:
             [21.30048150234794 +/- 8.48e-15]
             >>> ZZp64.harmonic(1000)
             6514760847963681162
+            >>> RR.harmonic(10.5)
+            [2.97545479443731 +/- 5.16e-15]
+            >>> RR.harmonic(15092688622113788323693563264538101449859497)
+            [100.000000000000 +/- 4.35e-14]
         """
         return ctx._unary_op_with_fmpz_fmpq_overloads(x, libgr.gr_harmonic, op_ui=libgr.gr_harmonic_ui, rstr="harmonic($x)")
 
@@ -1890,9 +2655,25 @@ class gr_ctx:
         return ctx._unary_op(x, libgr.gr_log_barnes_g, "log_barnes_g($x)")
 
     def zeta(ctx, s):
+        """
+        Riemann zeta function.
+
+            >>> RR.zeta(2)
+            [1.644934066848226 +/- 4.57e-16]
+            >>> CC.zeta(1+1j)
+            ([0.5821580597520036 +/- 5.17e-17] + [-0.9268485643308071 +/- 2.75e-17]*I)
+        """
         return ctx._unary_op(s, libgr.gr_zeta, "zeta($s)")
 
     def hurwitz_zeta(ctx, s, a):
+        """
+        Hurwitz zeta function.
+
+            >>> RR.hurwitz_zeta(2, 2)
+            [0.6449340668482264 +/- 3.72e-17]
+            >>> CC.hurwitz_zeta(1j, 1)
+            ([0.0033002236853241 +/- 2.42e-17] + [-0.4181554491413217 +/- 4.51e-17]*I)
+        """
         return ctx._binary_op(s, a, libgr.gr_hurwitz_zeta, "hurwitz_zeta($s, $a)")
 
     def stieltjes(ctx, n, a=1):
@@ -1960,6 +2741,18 @@ class gr_ctx:
         return ctx._unary_op(x, libgr.gr_riemann_xi, "riemann_xi($x)")
 
     def lambertw(ctx, x, k=None):
+        """
+            >>> RR.lambertw(1)
+            [0.567143290409784 +/- 2.72e-16]
+            >>> RR.lambertw(-0.25)
+            [-0.3574029561813889 +/- 5.91e-17]
+            >>> RR.lambertw(-0.25, -1)
+            [-2.153292364110349 +/- 8.59e-16]
+            >>> CC.lambertw(-1)
+            ([-0.318131505204764 +/- 1.92e-16] + [1.337235701430689 +/- 5.99e-16]*I)
+            >>> CC.lambertw(1, 5)
+            ([-3.398692196764719 +/- 6.76e-16] + [29.73131070782852 +/- 7.03e-15]*I)
+        """
         if k is None:
             return ctx._unary_op(x, libgr.gr_lambertw, "lambertw($x)")
         else:
@@ -2314,6 +3107,8 @@ class gr_ctx:
 
             >>> CC.hardy_theta(10)
             [-3.06707439628989 +/- 6.66e-15]
+            >>> RR.hardy_theta(2)
+            [-2.525910918816132 +/- 9.34e-16]
             >>> CC.hardy_theta(10, DirichletGroup(4)(3))
             [4.64979557270698 +/- 4.41e-15]
         """
@@ -2336,6 +3131,8 @@ class gr_ctx:
         Hardy Z-function.
 
             >>> CC.hardy_z(2)
+            [-0.539633125646145 +/- 8.59e-16]
+            >>> RR.hardy_z(2)
             [-0.539633125646145 +/- 8.59e-16]
             >>> CC.hardy_z(2, DirichletGroup(4)(3))
             [1.15107760668266 +/- 5.01e-15]
@@ -2370,6 +3167,26 @@ class gr_ctx:
         status = libgr.gr_dirichlet_chi_fmpz(res._ref, G, chi._ref, n._ref, ctx._ref)
         if status:
             _handle_error(ctx, status, "dirichlet_chi($n, $chi)", n, chi)
+        return res
+
+    def dirichlet_chi_vec(ctx, chi, n):
+        """
+        Vector of values of the given Dirichlet character.
+
+            >>> CC.dirichlet_chi_vec(DirichletGroup(4)(3), 5)
+            [0, 1.000000000000000, 0, -1.000000000000000, 0]
+        """
+        n = ctx._as_si(n)
+        assert n >= 0
+        assert n <= HUGE_LENGTH
+        assert isinstance(chi, dirichlet_char)
+        libgr.gr_dirichlet_chi_vec.argtypes = (ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, c_slong, ctypes.c_void_p)
+        G = libgr.gr_ctx_data_as_ptr(chi.parent()._ref)
+        res = Vec(ctx)()
+        assert not libgr.gr_vec_set_length(res._ref, n, ctx._ref)
+        status = libgr.gr_dirichlet_chi_vec(libgr.gr_vec_entry_ptr(res._ref, 0, ctx._ref), G, chi._ref, n, ctx._ref)
+        if status:
+            _handle_error(ctx, status, "dirichlet_chi_vec($chi, $n)", chi, n)
         return res
 
     def modular_j(ctx, tau):
@@ -2623,6 +3440,14 @@ class gr_elem:
     def _default_context():
         return None
 
+    @property
+    def _as_parameter_(self):
+        return self._ref
+
+    @staticmethod
+    def from_param(arg):
+        return arg
+
     def __init__(self, val=None, context=None, random=False):
         """
             >>> ZZ(QQ(1))
@@ -2694,6 +3519,37 @@ class gr_elem:
             return ctypes.cast(arr, ctypes.c_char_p).value.decode("ascii")
         finally:
             libflint.flint_free(arr)
+
+    def nstr(self, n):
+        """
+        Return a string representation of this element, where
+        real and complex numbers may be rounded to n digits.
+
+            >>> RR.pi().nstr(10)
+            '3.141592654'
+            >>> CC(1+1j).exp().nstr(10)
+            '(1.468693940 + 2.287355287*I)'
+        """
+        arr = ctypes.c_char_p()
+        n = self._ctx_python._as_si(n)
+        if libgr.gr_get_str_n(ctypes.byref(arr), self._ref, n, self._ctx) != GR_SUCCESS:
+            raise NotImplementedError
+        try:
+            return ctypes.cast(arr, ctypes.c_char_p).value.decode("ascii")
+        finally:
+            libflint.flint_free(arr)
+
+    def nprint(self, n):
+        """
+        Print a string representation of this element, where
+        real and complex numbers may be rounded to *n* digits.
+
+            >>> RR.pi().nprint(10)
+            3.141592654
+            >>> CC(1+1j).exp().nprint(10)
+            (1.468693940 + 2.287355287*I)
+        """
+        print(self.nstr(n))
 
     @staticmethod
     def _binary_coercion(self, other):
@@ -2938,6 +3794,10 @@ class gr_elem:
 
             >>> ZZ(24).gcd(30)
             6
+            >>> pi = CC_ca.pi(); i = CC_ca.i(); x = PolynomialRing(CC_ca).gen(); (x**2 + pi**2).gcd(x+i*pi)
+            (3.14159*I {a*b where a = 3.14159 [Pi], b = I [b^2+1=0]}) + x
+            >>> QQx([1,1,2,-1,3]).gcd(QQx([1,-1,1]))
+            1 - x + x^2
         """
         return self._binary_op(self, other, libgr.gr_gcd, "gcd")
 
@@ -3598,6 +4458,42 @@ class qqbar(gr_elem):
     def _default_context():
         return QQbar
 
+    def fexpr(self, formula=True, root_index=False, serialized=False,
+            gaussians=True, quadratics=True, cyclotomics=True, cubics=True,
+            quartics=True, quintics=True, depression=True, deflation=True,
+            separation=True):
+        """
+        """
+        res = fexpr()
+        if formula:
+            flags = 0
+            if gaussians: flags |= 1
+            if quadratics: flags |= 2
+            if cyclotomics: flags |= 4
+            if cubics: flags |= 8
+            if quartics: flags |= 16
+            if quintics: flags |= 32
+            if depression: flags |= 64
+            if deflation: flags |= 128
+            if separation: flags |= 256
+            if libcalcium.qqbar_get_fexpr_formula(res, self, flags):
+                return res
+        if root_index:
+            libcalcium.qqbar_get_fexpr_root_indexed(res, self)
+            return res
+        if serialized:
+            libcalcium.qqbar_get_fexpr_repr(res, self)
+            return res
+        libcalcium.qqbar_get_fexpr_root_nearest(res, self)
+        return res
+
+    def fexpr_repr(self):
+        """
+        """
+        res = fexpr()
+        libcalcium.qqbar_get_fexpr_repr(res, self)
+        return res
+
 class ca(gr_elem):
     _struct_type = ca_struct
 
@@ -3925,6 +4821,15 @@ class gr_poly(gr_elem):
             >>> f.roots(CF)     # complex floating-point roots
             ([-1.414213562373095, 1.414213562373095, 1.000000000000000*I, -1.000000000000000*I, -1.500000000000000], [1, 1, 1, 1, 2])
 
+        Calcium examples/tests:
+
+            >>> PolynomialRing(CC_ca)([2,11,20,12]).roots()
+            ([-0.666667 {-2/3}, -0.500000 {-1/2}], [1, 2])
+            >>> PolynomialRing(RR_ca)([1,-1,0,1]).roots()
+            ([-1.32472 {a where a = -1.32472 [a^3-a+1=0]}], [1])
+            >>> PolynomialRing(CC_ca)([1,-1,0,1]).roots()
+            ([-1.32472 {a where a = -1.32472 [a^3-a+1=0]}, 0.662359 + 0.562280*I {a where a = 0.662359 + 0.562280*I [a^3-a+1=0]}, 0.662359 - 0.562280*I {a where a = 0.662359 - 0.562280*I [a^3-a+1=0]}], [1, 1, 1])
+
         """
         Rx = self.parent()
         R = Rx._coefficient_ring
@@ -4042,6 +4947,14 @@ class gr_poly(gr_elem):
         return self._series_op_fmpz_fmpq_overloads(other, n, None, None, libgr.gr_poly_pow_series_fmpq_recurrence, "$f.pow_series($g, $n)")
 
     def atan_series(self, n):
+        """
+        Inverse tangent of this polynomial viewed as a power series,
+        truncated to length n.
+
+            >>> f = PolynomialRing(CC_ca)([2,3,4])
+            >>> 2*f.atan_series(5) - ((2*f).div_series(1-f**2, 5)).atan_series(5) == CC_ca.pi()
+            True
+        """
         return self._series_op(n, libgr.gr_poly_atan_series, "$f.atan_series($n)")
 
     def atanh_series(self, n):
@@ -4316,6 +5229,16 @@ class gr_mat(gr_elem):
         return x
 
     def det(self, algorithm=None):
+        """
+        Determinant of this matrix.
+
+            >>> MatZZ(3, 3, ZZ.fac_vec(9)).det()
+            233280
+            >>> MatRR(3, 3, ZZ.fac_vec(9)).det()
+            233280.0000000000
+            >>> MatRR(3, 3, ZZ.fac_vec(9)).det(algorithm="lu")
+            [233280.000000000 +/- 2.67e-10]
+        """
         element_ring = self.parent()._element_ring
         res = element_ring()
         if algorithm is None:
@@ -4335,9 +5258,164 @@ class gr_mat(gr_elem):
             if status & GR_DOMAIN: raise ValueError
         return res
 
-    def pascal(self, triangular=0):
+    def trace(self):
+        """
+            >>> MatZZ([[3,4],[5,6]]).trace()
+            9
+        """
         element_ring = self.parent()._element_ring
-        res = self.parent()()
+        res = element_ring()
+        status = libgr.gr_mat_trace(res._ref, self._ref, element_ring._ref)
+        if status:
+            if status & GR_UNABLE: raise NotImplementedError
+            if status & GR_DOMAIN: raise ValueError
+        return res
+
+    def rank(self):
+        """
+            >>> MatZZ([[1,2,3],[4,5,6],[7,8,9]]).rank()
+            2
+            >>> Mat(CC_ca)([[1, 0, 0], [0, 1-(CC_ca(2)**-10).exp(), 0]]).rank()
+            2
+            >>> Mat(CC_ca)([[1, 0, 0], [0, 1-(CC_ca(2)**-10000).exp(), 0]]).rank()
+            Traceback (most recent call last):
+              ...
+            NotImplementedError
+        """
+        element_ring = self.parent()._element_ring
+        r = (ctypes.c_long * 1)()
+        status = libgr.gr_mat_rank(r, self._ref, element_ring._ref)
+        if status:
+            if status & GR_UNABLE: raise NotImplementedError
+            if status & GR_DOMAIN: raise ValueError
+        return ZZ(r[0])
+
+    def solve(self, B):
+        """
+        Solves `AX = B` where `A` is given by self.
+        Allows the system to be singular, undetermined, or
+        overdetermined. If there are multiple solutions, an arbitrary
+        solution is returned.
+
+        This function currently only makes sense over fields.
+
+            >>> A = MatQQ([[1,2,0], [0,1,0], [2,-2,0]])
+            >>> B = MatQQ([[9], [2], [6]])
+            >>> A.nonsingular_solve(B)
+            Traceback (most recent call last):
+              ...
+            ValueError
+            >>> A.solve(B)
+            [[5],
+            [2],
+            [0]]
+            >>> X = A.solve(B)
+            >>> X
+            [[5],
+            [2],
+            [0]]
+            >>> A * X == B
+            True
+
+        """
+        r = self.nrows()
+        c = self.ncols()
+        if r != c or r != B.nrows():
+            raise ValueError
+        element_ring = self.parent()._element_ring
+        X = self.parent()(r, B.ncols())
+        status = libgr.gr_mat_solve_field(X._ref, self._ref, B._ref, element_ring._ref)
+        if status:
+            if status & GR_UNABLE: raise NotImplementedError
+            if status & GR_DOMAIN: raise ValueError
+        return X
+
+    def nonsingular_solve(self, B, algorithm=None):
+        """
+        Proves invertibility of A (self) over the corresponding fraction field
+        and solves `AX = B`.
+
+            >>> A = MatQQ([[1,2],[3,4]])
+            >>> B = MatQQ([[4],[5]])
+            >>> X = A.nonsingular_solve(B)
+            >>> A * X == B
+            True
+
+        The optional algorithm can be "lu" or "fflu".
+
+            >>> MatZZ([[3,5],[1,2]]).nonsingular_solve(MatZZ([[1],[2]]), algorithm="fflu")
+            [[-8],
+            [5]]
+        """
+        r = self.nrows()
+        c = self.ncols()
+        if r != c or r != B.nrows():
+            raise ValueError
+        element_ring = self.parent()._element_ring
+        X = self.parent()(r, B.ncols())
+        if algorithm is None:
+            status = libgr.gr_mat_nonsingular_solve(X._ref, self._ref, B._ref, element_ring._ref)
+        elif algorithm == "lu":
+            status = libgr.gr_mat_nonsingular_solve_lu(X._ref, self._ref, B._ref, element_ring._ref)
+        elif algorithm == "fflu":
+            status = libgr.gr_mat_nonsingular_solve_fflu(X._ref, self._ref, B._ref, element_ring._ref)
+        else:
+            raise ValueError("unknown algorithm")
+        if status:
+            if status & GR_UNABLE: raise NotImplementedError
+            if status & GR_DOMAIN: raise ValueError
+        return X
+
+    def nonsingular_solve_den(self, B):
+        """
+        Proves invertibility of A (self) over the corresponding fraction field
+        and solves `A(X/d) = B`.
+
+            >>> A = MatZZ([[3,4],[5,8]]); B = MatZZ([[1],[1]])
+            >>> X, d = A.nonsingular_solve_den(B)
+            >>> X
+            [[4],
+            [-2]]
+            >>> d
+            4
+            >>> A*X == B*d
+            True
+        """
+        r = self.nrows()
+        c = self.ncols()
+        if r != c or r != B.nrows():
+            raise ValueError
+        element_ring = self.parent()._element_ring
+        X = self.parent()(r, B.ncols())
+        den = element_ring()
+        status = libgr.gr_mat_nonsingular_solve_den(X._ref, den._ref, self._ref, B._ref, element_ring._ref)
+        if status:
+            if status & GR_UNABLE: raise NotImplementedError
+            if status & GR_DOMAIN: raise ValueError
+        return X, den
+
+    def pascal(self, triangular=0):
+        """
+        Returns a Pascal matrix of the same shape.
+
+            >>> MatZZ(4,5).pascal()
+            [[1, 1, 1, 1, 1],
+            [1, 2, 3, 4, 5],
+            [1, 3, 6, 10, 15],
+            [1, 4, 10, 20, 35]]
+            >>> MatZZ(4,5).pascal(1)
+            [[1, 1, 1, 1, 1],
+            [0, 1, 2, 3, 4],
+            [0, 0, 1, 3, 6],
+            [0, 0, 0, 1, 4]]
+            >>> MatZZ(4,5).pascal(-1)
+            [[1, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0],
+            [1, 2, 1, 0, 0],
+            [1, 3, 3, 1, 0]]
+        """
+        element_ring = self.parent()._element_ring
+        res = self.parent()(self.nrows(), self.ncols())
         status = libgr.gr_mat_pascal(res._ref, triangular, element_ring._ref)
         if status:
             if status & GR_UNABLE: raise NotImplementedError
@@ -4345,8 +5423,27 @@ class gr_mat(gr_elem):
         return res
 
     def stirling(self, kind=0):
+        """
+        Returns a Stirling matrix of the same shape.
+
+            >>> MatZZ(4,5).stirling()
+            [[1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 1, 1, 0, 0],
+            [0, 2, 3, 1, 0]]
+            >>> MatZZ(4,5).stirling(1)
+            [[1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, -1, 1, 0, 0],
+            [0, 2, -3, 1, 0]]
+            >>> MatZZ(4,5).stirling(2)
+            [[1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 1, 1, 0, 0],
+            [0, 1, 3, 1, 0]]
+        """
         element_ring = self.parent()._element_ring
-        res = self.parent()()
+        res = self.parent()(self.nrows(), self.ncols())
         status = libgr.gr_mat_stirling(res._ref, kind, element_ring._ref)
         if status:
             if status & GR_UNABLE: raise NotImplementedError
@@ -4354,8 +5451,15 @@ class gr_mat(gr_elem):
         return res
 
     def hilbert(self):
+        """
+        Returns a Hilbert matrix of the same shape.
+
+            >>> MatQQ(2,3).hilbert()
+            [[1, 1/2, 1/3],
+            [1/2, 1/3, 1/4]]
+        """
         element_ring = self.parent()._element_ring
-        res = self.parent()()
+        res = self.parent()(self.nrows(), self.ncols())
         status = libgr.gr_mat_hilbert(res._ref, element_ring._ref)
         if status:
             if status & GR_UNABLE: raise NotImplementedError
@@ -4363,8 +5467,22 @@ class gr_mat(gr_elem):
         return res
 
     def hadamard(self):
+        """
+        Returns a Hadamard matrix of the same shape.
+
+            >>> MatZZ(4,4).hadamard()
+            [[1, 1, 1, 1],
+            [1, -1, 1, -1],
+            [1, 1, -1, -1],
+            [1, -1, -1, 1]]
+            >>> MatZZ(3,3).hadamard()
+            Traceback (most recent call last):
+              ...
+            ValueError
+
+        """
         element_ring = self.parent()._element_ring
-        res = self.parent()()
+        res = self.parent()(self.nrows(), self.ncols())
         status = libgr.gr_mat_hadamard(res._ref, element_ring._ref)
         if status:
             if status & GR_UNABLE: raise NotImplementedError
@@ -4372,6 +5490,16 @@ class gr_mat(gr_elem):
         return res
 
     def charpoly(self, R=None, algorithm=None):
+        """
+        Characteristic polynomial of this matrix.
+
+            >>> MatZZ([[1,0,1],[0,0,0],[1,0,1]]).charpoly()
+            -2*x^2 + x^3
+            >>> MatRR([[1,0,1],[0,0,0],[1,0,1]]).charpoly()
+            -2.000000000000000*x^2 + 1.000000000000000*x^3
+            >>> Mat(CC_ca)([[5,CC_ca.pi()],[1,-1]]).charpoly()
+            (-8.14159 {-a-5 where a = 3.14159 [Pi]}) - 4*x + x^2
+        """
         mat_ring = self.parent()
         element_ring = mat_ring._element_ring
         poly_ring = R
@@ -4401,7 +5529,41 @@ class gr_mat(gr_elem):
             if status & GR_DOMAIN: raise ValueError
         return res
 
+    def minpoly(self, R=None):
+        """
+        Minimal polynomial of this matrix.
+        This currently only makes sense over fields.
+
+            >>> A = MatrixRing(QQ,3)([[1,0,1],[0,0,0],[1,0,1]])
+            >>> A.minpoly()
+            -2*x + x^2
+            >>> A.minpoly()(A)
+            [[0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]]
+        """
+        mat_ring = self.parent()
+        element_ring = mat_ring._element_ring
+        poly_ring = R
+        if poly_ring is None:
+            poly_ring = PolynomialRing_gr_poly(element_ring)
+        poly_element_ring = poly_ring._coefficient_ring
+        assert element_ring is poly_element_ring
+        res = poly_ring()
+        status = libgr.gr_mat_minpoly_field(res._ref, self._ref, element_ring._ref)
+        if status:
+            if status & GR_UNABLE: raise NotImplementedError
+            if status & GR_DOMAIN: raise ValueError
+        return res
+
     def transpose(self):
+        """
+            >>> MatZZ(3,4,range(12)).transpose()
+            [[0, 4, 8],
+            [1, 5, 9],
+            [2, 6, 10],
+            [3, 7, 11]]
+        """
         r = self.nrows()
         c = self.ncols()
         element_ring = self.parent()._element_ring
@@ -4569,6 +5731,32 @@ class gr_mat(gr_elem):
             [[1.000000000000000, -8.275113803054639e-17],
             [0, 1.000000000000000]]
 
+            >>> M = Mat(CC_ca)
+            >>> A = M([[1,2],[3,4]])
+            >>> D, L, R = A.diagonalization()
+            >>> D
+            [5.37228 {(a+5)/2 where a = 5.74456 [a^2-33=0]}, -0.372281 {(-a+5)/2 where a = 5.74456 [a^2-33=0]}]
+            >>> R * M([[D[0], 0], [0, D[1]]]) * L
+            [[1, 2],
+            [3, 4]]
+
+        A diagonalizable matrix without distinct eigenvalues:
+
+            >>> A = M([[-1,3,-1],[-3,5,-1],[-3,3,1]])
+            >>> D, L, R = A.diagonalization()
+            >>> D
+            [1, 2, 2]
+            >>> L
+            [[3, -3, 1],
+            [-3, 4, -1],
+            [-3, 3, 0]]
+            >>> R
+            [[1, 1, -0.333333 {-1/3}],
+            [1, 1, 0],
+            [1, 0, 1]]
+            >>> R * M([[D[0],0,0],[0,D[1],0],[0,0,D[2]]]) * L == A
+            True
+
         """
         Rmat = self.parent()
         C = Rmat._element_ring
@@ -4581,6 +5769,7 @@ class gr_mat(gr_elem):
             if status & GR_UNABLE: raise NotImplementedError
             if status & GR_DOMAIN: raise ValueError
         return (D, L, R)
+
 
     #def __getitem__(self, i):
     #    pass

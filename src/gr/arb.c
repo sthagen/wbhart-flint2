@@ -98,6 +98,14 @@ _gr_arb_write(gr_stream_t out, const arb_t x, const gr_ctx_t ctx)
 }
 
 int
+_gr_arb_write_n(gr_stream_t out, gr_srcptr x, slong n, gr_ctx_t ctx)
+{
+    n = FLINT_MAX(n, 1);
+    gr_stream_write_free(out, arb_get_str(x, n, ARB_STR_NO_RADIUS));
+    return GR_SUCCESS;
+}
+
+int
 _gr_arb_zero(arb_t x, const gr_ctx_t ctx)
 {
     arb_zero(x);
@@ -1740,6 +1748,16 @@ _gr_arb_mat_det(arb_t res, const arb_mat_t x, gr_ctx_t ctx)
     return GR_SUCCESS;
 }
 
+int
+_gr_arb_mat_exp(arb_mat_t res, const arb_mat_t x, gr_ctx_t ctx)
+{
+    if (x->r != x->c)
+        return GR_DOMAIN;
+
+    arb_mat_exp(res, x, ARB_CTX_PREC(ctx));
+    return GR_SUCCESS;
+}
+
 int _arb_methods_initialized = 0;
 
 gr_static_method_table _arb_methods;
@@ -1774,6 +1792,7 @@ gr_method_tab_input _arb_methods_input[] =
     {GR_METHOD_SET_SHALLOW,     (gr_funcptr) _gr_arb_set_shallow},
     {GR_METHOD_RANDTEST,        (gr_funcptr) _gr_arb_randtest},
     {GR_METHOD_WRITE,           (gr_funcptr) _gr_arb_write},
+    {GR_METHOD_WRITE_N,         (gr_funcptr) _gr_arb_write_n},
     {GR_METHOD_ZERO,            (gr_funcptr) _gr_arb_zero},
     {GR_METHOD_ONE,             (gr_funcptr) _gr_arb_one},
     {GR_METHOD_IS_ZERO,         (gr_funcptr) _gr_arb_is_zero},
@@ -1862,6 +1881,8 @@ gr_method_tab_input _arb_methods_input[] =
     {GR_METHOD_TAN_PI,          (gr_funcptr) _gr_arb_tan_pi},
     {GR_METHOD_COT_PI,          (gr_funcptr) _gr_arb_cot_pi},
     {GR_METHOD_CSC_PI,          (gr_funcptr) _gr_arb_csc_pi},
+    {GR_METHOD_SINC,            (gr_funcptr) _gr_arb_sinc},
+    {GR_METHOD_SINC_PI,         (gr_funcptr) _gr_arb_sinc_pi},
     {GR_METHOD_ASIN,            (gr_funcptr) _gr_arb_asin},
     {GR_METHOD_ACOS,            (gr_funcptr) _gr_arb_acos},
     {GR_METHOD_ATAN,            (gr_funcptr) _gr_arb_atan},
@@ -1965,6 +1986,7 @@ gr_method_tab_input _arb_methods_input[] =
     {GR_METHOD_POLY_ROOTS_OTHER,(gr_funcptr) _gr_arb_poly_roots_other},
     {GR_METHOD_MAT_MUL,         (gr_funcptr) _gr_arb_mat_mul},
     {GR_METHOD_MAT_DET,         (gr_funcptr) _gr_arb_mat_det},
+    {GR_METHOD_MAT_EXP,         (gr_funcptr) _gr_arb_mat_exp},
     {0,                         (gr_funcptr) NULL},
 };
 
