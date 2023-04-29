@@ -477,10 +477,24 @@ typedef struct {
     double* bbuf;
 } mul_precomp_struct;
 
+void _mul_precomp_init(
+    mul_precomp_struct* M,
+    const ulong * b, ulong bn, ulong btrunc,
+    ulong depth,
+    nmod_t mod,
+    mpn_ctx_t R);
+
 FLINT_INLINE void _mul_precomp_clear(mul_precomp_struct* M)
 {
     flint_aligned_free(M->bbuf);
 }
+
+int _nmod_poly_mul_mid_precomp(
+    ulong* z, ulong zl, ulong zh,
+    const ulong* a, ulong an,
+    mul_precomp_struct* M,
+    nmod_t mod,
+    mpn_ctx_t R);
 
 typedef struct {
     mul_precomp_struct quo_maker[1];
@@ -514,6 +528,17 @@ mpn_ctx_struct * get_default_mpn_ctx(void);
 void mpn_mul_default_mpn_ctx(mp_ptr r1, mp_srcptr i1, mp_size_t n1, mp_srcptr i2, mp_size_t n2);
 void _nmod_poly_mul_mid_default_mpn_ctx(mp_ptr res, slong zl, slong zh, mp_srcptr a, slong an, mp_srcptr b, slong bn, nmod_t mod);
 
+
+int _fmpz_poly_mul_mid_mpn_ctx(
+    fmpz * z, ulong zl, ulong zh,
+    const fmpz * a, ulong an,
+    const fmpz * b, ulong bn,
+    mpn_ctx_t R);
+
+int _fmpz_poly_mul_mid_default_mpn_ctx(
+    fmpz * z, slong zl, slong zh,
+    const fmpz * a, slong an,
+    const fmpz * b, slong bn);
 
 #ifdef __cplusplus
 }
