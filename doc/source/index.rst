@@ -8,12 +8,14 @@ FLINT: Fast Library for Number Theory
 
 Welcome to FLINT's documentation! FLINT is a C library for doing number theory.
 
+* Website: https://flintlib.org
 * Source code on GitHub: https://github.com/flintlib/flint2
 * Issue tracker: https://github.com/flintlib/flint2/issues
 * Mailing list: https://groups.google.com/group/flint-devel
 
 FLINT is free software distributed under the
 GNU Lesser General Public License (LGPL), version 2.1 or later.
+
 
 Introduction
 ------------
@@ -24,9 +26,9 @@ Introduction
    introduction.rst
    building.rst
    bug_reporting.rst
+   contributing.rst
    contributors.rst
    examples.rst
-   macros.rst
    memory.rst
    portability.rst
    threading.rst
@@ -205,9 +207,6 @@ Real and complex numbers
    polylogarithms.rst
    hypergeometric.rst
    agm.rst
-   setup.rst
-   contributing.rst
-   credits.rst
 
 .. toctree::
    :maxdepth: 1
@@ -307,11 +306,18 @@ Interfaces
    flintxx.rst
    python_flint.rst
 
-
 References
-----------------
+-----------------------------------
 
 .. toctree::
    :maxdepth: 1
 
    references.rst
+
+Version history
+-----------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   history.rst

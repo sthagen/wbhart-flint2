@@ -12,11 +12,8 @@
        :maxdepth: 2
 
        overview.rst
-       setup.rst
        using.rst
        issues.rst
-       contributing.rst
-       credits.rst
 
     Example programs
     ::::::::::::::::::::
@@ -134,7 +131,6 @@
 
        arb_fpwrap.rst
 
-
     Extra utility modules
     ::::::::::::::::::::::::::::::::::::
 
@@ -166,12 +162,3 @@
        polylogarithms.rst
        hypergeometric.rst
        agm.rst
-
-    Version history
-    :::::::::::::::::::::::::::::::::
-
-    .. toctree::
-       :maxdepth: 1
-
-       history.rst
-
