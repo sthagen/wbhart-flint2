@@ -124,6 +124,25 @@ int gr_generic_randtest_not_zero(gr_ptr x, flint_rand_t state, gr_ctx_t ctx)
     return GR_UNABLE;
 }
 
+int gr_generic_randtest_small(gr_ptr x, flint_rand_t state, gr_ctx_t ctx)
+{
+    int status = GR_SUCCESS;
+
+    if (gr_gen(x, ctx) != GR_SUCCESS || n_randint(state, 2) == 0)
+        status |= gr_zero(x, ctx);
+
+    status |= gr_mul_si(x, x, -3 + (slong) n_randint(state, 7), ctx);
+    status |= gr_add_si(x, x, -3 + (slong) n_randint(state, 7), ctx);
+
+    if (n_randint(state, 4) == 0)
+        status |= gr_div_ui(x, x, 1 + n_randint(state, 4), ctx);
+
+    if (status != GR_SUCCESS)
+        status = gr_set_si(x, -3 + (slong) n_randint(state, 7), ctx);
+
+    return status;
+}
+
 /* Generic arithmetic functions */
 
 truth_t gr_generic_is_zero(gr_srcptr x, gr_ctx_t ctx)
@@ -947,203 +966,6 @@ int gr_generic_other_div(gr_ptr res, gr_srcptr x, gr_ctx_t x_ctx, gr_srcptr y, g
 int gr_generic_divexact(gr_ptr res, gr_srcptr x, gr_srcptr y, gr_ctx_t ctx)
 {
     return gr_div(res, x, y, ctx);
-}
-
-
-/* Generic powering */
-
-/* Assumes exp >= 2; res and tmp not not aliased with x. */
-static int
-gr_generic_pow_ui_binexp(gr_ptr res, gr_ptr tmp, gr_srcptr x, ulong exp, gr_ctx_t ctx)
-{
-    gr_ptr R, S, T;
-    gr_method_unary_op sqr = GR_UNARY_OP(ctx, SQR);
-    gr_method_binary_op mul = GR_BINARY_OP(ctx, MUL);
-    int status;
-    int zeros;
-    ulong bit;
-
-    status = GR_SUCCESS;
-
-    /* Determine parity due to swaps */
-    zeros = 0;
-    bit = exp;
-    while (bit > 1)
-    {
-        zeros += !(bit & 1);
-        bit >>= 1;
-    }
-
-    if (zeros % 2)
-    {
-        R = res;
-        S = tmp;
-    }
-    else
-    {
-        R = tmp;
-        S = res;
-    }
-
-    bit = UWORD(1) << (FLINT_BIT_COUNT(exp) - 2);
-
-    status |= sqr(R, x, ctx);
-
-    if (bit & exp)
-    {
-        status |= mul(S, R, x, ctx);
-        T = R;
-        R = S;
-        S = T;
-    }
-
-    while (bit >>= 1)
-    {
-        status |= sqr(S, R, ctx);
-
-        if (bit & exp)
-        {
-            status |= mul(R, S, x, ctx);
-        }
-        else
-        {
-            T = R;
-            R = S;
-            S = T;
-        }
-    }
-
-    return status;
-}
-
-/* todo: optimize swaps */
-static int
-gr_generic_pow_fmpz_binexp(gr_ptr res, gr_srcptr x, const fmpz_t exp, gr_ctx_t ctx)
-{
-    gr_ptr t, u;
-    gr_method_binary_op mul = GR_BINARY_OP(ctx, MUL);
-    gr_method_unary_op sqr = GR_UNARY_OP(ctx, SQR);
-    gr_method_swap_op swap = GR_SWAP_OP(ctx, SWAP);
-    int status;
-    slong i;
-
-    status = GR_SUCCESS;
-
-    GR_TMP_INIT2(t, u, ctx);
-
-    status |= gr_set(t, x, ctx);
-
-    for (i = fmpz_bits(exp) - 2; i >= 0; i--)
-    {
-        status |= sqr(u, t, ctx);
-
-        if (fmpz_tstbit(exp, i))
-            status |= mul(t, u, x, ctx);
-        else
-            swap(t, u, ctx);
-    }
-
-    swap(res, t, ctx);
-
-    GR_TMP_CLEAR2(t, u, ctx);
-
-    return status;
-}
-
-int
-gr_generic_pow_ui(gr_ptr res, gr_srcptr x, ulong e, gr_ctx_t ctx)
-{
-    int status;
-
-    if (e == 0)
-    {
-        return gr_one(res, ctx);
-    }
-    else if (e == 1)
-    {
-        return gr_set(res, x, ctx);
-    }
-    else if (e == 2)
-    {
-        return gr_sqr(res, x, ctx);
-    }
-    else if (e == 4)
-    {
-        status = gr_sqr(res, x, ctx);
-        status |= gr_sqr(res, res, ctx);
-        return status;
-    }
-    else
-    {
-        gr_ptr t, u;
-
-        if (res == x)
-        {
-            GR_TMP_INIT2(t, u, ctx);
-            status = gr_set(u, x, ctx);
-            status |= gr_generic_pow_ui_binexp(res, t, u, e, ctx);
-            GR_TMP_CLEAR2(t, u, ctx);
-        }
-        else
-        {
-            GR_TMP_INIT(t, ctx);
-            status = gr_generic_pow_ui_binexp(res, t, x, e, ctx);
-            GR_TMP_CLEAR(t, ctx);
-        }
-
-        return status;
-    }
-}
-
-/* todo: call gr_pow_ui instead of gr_generic_pow_ui? */
-int
-gr_generic_pow_si(gr_ptr res, gr_srcptr x, slong e, gr_ctx_t ctx)
-{
-    if (e >= 0)
-    {
-        return gr_generic_pow_ui(res, x, e, ctx);
-    }
-    else
-    {
-        int status;
-
-        /* todo: some heuristic for when we want to invert before/after powering */
-        status = gr_inv(res, x, ctx);
-        if (status == GR_SUCCESS)
-            status = gr_generic_pow_ui(res, res, -e, ctx);
-
-        return status;
-    }
-}
-
-int
-gr_generic_pow_fmpz(gr_ptr res, gr_srcptr x, const fmpz_t e, gr_ctx_t ctx)
-{
-    int status;
-
-    if (fmpz_sgn(e) < 0)
-    {
-        fmpz_t f;
-        fmpz_init(f);
-        fmpz_neg(f, e);
-
-        /* todo: some heuristic for when we want to invert before/after powering */
-        status = gr_inv(res, x, ctx);
-        if (status == GR_SUCCESS)
-            status = gr_generic_pow_fmpz(res, res, f, ctx);
-
-        fmpz_clear(f);
-        return status;
-    }
-
-    if (*e == 0)
-        return gr_one(res, ctx);
-    else if (*e == 1)
-        return gr_set(res, x, ctx);
-    else if (*e == 2)
-        return gr_sqr(res, x, ctx);
-    else
-        return gr_generic_pow_fmpz_binexp(res, x, e, ctx);
 }
 
 /* at least catch square roots -- todo: generalize to nth roots */
@@ -2588,6 +2410,7 @@ const gr_method_tab_input _gr_generic_methods[] =
 
     {GR_METHOD_RANDTEST,                (gr_funcptr) gr_generic_randtest},
     {GR_METHOD_RANDTEST_NOT_ZERO,       (gr_funcptr) gr_generic_randtest_not_zero},
+    {GR_METHOD_RANDTEST_SMALL,          (gr_funcptr) gr_generic_randtest_small},
 
     {GR_METHOD_ZERO,                    (gr_funcptr) gr_generic_zero},
     {GR_METHOD_ONE,                     (gr_funcptr) gr_generic_one},
