@@ -590,7 +590,6 @@ typedef enum
     GR_METHOD_CTX_FQ_PRIME,
     GR_METHOD_CTX_FQ_DEGREE,
     GR_METHOD_CTX_FQ_ORDER,
-    GR_METHOD_FQ_GEN,
     GR_METHOD_FQ_FROBENIUS,
     GR_METHOD_FQ_MULTIPLICATIVE_ORDER,
     GR_METHOD_FQ_NORM,
@@ -718,8 +717,9 @@ typedef enum
     GR_CTX_COMPLEX_FLOAT_ACF,
 
     GR_CTX_FMPZ_POLY,
-
+    GR_CTX_FMPQ_POLY,
     GR_CTX_GR_POLY,
+
     GR_CTX_GR_MPOLY,
     GR_CTX_GR_MAT,
 
@@ -1125,7 +1125,6 @@ GR_INLINE WARN_UNUSED_RESULT int gr_ctx_fq_prime(fmpz_t res, gr_ctx_t ctx) { ret
 GR_INLINE WARN_UNUSED_RESULT int gr_ctx_fq_degree(slong * res, gr_ctx_t ctx) { return GR_CONSTANT_OP_GET_SI(ctx, CTX_FQ_DEGREE)(res, ctx); }
 GR_INLINE WARN_UNUSED_RESULT int gr_ctx_fq_order(fmpz_t res, gr_ctx_t ctx) { return GR_CONSTANT_OP_GET_FMPZ(ctx, CTX_FQ_ORDER)(res, ctx); }
 
-GR_INLINE WARN_UNUSED_RESULT int gr_fq_gen(gr_ptr res, gr_ctx_t ctx) { return GR_CONSTANT_OP(ctx, FQ_GEN)(res, ctx); }
 GR_INLINE WARN_UNUSED_RESULT int gr_fq_frobenius(gr_ptr res, gr_srcptr x, slong e, gr_ctx_t ctx) { return GR_BINARY_OP_SI(ctx, FQ_FROBENIUS)(res, x, e, ctx); }
 GR_INLINE WARN_UNUSED_RESULT int gr_fq_multiplicative_order(fmpz_t res, gr_srcptr x, gr_ctx_t ctx) { return GR_UNARY_OP_GET_FMPZ(ctx, FQ_MULTIPLICATIVE_ORDER)(res, x, ctx); }
 GR_INLINE WARN_UNUSED_RESULT int gr_fq_norm(fmpz_t res, gr_srcptr x, gr_ctx_t ctx) { return GR_UNARY_OP_GET_FMPZ(ctx, FQ_NORM)(res, x, ctx); }
@@ -1136,20 +1135,6 @@ GR_INLINE WARN_UNUSED_RESULT int gr_fq_pth_root(gr_ptr res, gr_srcptr x, gr_ctx_
 GR_INLINE void _gr_vec_init(gr_ptr vec, slong len, gr_ctx_t ctx) { GR_VEC_INIT_CLEAR_OP(ctx, VEC_INIT)(vec, len, ctx); }
 GR_INLINE void _gr_vec_clear(gr_ptr vec, slong len, gr_ctx_t ctx) { GR_VEC_INIT_CLEAR_OP(ctx, VEC_CLEAR)(vec, len, ctx); }
 GR_INLINE void _gr_vec_swap(gr_ptr vec1, gr_ptr vec2, slong len, gr_ctx_t ctx) { GR_VEC_SWAP_OP(ctx, VEC_SWAP)(vec1, vec2, len, ctx); }
-
-/* some useful generic functions, currently not overloadable */
-#ifdef FMPZ_POLY_H
-WARN_UNUSED_RESULT int _gr_fmpz_poly_evaluate_horner(gr_ptr res, const fmpz * f, slong len, gr_srcptr x, gr_ctx_t ctx);
-WARN_UNUSED_RESULT int gr_fmpz_poly_evaluate_horner(gr_ptr res, const fmpz_poly_t f, gr_srcptr x, gr_ctx_t ctx);
-WARN_UNUSED_RESULT int _gr_fmpz_poly_evaluate_rectangular(gr_ptr res, const fmpz * f, slong len, gr_srcptr x, gr_ctx_t ctx);
-WARN_UNUSED_RESULT int gr_fmpz_poly_evaluate_rectangular(gr_ptr res, const fmpz_poly_t f, gr_srcptr x, gr_ctx_t ctx);
-WARN_UNUSED_RESULT int _gr_fmpz_poly_evaluate(gr_ptr res, const fmpz * f, slong len, gr_srcptr x, gr_ctx_t ctx);
-WARN_UNUSED_RESULT int gr_fmpz_poly_evaluate(gr_ptr res, const fmpz_poly_t f, gr_srcptr x, gr_ctx_t ctx);
-#endif
-
-#ifdef FMPZ_MPOLY_H
-WARN_UNUSED_RESULT int gr_fmpz_mpoly_evaluate(gr_ptr res, const fmpz_mpoly_t f, gr_srcptr x, const fmpz_mpoly_ctx_t mctx, gr_ctx_t ctx);
-#endif
 
 /* todo: warn unused? */
 int gr_ctx_print(gr_ctx_t ctx);
@@ -1312,8 +1297,6 @@ GR_INLINE void gr_heap_clear_vec(gr_ptr x, slong len, gr_ctx_t ctx)
     flint_free(x);
 }
 
-/* Some generic implementations */
-
 truth_t gr_generic_ctx_predicate(gr_ctx_t ctx);
 truth_t gr_generic_ctx_predicate_true(gr_ctx_t ctx);
 truth_t gr_generic_ctx_predicate_false(gr_ctx_t ctx);
@@ -1359,6 +1342,7 @@ void _gr_ctx_init_fq_nmod_from_ref(gr_ctx_t ctx, const void * fq_nmod_ctx);
 void _gr_ctx_init_fq_zech_from_ref(gr_ctx_t ctx, const void * fq_zech_ctx);
 
 void gr_ctx_init_fmpz_poly(gr_ctx_t ctx);
+void gr_ctx_init_fmpq_poly(gr_ctx_t ctx);
 
 #ifdef FMPQ_POLY_H
 void gr_ctx_init_nf(gr_ctx_t ctx, const fmpq_poly_t poly);
@@ -1385,7 +1369,13 @@ polynomial_ctx_t;
 #define POLYNOMIAL_CTX(ring_ctx) ((polynomial_ctx_t *)((ring_ctx)))
 #define POLYNOMIAL_ELEM_CTX(ring_ctx) (POLYNOMIAL_CTX(ring_ctx)->base_ring)
 
-void gr_ctx_init_polynomial(gr_ctx_t ctx, gr_ctx_t base_ring);
+void gr_ctx_init_gr_poly(gr_ctx_t ctx, gr_ctx_t base_ring);
+
+/* Multivariate */
+
+#ifdef MPOLY_H
+void gr_ctx_init_gr_mpoly(gr_ctx_t ctx, gr_ctx_t base_ring, slong nvars, const ordering_t ord);
+#endif
 
 /* Generic series */
 
@@ -1428,12 +1418,6 @@ GR_INLINE void gr_ctx_init_matrix_ring(gr_ctx_t ctx, gr_ctx_t base_ring, slong n
     gr_ctx_init_matrix_space(ctx, base_ring, n, n);
 }
 
-/* Multivariate */
-
-#ifdef MPOLY_H
-void gr_ctx_init_mpoly(gr_ctx_t ctx, gr_ctx_t base_ring, slong nvars, const ordering_t ord);
-#endif
-
 /* Coercions */
 
 int gr_ctx_cmp_coercion(gr_ctx_t ctx1, gr_ctx_t ctx2);
@@ -1446,18 +1430,6 @@ int gr_ctx_cmp_coercion(gr_ctx_t ctx1, gr_ctx_t ctx2);
 /* todo: just have gr_test_structure() */
 void gr_test_ring(gr_ctx_t R, slong iters, int test_flags);
 void gr_test_multiplicative_group(gr_ctx_t R, slong iters, int test_flags);
-
-/* Various generic algorithms */
-
-int gr_generic_pow_fmpz_sliding(gr_ptr f, gr_srcptr g, const fmpz_t pow, gr_ctx_t ctx);
-int gr_generic_pow_ui_sliding(gr_ptr f, gr_srcptr g, ulong pow, gr_ctx_t ctx);
-
-int gr_generic_pow_fmpz_binexp(gr_ptr res, gr_srcptr x, const fmpz_t exp, gr_ctx_t ctx);
-int gr_generic_pow_ui_binexp(gr_ptr res, gr_srcptr x, ulong e, gr_ctx_t ctx);
-
-int gr_generic_pow_fmpz(gr_ptr res, gr_srcptr x, const fmpz_t e, gr_ctx_t ctx);
-int gr_generic_pow_si(gr_ptr res, gr_srcptr x, slong e, gr_ctx_t ctx);
-int gr_generic_pow_ui(gr_ptr res, gr_srcptr x, ulong e, gr_ctx_t ctx);
 
 #ifdef __cplusplus
 }

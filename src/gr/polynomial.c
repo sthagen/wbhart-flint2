@@ -144,6 +144,8 @@ polynomial_set_fmpq(gr_poly_t res, const fmpq_t v, gr_ctx_t ctx)
     return gr_poly_set_fmpq(res, v, POLYNOMIAL_ELEM_CTX(ctx));
 }
 
+#include "fmpz_poly.h"
+
 int
 polynomial_set_other(gr_poly_t res, gr_srcptr x, gr_ctx_t x_ctx, gr_ctx_t ctx)
 {
@@ -158,6 +160,14 @@ polynomial_set_other(gr_poly_t res, gr_srcptr x, gr_ctx_t x_ctx, gr_ctx_t ctx)
     else if (x_ctx->which_ring == GR_CTX_GR_POLY && !strcmp(POLYNOMIAL_CTX(x_ctx)->var, POLYNOMIAL_CTX(ctx)->var))
     {
         return gr_poly_set_gr_poly_other(res, x, POLYNOMIAL_ELEM_CTX(x_ctx), POLYNOMIAL_ELEM_CTX(ctx));
+    }
+    else if (x_ctx->which_ring == GR_CTX_FMPZ_POLY)
+    {
+        return gr_poly_set_fmpz_poly(res, x, POLYNOMIAL_ELEM_CTX(ctx));
+    }
+    else if (x_ctx->which_ring == GR_CTX_FMPQ_POLY)
+    {
+        return gr_poly_set_fmpq_poly(res, x, POLYNOMIAL_ELEM_CTX(ctx));
     }
     else if (x_ctx->which_ring == GR_CTX_GR_VEC)
     {
@@ -405,7 +415,7 @@ gr_method_tab_input _gr_poly_methods_input[] =
 };
 
 void
-gr_ctx_init_polynomial(gr_ctx_t ctx, gr_ctx_t base_ring)
+gr_ctx_init_gr_poly(gr_ctx_t ctx, gr_ctx_t base_ring)
 {
     ctx->which_ring = GR_CTX_GR_POLY;
     ctx->sizeof_elem = sizeof(gr_poly_struct);

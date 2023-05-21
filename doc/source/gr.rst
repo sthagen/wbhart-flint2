@@ -396,12 +396,6 @@ Input, output and string conversion
 Assignment and conversions
 ................................................................................
 
-.. function:: int gr_zero(gr_ptr res, gr_ctx_t ctx)
-              int gr_one(gr_ptr res, gr_ctx_t ctx)
-              int gr_neg_one(gr_ptr res, gr_ctx_t ctx)
-
-    Sets *res* to the ring element 0, 1 or -1.
-
 .. function:: int gr_set(gr_ptr res, gr_srcptr x, gr_ctx_t ctx)
 
     Sets *res* to a copy of the element *x*.
@@ -437,6 +431,20 @@ Assignment and conversions
               int gr_get_fmpz_2exp_fmpz(fmpz_t res1, fmpz_t res2, gr_srcptr x, gr_ctx_t ctx)
 
     Set or retrieve a dyadic number.
+
+Special values
+................................................................................
+
+.. function:: int gr_zero(gr_ptr res, gr_ctx_t ctx)
+              int gr_one(gr_ptr res, gr_ctx_t ctx)
+              int gr_neg_one(gr_ptr res, gr_ctx_t ctx)
+
+    Sets *res* to the ring element 0, 1 or -1.
+
+.. function:: int gr_gen(gr_ptr res, gr_ctx_t ctx)
+
+    Sets *res* to a generator of this domain. The meaning of
+    "generator" depends on the domain.
 
 Basic properties
 ........................................................................
@@ -549,22 +557,6 @@ attempting to perform a coercion into the target domain.
 Iterated arithmetic operations are best performed using vector
 functions.
 See in particular :func:`_gr_vec_dot` and :func:`_gr_vec_dot_rev`.
-
-.. function:: int _gr_fmpz_poly_evaluate_horner(gr_ptr res, const fmpz * f, slong len, gr_srcptr x, gr_ctx_t ctx)
-              int gr_fmpz_poly_evaluate_horner(gr_ptr res, const fmpz_poly_t f, gr_srcptr x, gr_ctx_t ctx)
-              int _gr_fmpz_poly_evaluate_rectangular(gr_ptr res, const fmpz * f, slong len, gr_srcptr x, gr_ctx_t ctx)
-              int gr_fmpz_poly_evaluate_rectangular(gr_ptr res, const fmpz_poly_t f, gr_srcptr x, gr_ctx_t ctx)
-              int _gr_fmpz_poly_evaluate(gr_ptr res, const fmpz * f, slong len, gr_srcptr x, gr_ctx_t ctx)
-              int gr_fmpz_poly_evaluate(gr_ptr res, const fmpz_poly_t f, gr_srcptr x, gr_ctx_t ctx)
-
-    Sets *res* to the value of the integer polynomial *f* evaluated
-    at the argument *x*.
-
-.. function:: int gr_fmpz_mpoly_evaluate(gr_ptr res, const fmpz_mpoly_t f, gr_srcptr x, const fmpz_mpoly_ctx_t mctx, gr_ctx_t ctx)
-
-    Sets *res* to value of the multivariate polynomial *f* (with
-    corresponding context object *mctx*) evaluated at the vector
-    of arguments in *x*.
 
 Division
 ........................................................................
@@ -784,8 +776,6 @@ Finite field methods
 .. function:: int gr_ctx_fq_degree(slong * deg, gr_ctx_t ctx)
 
 .. function:: int gr_ctx_fq_order(fmpz_t q, gr_ctx_t ctx)
-
-.. function:: int gr_fq_gen(gr_ptr res, gr_ctx_t ctx)
 
 .. function:: int gr_fq_frobenius(gr_ptr res, gr_srcptr x, slong e, gr_ctx_t ctx)
 
