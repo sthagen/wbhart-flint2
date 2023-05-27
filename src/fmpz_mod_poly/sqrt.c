@@ -32,7 +32,7 @@ int _fmpz_mod_poly_sqrt_2(fmpz * s, const fmpz * p, slong len)
 }
 
 int
-_fmpz_mod_poly_sqrt(fmpz * s, const fmpz * p, slong len, fmpz_mod_ctx_t mod)
+_fmpz_mod_poly_sqrt(fmpz * s, const fmpz * p, slong len, const fmpz_mod_ctx_t mod)
 {
     slong slen, i;
     int result;
@@ -85,13 +85,13 @@ _fmpz_mod_poly_sqrt(fmpz * s, const fmpz * p, slong len, fmpz_mod_ctx_t mod)
     t = _fmpz_vec_init(len);
 
     if (fmpz_is_one(c))
-        _fmpz_mod_poly_sqrt_series(s, p, slen, mod);
+        _fmpz_mod_poly_sqrt_series(s, p, slen, slen, mod);
     else
     {
         fmpz_invmod(d, d, mod->n);
 
         _fmpz_mod_vec_scalar_mul_fmpz_mod(t, p, slen, d, mod);
-        _fmpz_mod_poly_sqrt_series(s, t, slen, mod);
+        _fmpz_mod_poly_sqrt_series(s, t, slen, slen, mod);
     }
 
     if (!fmpz_is_one(c))
@@ -117,7 +117,7 @@ cleanup:
 }
 
 int
-fmpz_mod_poly_sqrt(fmpz_mod_poly_t b, const fmpz_mod_poly_t a, fmpz_mod_ctx_t ctx)
+fmpz_mod_poly_sqrt(fmpz_mod_poly_t b, const fmpz_mod_poly_t a, const fmpz_mod_ctx_t ctx)
 {
     slong blen, len = a->length;
     int result;

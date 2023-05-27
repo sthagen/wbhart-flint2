@@ -899,24 +899,6 @@ Power series inversion
 --------------------------------------------------------------------------------
 
 
-.. function:: void _fmpz_mod_poly_inv_series_newton(fmpz * Qinv, const fmpz * Q, slong n, const fmpz_t cinv, const fmpz_mod_ctx_t ctx)
-
-    Sets ``(Qinv, n)`` to the inverse of ``(Q, n)`` modulo `x^n`,
-    where `n \geq 1`, assuming that the bottom coefficient of `Q` is
-    invertible modulo `p` and that its inverse is ``cinv``.
-
-.. function:: void fmpz_mod_poly_inv_series_newton(fmpz_mod_poly_t Qinv, const fmpz_mod_poly_t Q, slong n, const fmpz_mod_ctx_t ctx)
-
-    Sets ``Qinv`` to the inverse of ``Q`` modulo `x^n`,
-    where `n \geq 1`, assuming that the bottom coefficient of
-    `Q` is a unit.
-
-.. function:: void fmpz_mod_poly_inv_series_newton_f(fmpz_t f, fmpz_mod_poly_t Qinv, const fmpz_mod_poly_t Q, slong n, const fmpz_mod_ctx_t ctx)
-
-    Either sets `f` to a nontrivial factor of `p` with the value of
-    ``Qinv`` undefined, or sets ``Qinv`` to the inverse of ``Q``
-    modulo `x^n`, where `n \geq 1`.
-
 .. function:: void _fmpz_mod_poly_inv_series(fmpz * Qinv, const fmpz * Q, slong n, const fmpz_t cinv, const fmpz_mod_ctx_t ctx)
 
     Sets ``(Qinv, n)`` to the inverse of ``(Q, n)`` modulo `x^n`,
@@ -1526,22 +1508,20 @@ by means of the generalised binomial theorem
 It is assumed that `h` has constant term `1` and that the coefficients
 `2^{-k}` exist in the coefficient ring (i.e. `2` must be invertible).
 
-.. function:: void _fmpz_mod_poly_invsqrt_series(fmpz * g, const fmpz * h, slong n, fmpz_mod_ctx_t ctx)
+.. function:: void _fmpz_mod_poly_invsqrt_series(fmpz * g, const fmpz * h, slong hlen, slong n, fmpz_mod_ctx_t ctx)
 
     Set the first `n` terms of `g` to the series expansion of `1/\sqrt{h}`.
-    It is assumed that `n > 0`, that `h` has constant term 1 and that `h`
-    is zero-padded as necessary to length `n`. Aliasing is not permitted.
+    It is assumed that `n > 0` and `h > 0`. Aliasing is not permitted.
 
 .. function:: void fmpz_mod_poly_invsqrt_series(fmpz_mod_poly_t g, const fmpz_mod_poly_t h, slong n, fmpz_ctx_t ctx)
 
     Set `g` to the series expansion of `1/\sqrt{h}` to order `O(x^n)`.
     It is assumed that `h` has constant term 1.
 
-.. function:: void _fmpz_mod_poly_sqrt_series(fmpz * g, const fmpz * h, slong n, fmpz_mod_ctx_t ctx)
+.. function:: void _fmpz_mod_poly_sqrt_series(fmpz * g, const fmpz * h, slong hlen, slong n, fmpz_mod_ctx_t ctx)
 
     Set the first `n` terms of `g` to the series expansion of `\sqrt{h}`.
-    It is assumed that `n > 0`, that `h` has constant term 1 and that `h`
-    is zero-padded as necessary to length `n`. Aliasing is not permitted.
+    It is assumed that `n > 0` and `h > 0`. Aliasing is not permitted.
 
 .. function:: void fmpz_mod_poly_sqrt_series(fmpz_mod_poly_t g, const fmpz_mod_poly_t h, slong n, fmpz_mod_ctx_t ctx)
 
