@@ -132,6 +132,13 @@ class fmpq_poly_struct(ctypes.Structure):
                 ('length', c_slong),
                 ('den', c_slong)]
 
+class fmpz_mpoly_struct(ctypes.Structure):
+    _fields_ = [('coeffs', ctypes.c_void_p),
+                ('exp', ctypes.c_void_p),
+                ('alloc', c_slong),
+                ('length', c_slong),
+                ('bits', c_slong)]
+
 # todo: actually a union
 class nf_elem_struct(ctypes.Structure):
     _fields_ = [('poly', fmpq_poly_struct)]
@@ -1169,6 +1176,14 @@ class gr_ctx:
             _handle_error(ctx, status, rstr, x, y)
         return res
 
+    def _op_vec_ctx(ctx, op, rstr):
+        op.argtypes = (ctypes.c_void_p, ctypes.c_void_p)
+        res = Vec(ctx)()
+        status = op(res._ref, ctx._ref)
+        if status:
+            _handle_error(ctx, status, rstr)
+        return res
+
     def _op_vec_len(ctx, n, op, rstr):
         n = ctx._as_si(n)
         assert n >= 0
@@ -1237,6 +1252,9 @@ class gr_ctx:
 
         """
         return ctx._constant(ctx, libgr.gr_gen, "gen")
+
+    def gens(ctx):
+        return ctx._op_vec_ctx(libgr.gr_gens, "gens")
 
     def i(ctx):
         """
@@ -1335,6 +1353,12 @@ class gr_ctx:
 
     def rsqrt(ctx, x):
         return ctx._unary_op(x, libgr.gr_rsqrt, "rsqrt($x)")
+
+    def numerator(ctx, x):
+        return ctx._unary_op(x, libgr.gr_numerator, "numerator($x)")
+
+    def denominator(ctx, x):
+        return ctx._unary_op(x, libgr.gr_denominator, "denominator($x)")
 
     def floor(ctx, x):
         return ctx._unary_op(x, libgr.gr_floor, "floor($x)")
@@ -3928,6 +3952,38 @@ class gr_elem:
         """
         return self._unary_op(self, libgr.gr_rsqrt, "rsqrt($x)")
 
+    def numerator(self):
+        r"""
+        Numerator of this element.
+
+            >>> (QQ(-2) / 3).numerator()
+            -2
+            >>> ZZ(5).numerator()
+            5
+        """
+        return self._unary_op(self, libgr.gr_numerator, "numerator($x)")
+
+    def denominator(self):
+        r"""
+        Denominator of this element.
+
+            >>> (QQ(-2) / 3).denominator()
+            3
+            >>> ZZ(5).denominator()
+            1
+
+        Depending on the ring, the denominator need not be minimal.
+        This is currently not the case for algebraic numbers:
+
+            >>> a = ((2 + QQbar.i()) / 4)
+            >>> a.numerator()
+            Root a = 8.00000 + 4.00000*I of a^2-16*a+80
+            >>> a.denominator()
+            16
+
+        """
+        return self._unary_op(self, libgr.gr_denominator, "denominator($x)")
+
     def floor(self):
         r"""
         Floor function: closest integer in the direction of `-\infty`.
@@ -5988,6 +6044,37 @@ ZZx_fmpz_poly = PolynomialRing_fmpz_poly()
 QQx_fmpq_poly = PolynomialRing_fmpq_poly()
 
 
+class fmpz_poly(gr_poly):
+    _struct_type = fmpz_poly_struct
+
+    @staticmethod
+    def _default_context():
+        return ZZx_fmpz_poly
+
+    def __init__(self, val=None, context=None):
+        if isinstance(val, (list, tuple)):
+            gr_elem.__init__(self, ZZx_gr_poly(val), context)
+        else:
+            gr_elem.__init__(self, val, context)
+
+
+class fmpz_mpoly(gr_elem):
+    _struct_type = fmpz_mpoly_struct
+
+class PolynomialRing_fmpz_mpoly(gr_ctx):
+
+    def __init__(self, nvars):
+        gr_ctx.__init__(self)
+        nvars = gr_ctx._as_si(nvars)
+        assert nvars >= 0
+        libgr.gr_ctx_init_fmpz_mpoly(self._ref, nvars, 0)
+        self._elem_type = fmpz_mpoly
+
+    @property
+    def _coefficient_ring(self):
+        return ZZ
+
+
 
 
 # todo: def .one()
@@ -6353,6 +6440,14 @@ def test_special():
         assert QQ.fib(i) == QQ.fib(i-1) + QQ.fib(i-2)
         assert F.fib(i) == F.fib(i-1) + F.fib(i-2)
 
+def test_mpoly():
+    ZZxyz = PolynomialRing_fmpz_mpoly(3)
+    x, y, z = ZZxyz.gens()
+    f = (-72 * (1+x)**2 * (y+z+1))
+    c, fac, exp = f.factor()
+    assert c == -72
+    assert ((fac, exp) == ([1+x, y+z+1], [2, 1])) or ((fac, exp) == ([y+z+1, 1+x], [1, 2]))
+    assert f.gcd(-100-100*x) == 4+4*x
 
 if __name__ == "__main__":
     from time import time

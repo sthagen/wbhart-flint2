@@ -446,6 +446,12 @@ Special values
     Sets *res* to a generator of this domain. The meaning of
     "generator" depends on the domain.
 
+.. function:: int gr_gens(gr_vec_t res, gr_ctx_t ctx)
+
+    Sets *res* to a vector containing the generators of this domain
+    where this makes sense, for example in a multivariate polynomial
+    ring.
+
 Basic properties
 ........................................................................
 
@@ -707,7 +713,7 @@ Factorization
 
     where `f_k` will be irreducible or prime (depending on `R`).
 
-    The prefactor `c` stores a unit or sign, e.g.\ the
+    The prefactor `c` stores a unit, sign, or coefficient, e.g.\ the
     sign `-1`, `0` or `+1` in `\mathbb{Z}`, or a sign multiplied
     by the coefficient content in `\mathbb{Z}[x]`.
     Note that this function outputs `c` as an element of the
@@ -719,6 +725,19 @@ Factorization
     The factors `f_k` are guaranteed to be distinct,
     but they are not guaranteed to be sorted in any particular
     order.
+
+Fractions
+........................................................................
+
+.. function:: int gr_numerator(gr_ptr res, gr_srcptr x, gr_ctx_t ctx)
+              int gr_denominator(gr_ptr res, gr_srcptr x, gr_ctx_t ctx)
+
+    Return a numerator `p` and denominator `q` such that `x = p/q`.
+    For typical fraction fields, the denominator will be minimal
+    and canonical.
+    However, some rings may return an arbitrary denominator as long
+    as the numerator matches.
+    The default implementations simply return `p = x` and `q = 1`.
 
 Integer and complex parts
 ........................................................................

@@ -290,6 +290,9 @@ typedef enum
 
     GR_METHOD_FACTOR,
 
+    GR_METHOD_NUMERATOR,
+    GR_METHOD_DENOMINATOR,
+
     GR_METHOD_FLOOR,
     GR_METHOD_CEIL,
     GR_METHOD_TRUNC,
@@ -584,7 +587,8 @@ typedef enum
     GR_METHOD_WEIERSTRASS_ZETA,
     GR_METHOD_WEIERSTRASS_SIGMA,
 
-    GR_METHOD_GEN,  /* todo: document; related functions */
+    GR_METHOD_GEN,
+    GR_METHOD_GENS,
 
     /* Finite field methods */
     GR_METHOD_CTX_FQ_PRIME,
@@ -720,11 +724,15 @@ typedef enum
     GR_CTX_FMPQ_POLY,
     GR_CTX_GR_POLY,
 
+    GR_CTX_FMPZ_MPOLY,
     GR_CTX_GR_MPOLY,
-    GR_CTX_GR_MAT,
+
+    GR_CTX_FMPZ_MPOLY_Q,
 
     GR_CTX_GR_SERIES,
     GR_CTX_GR_SERIES_MOD,
+
+    GR_CTX_GR_MAT,
 
     GR_CTX_GR_VEC,
 
@@ -854,6 +862,7 @@ typedef int ((*gr_method_poly_unary_trunc_op)(gr_ptr, gr_srcptr, slong, slong, g
 typedef int ((*gr_method_poly_binary_op)(gr_ptr, gr_srcptr, slong, gr_srcptr, slong, gr_ctx_ptr));
 typedef int ((*gr_method_poly_binary_binary_op)(gr_ptr, gr_ptr, gr_srcptr, slong, gr_srcptr, slong, gr_ctx_ptr));
 typedef int ((*gr_method_poly_binary_trunc_op)(gr_ptr, gr_srcptr, slong, gr_srcptr, slong, slong, gr_ctx_ptr));
+typedef int ((*gr_method_vec_ctx_op)(gr_vec_t, gr_ctx_ptr));
 
 
 /* Macros to retrieve methods (with correct call signature) from context object. */
@@ -941,6 +950,7 @@ typedef int ((*gr_method_poly_binary_trunc_op)(gr_ptr, gr_srcptr, slong, gr_srcp
 #define GR_POLY_UNARY_TRUNC_OP(ctx, NAME) (((gr_method_poly_unary_trunc_op *) ctx->methods)[GR_METHOD_ ## NAME])
 #define GR_POLY_BINARY_BINARY_OP(ctx, NAME) (((gr_method_poly_binary_binary_op *) ctx->methods)[GR_METHOD_ ## NAME])
 #define GR_POLY_BINARY_TRUNC_OP(ctx, NAME) (((gr_method_poly_binary_trunc_op *) ctx->methods)[GR_METHOD_ ## NAME])
+#define GR_VEC_CTX_OP(ctx, NAME) (((gr_method_vec_ctx_op *) ctx->methods)[GR_METHOD_ ## NAME])
 
 
 /* Wrappers to call methods. */
@@ -1087,6 +1097,9 @@ GR_INLINE WARN_UNUSED_RESULT int gr_euclidean_divrem(gr_ptr res1, gr_ptr res2, g
 GR_INLINE WARN_UNUSED_RESULT int gr_gcd(gr_ptr res, gr_srcptr x, gr_srcptr y, gr_ctx_t ctx) { return GR_BINARY_OP(ctx, GCD)(res, x, y, ctx); }
 GR_INLINE WARN_UNUSED_RESULT int gr_lcm(gr_ptr res, gr_srcptr x, gr_srcptr y, gr_ctx_t ctx) { return GR_BINARY_OP(ctx, LCM)(res, x, y, ctx); }
 
+GR_INLINE WARN_UNUSED_RESULT int gr_numerator(gr_ptr res, gr_srcptr x, gr_ctx_t ctx) { return GR_UNARY_OP(ctx, NUMERATOR)(res, x, ctx); }
+GR_INLINE WARN_UNUSED_RESULT int gr_denominator(gr_ptr res, gr_srcptr x, gr_ctx_t ctx) { return GR_UNARY_OP(ctx, DENOMINATOR)(res, x, ctx); }
+
 GR_INLINE WARN_UNUSED_RESULT int gr_factor(gr_ptr c, gr_vec_t factors, gr_vec_t exponents, gr_srcptr x, int flags, gr_ctx_t ctx) { return GR_FACTOR_OP(ctx, FACTOR)(c, factors, exponents, x, flags, ctx); }
 
 GR_INLINE WARN_UNUSED_RESULT int gr_pow(gr_ptr res, gr_srcptr x, gr_srcptr y, gr_ctx_t ctx) { return GR_BINARY_OP(ctx, POW)(res, x, y, ctx); }
@@ -1120,6 +1133,7 @@ GR_INLINE WARN_UNUSED_RESULT int gr_cmp_other(int * res, gr_srcptr x, gr_srcptr 
 GR_INLINE WARN_UNUSED_RESULT int gr_cmpabs_other(int * res, gr_srcptr x, gr_srcptr y, gr_ctx_t y_ctx, gr_ctx_t ctx) { return GR_BINARY_OP_OTHER_GET_INT(ctx, CMPABS_OTHER)(res, x, y, y_ctx, ctx); }
 
 GR_INLINE WARN_UNUSED_RESULT int gr_gen(gr_ptr res, gr_ctx_t ctx) { return GR_CONSTANT_OP(ctx, GEN)(res, ctx); }
+GR_INLINE WARN_UNUSED_RESULT int gr_gens(gr_vec_t res, gr_ctx_t ctx) { return GR_VEC_CTX_OP(ctx, GENS)(res, ctx); }
 
 GR_INLINE WARN_UNUSED_RESULT int gr_ctx_fq_prime(fmpz_t res, gr_ctx_t ctx) { return GR_CONSTANT_OP_GET_FMPZ(ctx, CTX_FQ_PRIME)(res, ctx); }
 GR_INLINE WARN_UNUSED_RESULT int gr_ctx_fq_degree(slong * res, gr_ctx_t ctx) { return GR_CONSTANT_OP_GET_SI(ctx, CTX_FQ_DEGREE)(res, ctx); }
@@ -1374,7 +1388,9 @@ void gr_ctx_init_gr_poly(gr_ctx_t ctx, gr_ctx_t base_ring);
 /* Multivariate */
 
 #ifdef MPOLY_H
+void gr_ctx_init_fmpz_mpoly(gr_ctx_t ctx, slong nvars, const ordering_t ord);
 void gr_ctx_init_gr_mpoly(gr_ctx_t ctx, gr_ctx_t base_ring, slong nvars, const ordering_t ord);
+void gr_ctx_init_fmpz_mpoly_q(gr_ctx_t ctx, slong nvars, const ordering_t ord);
 #endif
 
 /* Generic series */
