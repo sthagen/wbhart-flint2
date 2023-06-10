@@ -139,6 +139,11 @@ class fmpz_mpoly_struct(ctypes.Structure):
                 ('length', c_slong),
                 ('bits', c_slong)]
 
+class fmpz_mpoly_q_struct(ctypes.Structure):
+    _fields_ = [('num', fmpz_mpoly_struct),
+                ('den', fmpz_mpoly_struct)]
+
+
 # todo: actually a union
 class nf_elem_struct(ctypes.Structure):
     _fields_ = [('poly', fmpq_poly_struct)]
@@ -292,471 +297,6 @@ _pow_methods = [libgr.gr_pow, libgr.gr_pow_si, libgr.gr_pow_fmpz, libgr.gr_pow_o
 
 
 
-class fexpr:
-
-    @staticmethod
-    def inject(vars=False):
-        """
-        Inject all builtin symbol names into the calling namespace.
-        For interactive use only!
-
-            >>> fexpr.inject()
-            >>> n = fexpr("n")
-            >>> Sum(Sin(Pi*n/3)/Factorial(n), For(n,0,Infinity))
-            Sum(Div(Sin(Div(Mul(Pi, n), 3)), Factorial(n)), For(n, 0, Infinity))
-
-        """
-        from inspect import currentframe
-        frame = currentframe().f_back
-        num = libflint.fexpr_builtin_length()
-        for i in range(num):
-            # memory leak
-            symbol_name = libflint.fexpr_builtin_name(i)
-            symbol_name = symbol_name.decode('ascii')
-            if not symbol_name[0].islower():
-                frame.f_globals[symbol_name] = fexpr(symbol_name)
-        if vars:
-            def inject_vars(string):
-                for s in string.split():
-                    for symbol_name in [s, s + "_"]:
-                        frame.f_globals[symbol_name] = fexpr(symbol_name)
-            inject_vars("""a b c d e f g h i j k l m n o p q r s t u v w x y z""")
-            inject_vars("""A B C D E F G H I J K L M N O P Q R S T U V W X Y Z""")
-            inject_vars("""alpha beta gamma delta epsilon zeta eta theta iota kappa lamda mu nu xi pi rho sigma tau phi chi psi omega ell varphi vartheta""")
-            inject_vars("""Alpha Beta GreekGamma Delta Epsilon Zeta Eta Theta Iota Kappa Lamda Mu Nu Xi GreekPi Rho Sigma Tau Phi Chi Psi Omega""")
-        del frame
-
-    def builtins():
-        num = libflint.fexpr_builtin_length()
-        names = []
-        for i in range(num):
-            # memory leak
-            symbol_name = libflint.fexpr_builtin_name(i)
-            symbol_name = symbol_name.decode('ascii')
-            names.append(symbol_name)
-        return names
-
-    def __init__(self, val=None):
-        self._data = fexpr_struct()
-        self._ref = ctypes.byref(self._data)
-        libflint.fexpr_init(self)
-        if val is not None:
-            typ = type(val)
-            if typ is int:
-                b = sys.maxsize
-                if -b <= val <= b:
-                    libflint.fexpr_set_si(self, val)
-                else:
-                    n = _fmpz_struct()
-                    nref = ctypes.byref(n)
-                    libflint.fmpz_init(nref)
-                    libflint.fmpz_set_str(nref, ctypes.c_char_p(str(val).encode('ascii')), 10)
-                    libflint.fexpr_set_fmpz(self, nref)
-                    libflint.fmpz_clear(nref)
-            elif typ is str:
-                if val[0] == "'" or val[0] == '"':
-                    libflint.fexpr_set_string(self, val[1:-1].encode('ascii'))
-                else:
-                    libflint.fexpr_set_symbol_str(self, val.encode('ascii'))
-            elif typ is float:
-                libflint.fexpr_set_d(self, val)
-            elif typ is complex:
-                libflint.fexpr_set_re_im_d(self, val.real, val.imag)
-            elif typ is bool:
-                if val:
-                    libflint.fexpr_set_symbol_str(self, ("True").encode('ascii'))
-                else:
-                    libflint.fexpr_set_symbol_str(self, ("False").encode('ascii'))
-            elif typ is qqbar:
-                #libflint.qqbar_get_fexpr_repr(self, val, val._ctx)
-                tmp = val.fexpr()
-                libflint.fexpr_set(self, tmp)
-            elif typ is ca:
-                libflint.ca_get_fexpr(self, val, 0, val._ctx)
-            elif typ is ca_mat:
-                libflint.ca_mat_get_fexpr(self, val, 0, val._ctx)
-            elif typ is ca_poly:
-                libflint.ca_poly_get_fexpr(self, val, 0, val._ctx)
-            elif typ is tuple:
-                tmp = fexpr("Tuple")(*val)         # todo: create without copying
-                libflint.fexpr_set(self, tmp)
-            elif typ is list:
-                tmp = fexpr("List")(*val)
-                libflint.fexpr_set(self, tmp)
-            elif typ is set:
-                tmp = fexpr("Set")(*val)
-                libflint.fexpr_set(self, tmp)
-            else:
-                raise TypeError
-
-    def __del__(self):
-        libflint.fexpr_clear(self)
-
-    @property
-    def _as_parameter_(self):
-        return self._ref
-
-    @staticmethod
-    def from_param(arg):
-        return arg
-
-    def __repr__(self):
-        ptr = libflint.fexpr_get_str(self)
-        try:
-            return ctypes.cast(ptr, ctypes.c_char_p).value.decode("ascii")
-        finally:
-            libflint.flint_free(ptr)
-
-    def latex(self):
-        ptr = libflint.fexpr_get_str_latex(self, 0)
-        try:
-            return ctypes.cast(ptr, ctypes.c_char_p).value.decode()
-        finally:
-            libflint.flint_free(ptr)
-
-    def _repr_latex_(self):
-        return "$$" + self.latex() + "$$"
-
-    def nwords(self):
-        return libflint.fexpr_size(self)
-
-    def size_bytes(self):
-        return libflint.fexpr_size_bytes(self)
-
-    def allocated_bytes(self):
-        return libflint.fexpr_allocated_bytes(self)
-
-    def num_leaves(self):
-        return libflint.fexpr_num_leaves(self)
-
-    def depth(self):
-        return libflint.fexpr_depth(self)
-
-    def __eq__(self, other):
-        if type(self) is not type(other):
-            return NotImplemented
-        if libflint.fexpr_equal(self, other):
-            return True
-        return False
-
-    def is_atom(self):
-        return bool(libflint.fexpr_is_atom(self))
-
-    def is_atom_integer(self):
-        return bool(libflint.fexpr_is_integer(self))
-
-    def is_symbol(self):
-        return bool(libflint.fexpr_is_symbol(self))
-
-    def head(self):
-        if libflint.fexpr_is_atom(self):
-            return None
-        res = fexpr()
-        libflint.fexpr_func(res, self)
-        return res
-
-    def nargs(self):
-        # todo: long
-        if self.is_atom():
-            return None
-        return libflint.fexpr_nargs(self)
-
-    def args(self):
-        if libflint.fexpr_is_atom(self):
-            return None
-        n = self.nargs()
-        args = [fexpr() for i in range(n)]
-        for i in range(n):
-            libflint.fexpr_arg(args[i], self, i)
-        return tuple(args)
-
-    def __hash__(self):
-        return libflint.fexpr_hash(self)
-
-    def __call__(self, *args):
-        args2 = []
-        for arg in args:
-            tp = type(arg)
-            if tp is not fexpr:
-                if tp is str:
-                    arg = "'" + arg + "'"
-                arg = fexpr(arg)
-            args2.append(arg)
-        n = len(args2)
-        res = fexpr()
-        if n == 0:
-            libflint.fexpr_call0(res, self)
-        elif n == 1:
-            libflint.fexpr_call1(res, self, args2[0])
-        elif n == 2:
-            libflint.fexpr_call2(res, self, args2[0], args2[1])
-        elif n == 3:
-            libflint.fexpr_call3(res, self, args2[0], args2[1], args2[2])
-        elif n == 4:
-            libflint.fexpr_call4(res, self, args2[0], args2[1], args2[2], args2[3])
-        else:
-            vec = libflint.flint_malloc(n * ctypes.sizeof(fexpr_struct))
-            vec = ctypes.cast(vec, ctypes.POINTER(fexpr_struct))
-            for i in range(n):
-                vec[i] = args2[i]._data
-            libflint.fexpr_call_vec(res, self, vec, n)
-            libflint.flint_free(vec)
-        return res
-
-    def contains(self, x):
-        """
-        Check if *x* appears exactly as a subexpression in *self*.
-
-            >>> f = fexpr("f"); x = fexpr("x"); y = fexpr("y")
-            >>> (f(x+1).contains(f), f(x+1).contains(x), f(x+1).contains(y))
-            (True, True, False)
-            >>> (f(x+1).contains(1), f(x+1).contains(2))
-            (True, False)
-            >>> (f(x+1).contains(x+1), f(x+1).contains(f(x+1)))
-            (True, True)
-        """
-        if type(x) is not fexpr:
-            x = fexpr(x)
-        if libflint.fexpr_contains(self, x):
-            return True
-        return False
-
-    def replace(self, old, new=None):
-        """
-        Replace subexpression.
-
-            >>> f = fexpr("f"); x = fexpr("x"); y = fexpr("y")
-            >>> f(x+1, x-1).replace(x, y)
-            f(Add(y, 1), Sub(y, 1))
-            >>> f(x+1, x-1).replace(x+1, y-1)
-            f(Sub(y, 1), Sub(x, 1))
-            >>> f(x+1, x-1).replace(f, f+1)
-            Add(f, 1)(Add(x, 1), Sub(x, 1))
-            >>> f(x+1, x-1).replace(x+2, y)
-            f(Add(x, 1), Sub(x, 1))
-        """
-        # todo: dict replacement
-        if type(old) is not fexpr:
-            old = fexpr(old)
-        if type(new) is not fexpr:
-            new = fexpr(new)
-        res = fexpr()
-        libflint.fexpr_replace(res, self, old, new)
-        return res
-
-    def __add__(self, other):
-        if type(self) is not type(other):
-            try:
-                other = fexpr(other)
-            except TypeError:
-                return NotImplemented
-        res = fexpr()
-        libflint.fexpr_add(res, self, other)
-        return res
-
-    def __radd__(self, other):
-        if type(self) is not type(other):
-            try:
-                other = fexpr(other)
-            except TypeError:
-                return NotImplemented
-        res = fexpr()
-        libflint.fexpr_add(res, other, self)
-        return res
-
-    def __sub__(self, other):
-        if type(self) is not type(other):
-            try:
-                other = fexpr(other)
-            except TypeError:
-                return NotImplemented
-        res = fexpr()
-        libflint.fexpr_sub(res, self, other)
-        return res
-
-    def __rsub__(self, other):
-        if type(self) is not type(other):
-            try:
-                other = fexpr(other)
-            except TypeError:
-                return NotImplemented
-        res = fexpr()
-        libflint.fexpr_sub(res, other, self)
-        return res
-
-    def __mul__(self, other):
-        if type(self) is not type(other):
-            try:
-                other = fexpr(other)
-            except TypeError:
-                return NotImplemented
-        res = fexpr()
-        libflint.fexpr_mul(res, self, other)
-        return res
-
-    def __rmul__(self, other):
-        if type(self) is not type(other):
-            try:
-                other = fexpr(other)
-            except TypeError:
-                return NotImplemented
-        res = fexpr()
-        libflint.fexpr_mul(res, other, self)
-        return res
-
-    def __truediv__(self, other):
-        if type(self) is not type(other):
-            try:
-                other = fexpr(other)
-            except TypeError:
-                return NotImplemented
-        res = fexpr()
-        libflint.fexpr_div(res, self, other)
-        return res
-
-    def __rtruediv__(self, other):
-        if type(self) is not type(other):
-            try:
-                other = fexpr(other)
-            except TypeError:
-                return NotImplemented
-        res = fexpr()
-        libflint.fexpr_div(res, other, self)
-        return res
-
-    def __pow__(self, other):
-        if type(self) is not type(other):
-            try:
-                other = fexpr(other)
-            except TypeError:
-                return NotImplemented
-        res = fexpr()
-        libflint.fexpr_pow(res, self, other)
-        return res
-
-    def __rpow__(self, other):
-        if type(self) is not type(other):
-            try:
-                other = fexpr(other)
-            except TypeError:
-                return NotImplemented
-        res = fexpr()
-        libflint.fexpr_pow(res, other, self)
-        return res
-
-    # def __floordiv__(self, other):
-    #     return (self / other).floor()
-    # def __rfloordiv__(self, other):
-    #     return (other / self).floor()
-
-    def __bool__(self):
-        return True
-
-    def __abs__(self):
-        return fexpr("Abs")(self)
-
-    def __neg__(self):
-        res = fexpr()
-        libflint.fexpr_neg(res, self)
-        return res
-
-    def __pos__(self):
-        return fexpr("Pos")(self)
-
-    def expanded_normal_form(self):
-        """
-        Converts this expression to expanded normal form as
-        a formal rational function of its non-arithmetic subexpressions.
-
-            >>> x = fexpr("x"); y = fexpr("y")
-            >>> (x / x**2).expanded_normal_form()
-            Div(1, x)
-            >>> (((x ** 0) + 3) ** 5).expanded_normal_form()
-            1024
-            >>> ((x+y+1)**3 - (y+1)**3 - (x+y)**3 - (x+1)**3).expanded_normal_form()
-            Add(Mul(-1, Pow(x, 3)), Mul(6, x, y), Mul(-1, Pow(y, 3)), -1)
-            >>> (1/((1/y + 1/x))).expanded_normal_form()
-            Div(Mul(x, y), Add(x, y))
-            >>> (((x+y)**5 * (x-y)) / (x**2 - y**2)).expanded_normal_form()
-            Add(Pow(x, 4), Mul(4, Pow(x, 3), y), Mul(6, Pow(x, 2), Pow(y, 2)), Mul(4, x, Pow(y, 3)), Pow(y, 4))
-            >>> (1 / (x - x)).expanded_normal_form()
-            Traceback (most recent call last):
-              ...
-            ValueError: expanded_normal_form: overflow, formal division by zero or unsupported expression
-        """
-        res = fexpr()
-        if not libflint.fexpr_expanded_normal_form(res, self, 0):
-            raise ValueError("expanded_normal_form: overflow, formal division by zero or unsupported expression")
-        return res
-
-    def nstr(self, n=16):
-        """
-        Evaluates this expression numerically using Arb, returning
-        a decimal string correct within 1 ulp in the last output digit.
-        Attempts to obtain *n* digits (but the actual output accuracy
-        may be lower).
-
-            >>> Exp = fexpr("Exp"); Exp(1).nstr()
-            '2.718281828459045'
-            >>> Pi = fexpr("Pi"); Pi.nstr(30)
-            '3.14159265358979323846264338328'
-            >>> Log = fexpr("Log"); Log(-2).nstr()
-            '0.6931471805599453 + 3.141592653589793*I'
-            >>> Im = fexpr("Im")
-            >>> Im(Log(2)).nstr()   # exact zero
-            '0'
-
-        Here the imaginary part is zero, but Arb is not able to
-        compute so exactly. The output ``0e-N``
-        indicates only that the absolute value is bounded by ``1e-N``:
-
-            >>> Exp(Log(-2)).nstr()
-            '-2.000000000000000 + 0e-22*I'
-            >>> Im(Exp(Log(-2))).nstr()
-            '0e-731'
-
-        The algorithm fails if the expression or any subexpression
-        is not a finite complex number:
-
-            >>> Log(0).nstr()
-            Traceback (most recent call last):
-              ...
-            ValueError: nstr: unable to evaluate to a number
-
-        Expressions must be constant:
-
-            >>> fexpr("x").nstr()
-            Traceback (most recent call last):
-              ...
-            ValueError: nstr: unable to evaluate to a number
-
-        """
-        ptr = libflint.fexpr_get_decimal_str(self, n, 0)
-        try:
-            s = ctypes.cast(ptr, ctypes.c_char_p).value.decode("ascii")
-            if s == "?":
-                raise ValueError("nstr: unable to evaluate to a number")
-            return s
-        finally:
-            libflint.flint_free(ptr)
-
-
-libflint.fexpr_builtin_name.restype = ctypes.c_char_p
-libflint.fexpr_set_symbol_str.argtypes = ctypes.c_void_p, ctypes.c_char_p
-libflint.fexpr_get_str.restype = ctypes.c_void_p
-libflint.fexpr_get_str_latex.restype = ctypes.c_void_p
-libflint.fexpr_set_si.argtypes = fexpr, ctypes.c_long
-libflint.fexpr_set_d.argtypes = fexpr, ctypes.c_double
-libflint.fexpr_set_re_im_d.argtypes = fexpr, ctypes.c_double, ctypes.c_double
-libflint.fexpr_get_decimal_str.restype = ctypes.c_void_p
-
-
-
-
-
-
-
-
 _gr_logic = 0
 
 class Truth:
@@ -848,6 +388,11 @@ class gr_ctx:
             finally:
                 libflint.flint_free(arr)
         return self._str
+
+    def _set_gen_name(self, s):
+        status = libflint.gr_ctx_set_gen_name(self._ref, ctypes.c_char_p(str(s).encode('ascii')))
+        self._str = None
+        assert not status
 
     def __call__(self, *args, **kwargs):
         kwargs['context'] = self
@@ -1389,6 +934,72 @@ class gr_ctx:
 
     def csgn(ctx, x):
         return ctx._unary_op(x, libgr.gr_csgn, "csgn($x)")
+
+    def arg(ctx, x):
+        return ctx._unary_op(x, libgr.gr_arg, "arg($x)")
+
+    def inf(ctx):
+        """
+        Positive infinity (for extended number sets which support it).
+
+            >>> CF.inf()
+            +inf
+            >>> ComplexExtended_ca().inf()
+            +Infinity
+            >>> RR.inf()
+            Traceback (most recent call last):
+              ...
+            FlintUnableError: failed to compute inf in {Real numbers (arb, prec = 53)}
+        """
+        return ctx._constant(ctx, libgr.gr_pos_inf, "inf")
+
+    def neg_inf(ctx):
+        """
+        Negative infinity (for extended number sets which support it).
+
+            >>> CF.neg_inf()
+            -inf
+            >>> ComplexExtended_ca().neg_inf()
+            -Infinity
+            >>> RR.neg_inf()
+            Traceback (most recent call last):
+              ...
+            FlintUnableError: failed to compute neg_inf in {Real numbers (arb, prec = 53)}
+        """
+        return ctx._constant(ctx, libgr.gr_neg_inf, "neg_inf")
+
+    def uinf(ctx):
+        """
+        Unsigned infinity (for extended number sets which support it).
+
+            >>> CF.uinf()
+            Traceback (most recent call last):
+              ...
+            FlintDomainError: uinf is not an element of {Complex floating-point numbers (acf, prec = 53)}
+            >>> ComplexExtended_ca().uinf()
+            UnsignedInfinity
+        """
+        return ctx._constant(ctx, libgr.gr_uinf, "uinf")
+
+    def undefined(ctx):
+        """
+        Undefined value (for extended number sets which support it).
+
+            >>> CF.undefined()
+            (nan + nan*I)
+            >>> ComplexExtended_ca().undefined()
+            Undefined
+        """
+        return ctx._constant(ctx, libgr.gr_undefined, "undefined")
+
+    def unknown(ctx):
+        """
+        Unknown value (for enclosures and other types which support it).
+
+            >>> ComplexExtended_ca().unknown()
+            Unknown
+        """
+        return ctx._constant(ctx, libgr.gr_unknown, "unknown")
 
     def mul_2exp(ctx, x, y):
         return ctx._binary_op_fmpz(x, y, libgr.gr_mul_2exp_fmpz, "mul_2exp($x, $y)")
@@ -2209,7 +1820,7 @@ class gr_ctx:
             >>> RR.chebyshev_t(0.5, 0.75)
             [0.935414346693485 +/- 5.18e-16]
             >>> ZZx.chebyshev_t(4, [0, 1])
-            1 - 8*x^2 + 8*x^4
+            8*x^4-8*x^2+1
         """
         return ctx._binary_op_with_overloads(n, x, libgr.gr_chebyshev_t, fmpz_op=libgr.gr_chebyshev_t_fmpz, rstr="chebyshev_t($n, $x)")
 
@@ -2222,7 +1833,7 @@ class gr_ctx:
             >>> RR.chebyshev_u(0.5, 0.75)
             [1.33630620956212 +/- 2.68e-15]
             >>> ZZx.chebyshev_u(4, [0, 1])
-            1 - 12*x^2 + 16*x^4
+            16*x^4-12*x^2+1
         """
         return ctx._binary_op_with_overloads(n, x, libgr.gr_chebyshev_u, fmpz_op=libgr.gr_chebyshev_u_fmpz, rstr="chebyshev_u($n, $x)")
 
@@ -2505,7 +2116,7 @@ class gr_ctx:
             >>> [ZZ.rising(3, k) for k in range(5)]
             [1, 3, 12, 60, 360]
             >>> ZZx.rising(ZZx([0,1]), 5)
-            24*x + 50*x^2 + 35*x^3 + 10*x^4 + x^5
+            x^5+10*x^4+35*x^3+50*x^2+24*x
             >>> RR.rising(1, 10**7)
             [1.202423400515903e+65657059 +/- 5.57e+65657043]
         """
@@ -2518,7 +2129,7 @@ class gr_ctx:
             >>> [ZZ.falling(3, k) for k in range(5)]
             [1, 3, 6, 6, 0]
             >>> ZZx.falling(ZZx([0,1]), 5)
-            24*x - 50*x^2 + 35*x^3 - 10*x^4 + x^5
+            x^5-10*x^4+35*x^3-50*x^2+24*x
             >>> RR.log(RR.falling(RR.pi(), 10**7))
             [151180898.7174084 +/- 9.72e-8]
             >>> RR.falling(10.5, 3.5)
@@ -3262,13 +2873,13 @@ class gr_ctx:
         Hilbert class polynomial H_D(x) evaluated at x.
 
             >>> ZZx.hilbert_class_poly(-20, ZZx.gen())
-            -681472000 - 1264000*x + x^2
+            x^2-1264000*x-681472000
             >>> CC.hilbert_class_poly(-20, 1+1j)
             (-682736000.0000000 - 1263998.000000000*I)
             >>> ZZx.hilbert_class_poly(-21, ZZx.gen())
             Traceback (most recent call last):
               ...
-            FlintDomainError: hilbert_class_poly(D, x) is not an element of {Ring of polynomials over Integer ring (fmpz)} for {D = -21}, {x = x}
+            FlintDomainError: hilbert_class_poly(D, x) is not an element of {Polynomials over integers (fmpz_poly)} for {D = -21}, {x = x}
         """
         D = ctx._as_si(D)
         x = ctx._as_elem(x)
@@ -3514,6 +3125,10 @@ class gr_elem:
                 # todo
                 x = context(val.real) + context(val.imag) * context.i()
                 status = libgr.gr_set(self._ref, x._ref, self._ctx)
+            elif typ is fexpr:
+                # XXX
+                xvec = yvec = Vec(context)()
+                status = libgr.gr_set_fexpr(self._ref, xvec._ref, yvec._ref, val._ref, self._ctx)
             elif hasattr(val, "_gr_elem_"):
                 val = val._gr_elem_(context)
                 assert val.parent() is context
@@ -3582,6 +3197,16 @@ class gr_elem:
             (1.468693940 + 2.287355287*I)
         """
         print(self.nstr(n))
+
+    def fexpr(self, serialize=True):
+        res = fexpr()
+        if serialize:
+            status = libflint.gr_get_fexpr_serialize(res._ref, self._ref, self._ctx)
+        else:
+            status = libflint.gr_get_fexpr(res._ref, self._ref, self._ctx)
+        if status:
+            _handle_error(self.parent(), status, "fexpr($x)")
+        return res
 
     @staticmethod
     def _binary_coercion(self, other):
@@ -4089,6 +3714,21 @@ class gr_elem:
         """
         return self._unary_op(self, libgr.gr_csgn, "csgn($x)")
 
+    def arg(self):
+        """
+        >>> RR(1).arg()
+        0
+        >>> RR(-1).arg()
+        [3.141592653589793 +/- 3.39e-16]
+        >>> CC(1j).arg()
+        [1.570796326794897 +/- 5.54e-16]
+        >>> CC_ca.i().arg()
+        1.57080 {(a)/2 where a = 3.14159 [Pi]}
+        >>> RR("+/- 0.1").arg()
+        [+/- 3.15]
+        """
+        return self._unary_op(self, libgr.gr_arg, "arg($x)")
+
     def mul_2exp(self, other):
         """
         Exact multiplication by a dyadic number `2^y`.
@@ -4442,6 +4082,13 @@ class ComplexField_ca(gr_ctx_ca):
         self._elem_type = ca
         self._set_options(kwargs)
 
+class ComplexExtended_ca(gr_ctx_ca):
+    def __init__(self, **kwargs):
+        gr_ctx.__init__(self)
+        libgr.gr_ctx_init_complex_extended_ca(self._ref)
+        self._elem_type = ca
+        self._set_options(kwargs)
+
 
 class PolynomialRing_gr_poly(gr_ctx):
     def __init__(self, coefficient_ring):
@@ -4522,13 +4169,16 @@ class qqbar(gr_elem):
     def _default_context():
         return QQbar
 
-    def fexpr(self, formula=True, root_index=False, serialized=False,
+    def fexpr(self, formula=True, root_index=False, serialize=False,
             gaussians=True, quadratics=True, cyclotomics=True, cubics=True,
             quartics=True, quintics=True, depression=True, deflation=True,
             separation=True):
         """
         """
         res = fexpr()
+        if serialize:
+            libcalcium.qqbar_get_fexpr_repr(res, self)
+            return res
         if formula:
             flags = 0
             if gaussians: flags |= 1
@@ -4544,9 +4194,6 @@ class qqbar(gr_elem):
                 return res
         if root_index:
             libcalcium.qqbar_get_fexpr_root_indexed(res, self)
-            return res
-        if serialized:
-            libcalcium.qqbar_get_fexpr_repr(res, self)
             return res
         libcalcium.qqbar_get_fexpr_root_nearest(res, self)
         return res
@@ -4958,11 +4605,11 @@ class gr_poly(gr_elem):
         truncated to length n.
 
             >>> ZZx([1,2,3]).inv_series(10)
-            1 - 2*x + x^2 + 4*x^3 - 11*x^4 + 10*x^5 + 13*x^6 - 56*x^7 + 73*x^8 + 22*x^9
+            22*x^9+73*x^8-56*x^7+13*x^6+10*x^5-11*x^4+4*x^3+x^2-2*x+1
             >>> ZZx([2,3,4]).inv_series(5)
             Traceback (most recent call last):
               ...
-            FlintDomainError: f.inv_series(n) is not an element of {Ring of polynomials over Integer ring (fmpz)} for {f = 2 + 3*x + 4*x^2}, {n = 5}
+            FlintDomainError: f.inv_series(n) is not an element of {Polynomials over integers (fmpz_poly)} for {f = 4*x^2+3*x+2}, {n = 5}
             >>> QQx([2,3,4]).inv_series(5)
             (1/2) + (-3/4)*x + (1/8)*x^2 + (21/16)*x^3 + (-71/32)*x^4
         """
@@ -6075,6 +5722,503 @@ class PolynomialRing_fmpz_mpoly(gr_ctx):
         return ZZ
 
 
+class fmpz_mpoly_q(gr_elem):
+    _struct_type = fmpz_mpoly_q_struct
+
+class FractionField_fmpz_mpoly_q(gr_ctx):
+
+    def __init__(self, nvars):
+        gr_ctx.__init__(self)
+        nvars = gr_ctx._as_si(nvars)
+        assert nvars >= 0
+        libgr.gr_ctx_init_fmpz_mpoly_q(self._ref, nvars, 0)
+        self._elem_type = fmpz_mpoly_q
+
+    @property
+    def _coefficient_ring(self):
+        return QQ
+
+
+
+
+
+
+
+
+class fexpr(gr_elem):
+
+    _struct_type = fexpr_struct
+
+    @staticmethod
+    def inject(vars=False):
+        """
+        Inject all builtin symbol names into the calling namespace.
+        For interactive use only!
+
+            >>> fexpr.inject()
+            >>> n = fexpr("n")
+            >>> Sum(Sin(Pi*n/3)/Factorial(n), For(n,0,Infinity))
+            Sum(Div(Sin(Div(Mul(Pi, n), 3)), Factorial(n)), For(n, 0, Infinity))
+
+        """
+        from inspect import currentframe
+        frame = currentframe().f_back
+        num = libflint.fexpr_builtin_length()
+        for i in range(num):
+            # memory leak
+            symbol_name = libflint.fexpr_builtin_name(i)
+            symbol_name = symbol_name.decode('ascii')
+            if not symbol_name[0].islower():
+                frame.f_globals[symbol_name] = fexpr(symbol_name)
+        if vars:
+            def inject_vars(string):
+                for s in string.split():
+                    for symbol_name in [s, s + "_"]:
+                        frame.f_globals[symbol_name] = fexpr(symbol_name)
+            inject_vars("""a b c d e f g h i j k l m n o p q r s t u v w x y z""")
+            inject_vars("""A B C D E F G H I J K L M N O P Q R S T U V W X Y Z""")
+            inject_vars("""alpha beta gamma delta epsilon zeta eta theta iota kappa lamda mu nu xi pi rho sigma tau phi chi psi omega ell varphi vartheta""")
+            inject_vars("""Alpha Beta GreekGamma Delta Epsilon Zeta Eta Theta Iota Kappa Lamda Mu Nu Xi GreekPi Rho Sigma Tau Phi Chi Psi Omega""")
+        del frame
+
+    def builtins():
+        num = libflint.fexpr_builtin_length()
+        names = []
+        for i in range(num):
+            # memory leak
+            symbol_name = libflint.fexpr_builtin_name(i)
+            symbol_name = symbol_name.decode('ascii')
+            names.append(symbol_name)
+        return names
+
+    def __init__(self, val=None, context=None):
+        if context is None:
+            context = FExpressions
+        gr_elem.__init__(self, None, context)
+        #self._data = fexpr_struct()
+        #self._ref = ctypes.byref(self._data)
+        #libflint.fexpr_init(self)
+        if val is not None:
+            typ = type(val)
+            if typ is int:
+                b = sys.maxsize
+                if -b <= val <= b:
+                    libflint.fexpr_set_si(self, val)
+                else:
+                    n = _fmpz_struct()
+                    nref = ctypes.byref(n)
+                    libflint.fmpz_init(nref)
+                    libflint.fmpz_set_str(nref, ctypes.c_char_p(str(val).encode('ascii')), 10)
+                    libflint.fexpr_set_fmpz(self, nref)
+                    libflint.fmpz_clear(nref)
+            elif typ is str:
+                if val[0] == "'" or val[0] == '"':
+                    libflint.fexpr_set_string(self, val[1:-1].encode('ascii'))
+                else:
+                    libflint.fexpr_set_symbol_str(self, val.encode('ascii'))
+            elif typ is float:
+                libflint.fexpr_set_d(self, val)
+            elif typ is complex:
+                libflint.fexpr_set_re_im_d(self, val.real, val.imag)
+            elif typ is bool:
+                if val:
+                    libflint.fexpr_set_symbol_str(self, ("True").encode('ascii'))
+                else:
+                    libflint.fexpr_set_symbol_str(self, ("False").encode('ascii'))
+            elif typ is qqbar:
+                #libflint.qqbar_get_fexpr_repr(self, val, val._ctx)
+                tmp = val.fexpr()
+                libflint.fexpr_set(self, tmp)
+            elif typ is ca:
+                libflint.ca_get_fexpr(self, val, 0, val._ctx)
+            #elif typ is ca_mat:
+            #    libflint.ca_mat_get_fexpr(self, val, 0, val._ctx)
+            #elif typ is ca_poly:
+            #    libflint.ca_poly_get_fexpr(self, val, 0, val._ctx)
+            elif typ is tuple:
+                tmp = fexpr("Tuple")(*val)         # todo: create without copying
+                libflint.fexpr_set(self, tmp)
+            elif typ is list:
+                tmp = fexpr("List")(*val)
+                libflint.fexpr_set(self, tmp)
+            elif typ is set:
+                tmp = fexpr("Set")(*val)
+                libflint.fexpr_set(self, tmp)
+            else:
+                raise TypeError
+
+    def __del__(self):
+        libflint.fexpr_clear(self)
+
+    @property
+    def _as_parameter_(self):
+        return self._ref
+
+    @staticmethod
+    def from_param(arg):
+        return arg
+
+    def __repr__(self):
+        ptr = libflint.fexpr_get_str(self)
+        try:
+            return ctypes.cast(ptr, ctypes.c_char_p).value.decode("ascii")
+        finally:
+            libflint.flint_free(ptr)
+
+    def latex(self):
+        ptr = libflint.fexpr_get_str_latex(self, 0)
+        try:
+            return ctypes.cast(ptr, ctypes.c_char_p).value.decode()
+        finally:
+            libflint.flint_free(ptr)
+
+    def _repr_latex_(self):
+        return "$$" + self.latex() + "$$"
+
+    def nwords(self):
+        return libflint.fexpr_size(self)
+
+    def size_bytes(self):
+        return libflint.fexpr_size_bytes(self)
+
+    def allocated_bytes(self):
+        return libflint.fexpr_allocated_bytes(self)
+
+    def num_leaves(self):
+        return libflint.fexpr_num_leaves(self)
+
+    def depth(self):
+        return libflint.fexpr_depth(self)
+
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+        if libflint.fexpr_equal(self, other):
+            return True
+        return False
+
+    def is_atom(self):
+        return bool(libflint.fexpr_is_atom(self))
+
+    def is_atom_integer(self):
+        return bool(libflint.fexpr_is_integer(self))
+
+    def is_symbol(self):
+        return bool(libflint.fexpr_is_symbol(self))
+
+    def head(self):
+        if libflint.fexpr_is_atom(self):
+            return None
+        res = fexpr()
+        libflint.fexpr_func(res, self)
+        return res
+
+    def nargs(self):
+        # todo: long
+        if self.is_atom():
+            return None
+        return libflint.fexpr_nargs(self)
+
+    def args(self):
+        if libflint.fexpr_is_atom(self):
+            return None
+        n = self.nargs()
+        args = [fexpr() for i in range(n)]
+        for i in range(n):
+            libflint.fexpr_arg(args[i], self, i)
+        return tuple(args)
+
+    def __hash__(self):
+        return libflint.fexpr_hash(self)
+
+    def __call__(self, *args):
+        args2 = []
+        for arg in args:
+            tp = type(arg)
+            if tp is not fexpr:
+                if tp is str:
+                    arg = "'" + arg + "'"
+                arg = fexpr(arg)
+            args2.append(arg)
+        n = len(args2)
+        res = fexpr()
+        if n == 0:
+            libflint.fexpr_call0(res, self)
+        elif n == 1:
+            libflint.fexpr_call1(res, self, args2[0])
+        elif n == 2:
+            libflint.fexpr_call2(res, self, args2[0], args2[1])
+        elif n == 3:
+            libflint.fexpr_call3(res, self, args2[0], args2[1], args2[2])
+        elif n == 4:
+            libflint.fexpr_call4(res, self, args2[0], args2[1], args2[2], args2[3])
+        else:
+            vec = libflint.flint_malloc(n * ctypes.sizeof(fexpr_struct))
+            vec = ctypes.cast(vec, ctypes.POINTER(fexpr_struct))
+            for i in range(n):
+                vec[i] = args2[i]._data
+            libflint.fexpr_call_vec(res, self, vec, n)
+            libflint.flint_free(vec)
+        return res
+
+    def contains(self, x):
+        """
+        Check if *x* appears exactly as a subexpression in *self*.
+
+            >>> f = fexpr("f"); x = fexpr("x"); y = fexpr("y")
+            >>> (f(x+1).contains(f), f(x+1).contains(x), f(x+1).contains(y))
+            (True, True, False)
+            >>> (f(x+1).contains(1), f(x+1).contains(2))
+            (True, False)
+            >>> (f(x+1).contains(x+1), f(x+1).contains(f(x+1)))
+            (True, True)
+        """
+        if type(x) is not fexpr:
+            x = fexpr(x)
+        if libflint.fexpr_contains(self, x):
+            return True
+        return False
+
+    def replace(self, old, new=None):
+        """
+        Replace subexpression.
+
+            >>> f = fexpr("f"); x = fexpr("x"); y = fexpr("y")
+            >>> f(x+1, x-1).replace(x, y)
+            f(Add(y, 1), Sub(y, 1))
+            >>> f(x+1, x-1).replace(x+1, y-1)
+            f(Sub(y, 1), Sub(x, 1))
+            >>> f(x+1, x-1).replace(f, f+1)
+            Add(f, 1)(Add(x, 1), Sub(x, 1))
+            >>> f(x+1, x-1).replace(x+2, y)
+            f(Add(x, 1), Sub(x, 1))
+        """
+        # todo: dict replacement
+        if type(old) is not fexpr:
+            old = fexpr(old)
+        if type(new) is not fexpr:
+            new = fexpr(new)
+        res = fexpr()
+        libflint.fexpr_replace(res, self, old, new)
+        return res
+
+    def __add__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_add(res, self, other)
+        return res
+
+    def __radd__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_add(res, other, self)
+        return res
+
+    def __sub__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_sub(res, self, other)
+        return res
+
+    def __rsub__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_sub(res, other, self)
+        return res
+
+    def __mul__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_mul(res, self, other)
+        return res
+
+    def __rmul__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_mul(res, other, self)
+        return res
+
+    def __truediv__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_div(res, self, other)
+        return res
+
+    def __rtruediv__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_div(res, other, self)
+        return res
+
+    def __pow__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_pow(res, self, other)
+        return res
+
+    def __rpow__(self, other):
+        if type(self) is not type(other):
+            try:
+                other = fexpr(other)
+            except TypeError:
+                return NotImplemented
+        res = fexpr()
+        libflint.fexpr_pow(res, other, self)
+        return res
+
+    # def __floordiv__(self, other):
+    #     return (self / other).floor()
+    # def __rfloordiv__(self, other):
+    #     return (other / self).floor()
+
+    def __bool__(self):
+        return True
+
+    def __abs__(self):
+        return fexpr("Abs")(self)
+
+    def __neg__(self):
+        res = fexpr()
+        libflint.fexpr_neg(res, self)
+        return res
+
+    def __pos__(self):
+        return fexpr("Pos")(self)
+
+    def expanded_normal_form(self):
+        """
+        Converts this expression to expanded normal form as
+        a formal rational function of its non-arithmetic subexpressions.
+
+            >>> x = fexpr("x"); y = fexpr("y")
+            >>> (x / x**2).expanded_normal_form()
+            Div(1, x)
+            >>> (((x ** 0) + 3) ** 5).expanded_normal_form()
+            1024
+            >>> ((x+y+1)**3 - (y+1)**3 - (x+y)**3 - (x+1)**3).expanded_normal_form()
+            Add(Mul(-1, Pow(x, 3)), Mul(6, x, y), Mul(-1, Pow(y, 3)), -1)
+            >>> (1/((1/y + 1/x))).expanded_normal_form()
+            Div(Mul(x, y), Add(x, y))
+            >>> (((x+y)**5 * (x-y)) / (x**2 - y**2)).expanded_normal_form()
+            Add(Pow(x, 4), Mul(4, Pow(x, 3), y), Mul(6, Pow(x, 2), Pow(y, 2)), Mul(4, x, Pow(y, 3)), Pow(y, 4))
+            >>> (1 / (x - x)).expanded_normal_form()
+            Traceback (most recent call last):
+              ...
+            ValueError: expanded_normal_form: overflow, formal division by zero or unsupported expression
+        """
+        res = fexpr()
+        if not libflint.fexpr_expanded_normal_form(res, self, 0):
+            raise ValueError("expanded_normal_form: overflow, formal division by zero or unsupported expression")
+        return res
+
+    def nstr(self, n=16):
+        """
+        Evaluates this expression numerically using Arb, returning
+        a decimal string correct within 1 ulp in the last output digit.
+        Attempts to obtain *n* digits (but the actual output accuracy
+        may be lower).
+
+            >>> Exp = fexpr("Exp"); Exp(1).nstr()
+            '2.718281828459045'
+            >>> Pi = fexpr("Pi"); Pi.nstr(30)
+            '3.14159265358979323846264338328'
+            >>> Log = fexpr("Log"); Log(-2).nstr()
+            '0.6931471805599453 + 3.141592653589793*I'
+            >>> Im = fexpr("Im")
+            >>> Im(Log(2)).nstr()   # exact zero
+            '0'
+
+        Here the imaginary part is zero, but Arb is not able to
+        compute so exactly. The output ``0e-N``
+        indicates only that the absolute value is bounded by ``1e-N``:
+
+            >>> Exp(Log(-2)).nstr()
+            '-2.000000000000000 + 0e-22*I'
+            >>> Im(Exp(Log(-2))).nstr()
+            '0e-731'
+
+        The algorithm fails if the expression or any subexpression
+        is not a finite complex number:
+
+            >>> Log(0).nstr()
+            Traceback (most recent call last):
+              ...
+            ValueError: nstr: unable to evaluate to a number
+
+        Expressions must be constant:
+
+            >>> fexpr("x").nstr()
+            Traceback (most recent call last):
+              ...
+            ValueError: nstr: unable to evaluate to a number
+
+        """
+        ptr = libflint.fexpr_get_decimal_str(self, n, 0)
+        try:
+            s = ctypes.cast(ptr, ctypes.c_char_p).value.decode("ascii")
+            if s == "?":
+                raise ValueError("nstr: unable to evaluate to a number")
+            return s
+        finally:
+            libflint.flint_free(ptr)
+
+class Expressions_fexpr(gr_ctx):
+
+    def __init__(self):
+        gr_ctx.__init__(self)
+        libgr.gr_ctx_init_fexpr(self._ref)
+        self._elem_type = fexpr
+
+FExpressions = Expressions_fexpr()
+
+
+libflint.fexpr_builtin_name.restype = ctypes.c_char_p
+libflint.fexpr_set_symbol_str.argtypes = ctypes.c_void_p, ctypes.c_char_p
+libflint.fexpr_get_str.restype = ctypes.c_void_p
+libflint.fexpr_get_str_latex.restype = ctypes.c_void_p
+libflint.fexpr_set_si.argtypes = fexpr, ctypes.c_long
+libflint.fexpr_set_d.argtypes = fexpr, ctypes.c_double
+libflint.fexpr_set_re_im_d.argtypes = fexpr, ctypes.c_double, ctypes.c_double
+libflint.fexpr_get_decimal_str.restype = ctypes.c_void_p
+
+
+
 
 
 # todo: def .one()
@@ -6124,7 +6268,8 @@ MatCC = Mat(CC)
 MatRF = Mat(RF)
 MatCF = Mat(CF)
 
-ZZx = ZZx_gr_poly = PolynomialRing_gr_poly(ZZ)
+ZZx_gr_poly = PolynomialRing_gr_poly(ZZ)
+ZZx = ZZx_fmpz_poly
 QQx = QQx_gr_poly = PolynomialRing_gr_poly(QQ)
 RRx = RRx_arb = PolynomialRing_gr_poly(RR_arb)
 CCx = CCx_acb = PolynomialRing_gr_poly(CC_acb)
@@ -6319,6 +6464,20 @@ def test_qqbar():
 def test_nf():
     a = NumberField_nf(ZZx([1,2,3])).gen()
     assert (a+5)**(-1) * (2*a+10) == 2
+
+def test_ca():
+    R = ComplexField_ca()
+    X = ComplexExtended_ca()
+    assert X.inf() == -X.neg_inf()
+    assert 1 / X(0) == X.uinf()
+    assert 0 / X(0) == X.undefined()
+    assert X(0).log() == X.neg_inf()
+    assert X.inf().exp() == X.inf()
+    assert raises(lambda: R(X.inf()), FlintDomainError)
+    assert raises(lambda: R(X.undefined()), FlintDomainError)
+    assert raises(lambda: R(X.unknown()), FlintUnableError)
+    assert X(R(1)) == 1
+    assert R(X(1)) == 1
 
 def test_arb():
     a = arb(2.5)

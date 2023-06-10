@@ -14,6 +14,7 @@
 #include "acb.h"
 #include "arb_fmpz_poly.h"
 #include "gr.h"
+#include "gr_generic.h"
 #include "gr_vec.h"
 #include "gr_poly.h"
 
@@ -542,6 +543,30 @@ int
 _gr_acf_sqrt(acf_t res, const acf_t x, const gr_ctx_t ctx)
 {
     acf_approx_sqrt(res, x, ACF_CTX_PREC(ctx), ACF_CTX_RND(ctx));
+    return GR_SUCCESS;
+}
+
+int
+_gr_acf_pos_inf(acf_t res, const gr_ctx_t ctx)
+{
+    arf_pos_inf(acf_realref(res));
+    arf_zero(acf_imagref(res));
+    return GR_SUCCESS;
+}
+
+int
+_gr_acf_neg_inf(acf_t res, const gr_ctx_t ctx)
+{
+    arf_neg_inf(acf_realref(res));
+    arf_zero(acf_imagref(res));
+    return GR_SUCCESS;
+}
+
+int
+_gr_acf_nan(acf_t res, const gr_ctx_t ctx)
+{
+    arf_nan(acf_realref(res));
+    arf_nan(acf_imagref(res));
     return GR_SUCCESS;
 }
 
@@ -1204,9 +1229,15 @@ gr_method_tab_input _acf_methods_input[] =
     {GR_METHOD_POW_FMPQ,        (gr_funcptr) _gr_acf_pow_fmpq},
 */
     {GR_METHOD_SQRT,            (gr_funcptr) _gr_acf_sqrt},
-/*
-    {GR_METHOD_RSQRT,           (gr_funcptr) _gr_acf_rsqrt},
+/*    {GR_METHOD_RSQRT,           (gr_funcptr) _gr_acf_rsqrt}, */
 
+    {GR_METHOD_POS_INF,         (gr_funcptr) _gr_acf_pos_inf},
+    {GR_METHOD_NEG_INF,         (gr_funcptr) _gr_acf_neg_inf},
+    {GR_METHOD_UINF,            (gr_funcptr) gr_not_in_domain},
+    {GR_METHOD_UNDEFINED,       (gr_funcptr) _gr_acf_nan},
+    {GR_METHOD_UNKNOWN,         (gr_funcptr) _gr_acf_nan},
+
+/*
     {GR_METHOD_FLOOR,           (gr_funcptr) _gr_acf_floor},
     {GR_METHOD_CEIL,            (gr_funcptr) _gr_acf_ceil},
     {GR_METHOD_TRUNC,           (gr_funcptr) _gr_acf_trunc},

@@ -255,6 +255,14 @@ Context operations
     the string with ``flint_free``).
     The *println* version prints a trailing newline.
 
+.. function:: int gr_ctx_set_gen_name(gr_ctx_t ctx, const char * s)
+              int gr_ctx_set_gen_names(gr_ctx_t ctx, const char ** s)
+
+    Set the name of the generator (univariate polynomial ring,
+    finite field, etc.) or generators (multivariate).
+    The name is used when printing and may be used to choose
+    coercions.
+
 Element operations
 --------------------------------------------------------------------------------
 
@@ -431,6 +439,22 @@ Assignment and conversions
               int gr_get_fmpz_2exp_fmpz(fmpz_t res1, fmpz_t res2, gr_srcptr x, gr_ctx_t ctx)
 
     Set or retrieve a dyadic number.
+
+.. function:: int gr_get_fexpr(fexpr_t res, gr_srcptr x, gr_ctx_t ctx)
+              int gr_get_fexpr_serialize(fexpr_t res, gr_srcptr x, gr_ctx_t ctx)
+
+    Sets *res* to a symbolic expression representing *x*.
+    The *serialize* version may generate a representation of the
+    internal representation which is not intended to be human-readable.
+
+.. function:: int gr_set_fexpr(gr_ptr res, fexpr_vec_t inputs, gr_vec_t outputs, const fexpr_t x, gr_ctx_t ctx)
+
+    Sets *res* to the evaluation of the expression *x* in the
+    given ring or structure.
+    The user must provide vectors *inputs* and *outputs* which
+    may be empty initially and which may be used as scratch space
+    during evaluation. Non-empty vectors may be given to map symbols
+    to predefined values.
 
 Special values
 ................................................................................
@@ -765,9 +789,19 @@ Integer and complex parts
               int gr_im(gr_ptr res, gr_srcptr x, gr_ctx_t ctx)
               int gr_sgn(gr_ptr res, gr_srcptr x, gr_ctx_t ctx)
               int gr_csgn(gr_ptr res, gr_srcptr x, gr_ctx_t ctx)
+              int gr_arg(gr_ptr res, gr_srcptr x, gr_ctx_t ctx)
 
     These methods may return the flag ``GR_DOMAIN`` (or ``GR_UNABLE``)
     when the ring is not a subring of the real or complex numbers.
+
+Infinities and extended values
+........................................................................
+
+.. function:: int gr_pos_inf(gr_ptr res, gr_ctx_t ctx)
+              int gr_neg_inf(gr_ptr res, gr_ctx_t ctx)
+              int gr_uinf(gr_ptr res, gr_ctx_t ctx)
+              int gr_undefined(gr_ptr res, gr_ctx_t ctx)
+              int gr_unknown(gr_ptr res, gr_ctx_t ctx)
 
 Ordering methods
 ........................................................................

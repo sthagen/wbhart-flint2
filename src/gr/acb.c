@@ -23,6 +23,7 @@
 #include "qqbar.h"
 #include "arb_fmpz_poly.h"
 #include "gr.h"
+#include "gr_generic.h"
 #include "gr_vec.h"
 #include "gr_poly.h"
 
@@ -203,7 +204,7 @@ int
 _gr_ca_get_acb_with_prec(acb_t res, gr_srcptr x, gr_ctx_t x_ctx, slong prec);
 
 int
-_gr_acb_set_other(acb_t res, gr_srcptr x, gr_ctx_t x_ctx, const gr_ctx_t ctx)
+_gr_acb_set_other(acb_t res, gr_srcptr x, gr_ctx_t x_ctx, gr_ctx_t ctx)
 {
     switch (x_ctx->which_ring)
     {
@@ -265,7 +266,7 @@ _gr_acb_set_other(acb_t res, gr_srcptr x, gr_ctx_t x_ctx, const gr_ctx_t ctx)
             return GR_SUCCESS;
     }
 
-    return GR_UNABLE;
+    return gr_generic_set_other(res, x, x_ctx, ctx);
 }
 
 /* xxx: assumes that ctx are not read */
@@ -861,6 +862,14 @@ int
 _gr_acb_csgn(acb_t res, const acb_t x, const gr_ctx_t ctx)
 {
     acb_csgn(acb_realref(res), x);
+    arb_zero(acb_imagref(res));
+    return GR_SUCCESS;
+}
+
+int
+_gr_acb_arg(acb_t res, const acb_t x, const gr_ctx_t ctx)
+{
+    acb_arg(acb_realref(res), x, ACB_CTX_PREC(ctx));
     arb_zero(acb_imagref(res));
     return GR_SUCCESS;
 }
@@ -2068,6 +2077,7 @@ gr_method_tab_input _acb_methods_input[] =
     {GR_METHOD_IM,              (gr_funcptr) _gr_acb_im},
     {GR_METHOD_SGN,             (gr_funcptr) _gr_acb_sgn},
     {GR_METHOD_CSGN,            (gr_funcptr) _gr_acb_csgn},
+    {GR_METHOD_ARG,             (gr_funcptr) _gr_acb_arg},
     {GR_METHOD_PI,              (gr_funcptr) _gr_acb_pi},
     {GR_METHOD_EXP,             (gr_funcptr) _gr_acb_exp},
     {GR_METHOD_EXPM1,           (gr_funcptr) _gr_acb_expm1},

@@ -19,6 +19,7 @@
 #include "fmpzi.h"
 #include "qqbar.h"
 #include "gr.h"
+#include "gr_generic.h"
 #include "gr_vec.h"
 #include "gr_poly.h"
 
@@ -174,7 +175,7 @@ int
 _gr_ca_get_arb_with_prec(arb_t res, gr_srcptr x, gr_ctx_t x_ctx, slong prec);
 
 int
-_gr_arb_set_other(arb_t res, gr_srcptr x, gr_ctx_t x_ctx, const gr_ctx_t ctx)
+_gr_arb_set_other(arb_t res, gr_srcptr x, gr_ctx_t x_ctx, gr_ctx_t ctx)
 {
     switch (x_ctx->which_ring)
     {
@@ -243,7 +244,7 @@ _gr_arb_set_other(arb_t res, gr_srcptr x, gr_ctx_t x_ctx, const gr_ctx_t ctx)
             }
     }
 
-    return GR_UNABLE;
+    return gr_generic_set_other(res, x, x_ctx, ctx);
 }
 
 /* xxx: assumes that ctx are not read */
@@ -807,6 +808,29 @@ int
 _gr_arb_sgn(arb_t res, const arb_t x, const gr_ctx_t ctx)
 {
     arb_sgn(res, x);
+    return GR_SUCCESS;
+}
+
+int
+_gr_arb_arg(arb_t res, const arb_t x, const gr_ctx_t ctx)
+{
+    if (arb_is_nonnegative(x))
+    {
+        arb_zero(res);
+    }
+    else if (arb_is_negative(x))
+    {
+        arb_const_pi(res, ARB_CTX_PREC(ctx));
+    }
+    else
+    {
+        arb_t t;
+        arb_init(t);
+        arb_const_pi(res, 2 * MAG_BITS);
+        arb_union(res, res, t, ARB_CTX_PREC(ctx));
+        arb_clear(t);
+    }
+
     return GR_SUCCESS;
 }
 
@@ -1780,6 +1804,7 @@ gr_method_tab_input _arb_methods_input[] =
     {GR_METHOD_IM,              (gr_funcptr) _gr_arb_im},
     {GR_METHOD_SGN,             (gr_funcptr) _gr_arb_sgn},
     {GR_METHOD_CSGN,            (gr_funcptr) _gr_arb_sgn},
+    {GR_METHOD_ARG,             (gr_funcptr) _gr_arb_arg},
     {GR_METHOD_CMP,             (gr_funcptr) _gr_arb_cmp},
     {GR_METHOD_CMPABS,          (gr_funcptr) _gr_arb_cmpabs},
     {GR_METHOD_I,               (gr_funcptr) gr_not_in_domain},

@@ -176,6 +176,14 @@ Base rings and fields
 
     Sets or retrieves options of a Calcium context object.
 
+Extended number sets
+-------------------------------------------------------------------------------
+
+.. function:: void gr_ctx_init_complex_extended_ca(gr_ctx_t ctx)
+
+    Like :func:`gr_ctx_init_complex_ca` but allows special values
+    (infinities, undefined).
+
 Floating-point arithmetic
 -------------------------------------------------------------------------------
 
@@ -279,6 +287,14 @@ Fraction fields
     fractions in *nvars* variables over the integers (equivalently, rationals),
     with monomial ordering *ord*.
     Elements have type :type:`fmpz_mpoly_q_struct`.
+
+Symbolic expressions
+-------------------------------------------------------------------------------
+
+.. function:: void gr_ctx_init_fexpr(gr_ctx_t ctx)
+
+    Initializes *ctx* to handle symbolic expressions.
+    Elements have type :type:`fexpr_struct`.
 
 .. raw:: latex
 
