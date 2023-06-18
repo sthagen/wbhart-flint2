@@ -19,6 +19,7 @@
 #include "gr_generic.h"
 #include "gr_vec.h"
 #include "gr_poly.h"
+#include "ca.h"
 
 typedef struct
 {
@@ -269,7 +270,7 @@ qqbar_set_fmpzi(qqbar_t res, const fmpzi_t x)
 }
 
 int
-_gr_qqbar_set_other(qqbar_t res, gr_srcptr x, gr_ctx_t x_ctx, const gr_ctx_t ctx)
+_gr_qqbar_set_other(qqbar_t res, gr_srcptr x, gr_ctx_t x_ctx, gr_ctx_t ctx)
 {
     switch (x_ctx->which_ring)
     {
@@ -293,9 +294,33 @@ _gr_qqbar_set_other(qqbar_t res, gr_srcptr x, gr_ctx_t x_ctx, const gr_ctx_t ctx
                 return GR_DOMAIN;
             qqbar_set(res, x);
             return GR_SUCCESS;
+
+        /* todo: all cases */
+        case GR_CTX_RR_CA:
+        case GR_CTX_CC_CA:
+        case GR_CTX_REAL_ALGEBRAIC_CA:
+        case GR_CTX_COMPLEX_ALGEBRAIC_CA:
+        case GR_CTX_COMPLEX_EXTENDED_CA:
+
+            if (!ca_get_qqbar(res, x, gr_ctx_data_as_ptr(x_ctx)))
+                return GR_UNABLE;
+
+            if (ctx->which_ring == GR_CTX_COMPLEX_ALGEBRAIC_QQBAR ||
+                x_ctx->which_ring == GR_CTX_REAL_ALGEBRAIC_CA ||
+                x_ctx->which_ring == GR_CTX_RR_CA)
+                return GR_SUCCESS;
+
+            if (!qqbar_is_real(res))
+            {
+                qqbar_zero(res);
+                return GR_DOMAIN;
+            }
+
+            return GR_SUCCESS;
+
     }
 
-    return GR_UNABLE;
+    return gr_generic_set_other(res, x, x_ctx, ctx);
 }
 
 int
