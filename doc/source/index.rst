@@ -9,8 +9,8 @@ FLINT: Fast Library for Number Theory
 Welcome to FLINT's documentation! FLINT is a C library for doing number theory.
 
 * Website: https://flintlib.org
-* Source code on GitHub: https://github.com/flintlib/flint2
-* Issue tracker: https://github.com/flintlib/flint2/issues
+* Source code on GitHub: https://github.com/flintlib/flint
+* Issue tracker: https://github.com/flintlib/flint/issues
 * Mailing list: https://groups.google.com/group/flint-devel
 
 FLINT is free software distributed under the
@@ -303,7 +303,6 @@ Interfaces
 .. toctree::
    :maxdepth: 1
 
-   flintxx.rst
    python_flint.rst
 
 References
