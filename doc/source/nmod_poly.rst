@@ -3,7 +3,74 @@
 **nmod_poly.h** -- univariate polynomials over integers mod n (word-size n)
 ===============================================================================
 
-Description.
+The :type:`nmod_poly_t` data type represents elements of
+`\mathbb{Z}/n\mathbb{Z}[x]` for a fixed modulus `n`. The ``nmod_poly``
+module provides routines for memory management, basic arithmetic and
+some higher level functions such as GCD, etc.
+
+Each coefficient of an :type:`nmod_poly_t` is of type ``mp_limb_t``
+and represents an integer reduced modulo the fixed modulus `n`.
+
+Unless otherwise specified, all functions in this section permit
+aliasing between their input arguments and between their input and
+output arguments.
+
+The :type:`nmod_poly_t` type is a typedef for an array of length 1 of
+:type:`nmod_poly_struct`'s. This permits passing parameters of type
+:type:`nmod_poly_t` by reference.
+
+In reality one never deals directly with the ``struct`` and simply
+deals with objects of type :type:`nmod_poly_t`. For simplicity we will
+think of an :type:`nmod_poly_t` as a ``struct``, though in practice to
+access fields of this ``struct``, one needs to dereference first,
+e.g.\ to access the ``length`` field of an :type:`nmod_poly_t` called
+``poly1`` one writes ``poly1->length``.
+
+An :type:`nmod_poly_t` is said to be *normalised* if either ``length``
+is zero, or if the leading coefficient of the polynomial is non-zero.
+All ``nmod_poly`` functions expect their inputs to be normalised and
+for all coefficients to be reduced modulo `n` and unless otherwise
+specified they produce output that is normalised with coefficients
+reduced modulo `n`.
+
+It is recommended that users do not access the fields of an
+:type:`nmod_poly_t` or its coefficient data directly, but make use of
+the functions designed for this purpose, detailed below.
+
+Functions in ``nmod_poly`` do all the memory management for the user.
+One does not need to specify the maximum length in advance before
+using a polynomial object. FLINT reallocates space automatically as
+the computation proceeds, if more space is required.
+
+Simple example
+--------------
+
+The following example computes the square of the polynomial `5x^3 + 6`
+in `\mathbb{Z}/7\mathbb{Z}[x]`.
+
+.. code:: c
+
+   #include "nmod_poly.h"
+   int main()
+   {
+       nmod_poly_t x, y;
+       nmod_poly_init(x, 7);
+       nmod_poly_init(y, 7);
+       nmod_poly_set_coeff_ui(x, 3, 5);
+       nmod_poly_set_coeff_ui(x, 0, 6);
+       nmod_poly_mul(y, x, x);
+       nmod_poly_print(x); flint_printf("\n");
+       nmod_poly_print(y); flint_printf("\n");
+       nmod_poly_clear(x);
+       nmod_poly_clear(y);
+   }
+
+The output is:
+
+::
+
+   4 7  6 0 0 5
+   7 7  1 0 0 4 0 0 4
 
 Types, macros and constants
 -------------------------------------------------------------------------------
@@ -11,9 +78,6 @@ Types, macros and constants
 .. type:: nmod_poly_struct
 
 .. type:: nmod_poly_t
-
-    Description.
-
 
 Helper functions
 --------------------------------------------------------------------------------
@@ -105,11 +169,12 @@ Polynomial properties
 .. function:: int nmod_poly_is_unit(const nmod_poly_t poly)
 
    Returns `1` if the polynomial is a nonzero constant (in the case of prime
-   modulus, this is equivalent to being a unit).
+   modulus, this is equivalent to being a unit), otherwise `0`.
 
 .. function:: int nmod_poly_is_monic(const nmod_poly_t poly)
 
-   Returns `1` if the polynomial is monic, i.e. nonzero with leading coefficient `1`.
+   Returns `1` if the polynomial is monic, i.e. nonzero with leading
+   coefficient `1`, otherwise `0`.
 
 
 Assignment and basic manipulation
@@ -135,9 +200,9 @@ Assignment and basic manipulation
     If ``len`` is greater than the current length of ``poly``,
     then nothing happens.
 
-.. function:: void nmod_poly_set_trunc(nmod_poly_t res, const nmod_poly_t poly, slong n)
+.. function:: void nmod_poly_set_trunc(nmod_poly_t res, const nmod_poly_t poly, slong len)
 
-    Notionally truncate ``poly`` to length `n` and set ``res`` to the
+    Notionally truncate ``poly`` to length ``len`` and set ``res`` to the
     result. The result is normalised.
 
 .. function:: void _nmod_poly_reverse(mp_ptr output, mp_srcptr input, slong len, slong m)
@@ -335,6 +400,18 @@ Comparison
 
     Returns `1` if the polynomials are equal, otherwise `0`.
 
+.. function:: int nmod_poly_equal_nmod(const nmod_poly_t poly, ulong cst)
+
+    Returns `1` if the polynomial ``poly`` is constant, equal to ``cst``,
+    otherwise `0`.
+    ``cst`` is assumed to be already reduced, i.e. less than the modulus of
+    ``poly``.
+
+.. function:: int nmod_poly_equal_ui(const nmod_poly_t poly, ulong cst)
+
+    Returns `1` if the polynomial ``poly`` is constant and equal to ``cst`` up to
+    reduction modulo the modulus of ``poly``, otherwise returns `0`.
+
 .. function:: int nmod_poly_equal_trunc(const nmod_poly_t poly1, const nmod_poly_t poly2, slong n)
 
     Notionally truncate ``poly1`` and ``poly2`` to length `n` and return
@@ -353,7 +430,8 @@ Comparison
 .. function:: int nmod_poly_is_gen(const nmod_poly_t poly)
 
    Returns `1` if the polynomial is the generating indeterminate (i.e. has
-   degree `1`, constant coefficient `0`, and leading coefficient `1`).
+   degree `1`, constant coefficient `0`, and leading coefficient `1`), otherwise
+   returns `0`.
 
 
 Shifting
@@ -369,7 +447,7 @@ Shifting
 .. function:: void nmod_poly_shift_left(nmod_poly_t res, const nmod_poly_t poly, slong k)
 
     Sets ``res`` to ``poly`` shifted left by ``k`` coefficients,
-    i.e.\ multiplied by `x^k`.
+    i.e. multiplied by `x^k`.
 
 .. function:: void _nmod_poly_shift_right(mp_ptr res, mp_srcptr poly, slong len, slong k)
 
@@ -380,7 +458,7 @@ Shifting
 .. function:: void nmod_poly_shift_right(nmod_poly_t res, const nmod_poly_t poly, slong k)
 
     Sets ``res`` to ``poly`` shifted right by ``k`` coefficients,
-    i.e.\ divide by `x^k` and throws away the remainder. If ``k`` is
+    i.e. divide by `x^k` and throw away the remainder. If ``k`` is
     greater than or equal to the length of ``poly``, the result is the
     zero polynomial.
 
@@ -457,7 +535,7 @@ Bit packing and unpacking
 .. function:: void _nmod_poly_bit_pack(mp_ptr res, mp_srcptr poly, slong len, flint_bitcnt_t bits)
 
     Packs ``len`` coefficients of ``poly`` into fields of the given
-    number of bits in the large integer ``res``, i.e.\ evaluates
+    number of bits in the large integer ``res``, i.e. evaluates
     ``poly`` at ``2^bits`` and store the result in ``res``.
     Assumes ``len > 0`` and ``bits > 0``. Also assumes that no
     coefficient of ``poly`` is bigger than ``bits/2`` bits. We
@@ -886,7 +964,7 @@ Powering
     ``ginv`` of length ``ginvlen`` is set to the power series inverse of the
     reverse of ``g``.
 
-.. function:: void _nmod_poly_powers_mod_preinv_threaded(mp_ptr * res, mp_srcptr f, slong flen, slong n, mp_srcptr g, slong glen, mp_srcptr ginv, slong ginvlen, const nmod_t mod)   
+.. function:: void _nmod_poly_powers_mod_preinv_threaded(mp_ptr * res, mp_srcptr f, slong flen, slong n, mp_srcptr g, slong glen, mp_srcptr ginv, slong ginvlen, const nmod_t mod)
 
     Compute ``f^0, f^1, ..., f^(n-1) mod g``, where ``g`` has length ``glen``
     and ``f`` is reduced mod ``g`` and has length ``flen`` (possibly zero
@@ -1328,7 +1406,7 @@ Composition
 .. function:: void _nmod_poly_compose_horner(mp_ptr res, mp_srcptr poly1, slong len1, mp_srcptr poly2, slong len2, nmod_t mod)
 
     Composes ``poly1`` of length ``len1`` with ``poly2`` of length
-    ``len2`` and sets ``res`` to the result, i.e.\ evaluates
+    ``len2`` and sets ``res`` to the result, i.e. evaluates
     ``poly1`` at ``poly2``. The algorithm used is Horner's algorithm.
     We require that ``res`` have space for ``(len1 - 1)*(len2 - 1) + 1``
     coefficients. It is assumed that ``len1 > 0`` and ``len2 > 0``.
@@ -1336,13 +1414,13 @@ Composition
 .. function:: void nmod_poly_compose_horner(nmod_poly_t res, const nmod_poly_t poly1, const nmod_poly_t poly2)
 
     Composes ``poly1`` with ``poly2`` and sets ``res`` to the result,
-    i.e.\ evaluates ``poly1`` at ``poly2``. The algorithm used is
+    i.e. evaluates ``poly1`` at ``poly2``. The algorithm used is
     Horner's algorithm.
 
 .. function:: void _nmod_poly_compose_divconquer(mp_ptr res, mp_srcptr poly1, slong len1, mp_srcptr poly2, slong len2, nmod_t mod)
 
     Composes ``poly1`` of length ``len1`` with ``poly2`` of length
-    ``len2`` and sets ``res`` to the result, i.e.\ evaluates
+    ``len2`` and sets ``res`` to the result, i.e. evaluates
     ``poly1`` at ``poly2``. The algorithm used is the divide and
     conquer algorithm. We require that ``res`` have space for
     ``(len1 - 1)*(len2 - 1) + 1`` coefficients. It is assumed that
@@ -1351,13 +1429,13 @@ Composition
 .. function:: void nmod_poly_compose_divconquer(nmod_poly_t res, const nmod_poly_t poly1, const nmod_poly_t poly2)
 
     Composes ``poly1`` with ``poly2`` and sets ``res`` to the result,
-    i.e.\ evaluates ``poly1`` at ``poly2``. The algorithm used is
+    i.e. evaluates ``poly1`` at ``poly2``. The algorithm used is
     the divide and conquer algorithm.
 
 .. function:: void _nmod_poly_compose(mp_ptr res, mp_srcptr poly1, slong len1, mp_srcptr poly2, slong len2, nmod_t mod)
 
     Composes ``poly1`` of length ``len1`` with ``poly2`` of length
-    ``len2`` and sets ``res`` to the result, i.e.\ evaluates ``poly1``
+    ``len2`` and sets ``res`` to the result, i.e. evaluates ``poly1``
     at ``poly2``. We require that ``res`` have space for
     ``(len1 - 1)*(len2 - 1) + 1`` coefficients. It is assumed that
     ``len1 > 0`` and ``len2 > 0``.
@@ -1543,7 +1621,7 @@ Modular composition
     :func:`_nmod_poly_compose_mod_brent_kung_vec_preinv`. Distributing the
     Horner evaluations across :func:`flint_get_num_threads` threads.
 
-.. function:: void nmod_poly_compose_mod_brent_kung_vec_preinv_threaded_pool(nmod_poly_struct * res, const nmod_poly_struct * polys, slong len1, slong n, const nmod_poly_t g, const nmod_poly_t poly, const nmod_poly_t polyinv, thread_pool_handle * threads, slong num_threads) 
+.. function:: void nmod_poly_compose_mod_brent_kung_vec_preinv_threaded_pool(nmod_poly_struct * res, const nmod_poly_struct * polys, slong len1, slong n, const nmod_poly_t g, const nmod_poly_t poly, const nmod_poly_t polyinv, thread_pool_handle * threads, slong num_threads)
 
     Multithreaded version of
     :func:`nmod_poly_compose_mod_brent_kung_vec_preinv`. Distributing the
@@ -1871,7 +1949,7 @@ Greatest common divisor
 
 
 
-Power series composition
+Discriminant
 --------------------------------------------------------------------------------
 
 
@@ -1883,10 +1961,10 @@ Power series composition
 
     Return the discriminant of `f`.
     We normalise the discriminant so that
-    `\operatorname{disc}(f) = (-1)^(n(n-1)/2) \operatorname{res}(f, f') /
-    \operatorname{lc}(f)^(n - m - 2)`, where ``n = len(f)`` and
+    `\operatorname{disc}(f) = (-1)^{n(n-1)/2} \operatorname{res}(f, f') /
+    \operatorname{lc}(f)^{n - m - 2}`, where ``n = len(f)`` and
     ``m = len(f')``. Thus `\operatorname{disc}(f) =
-    \operatorname{lc}(f)^(2n - 2) \prod_{i < j} (r_i - r_j)^2`, where
+    \operatorname{lc}(f)^{2n - 2} \prod_{i < j} (r_i - r_j)^2`, where
     `\operatorname{lc}(f)` is the leading coefficient of `f` and `r_i` are the
     roots of `f`.
 
@@ -1902,7 +1980,7 @@ Power series composition
     to be zero.
 
     Assumes that ``len1, len2, n > 0``, that ``len1, len2 <= n``,
-    and that\\ ``(len1-1) * (len2-1) + 1 <= n``, and that ``res`` has
+    and that ``(len1-1) * (len2-1) + 1 <= n``, and that ``res`` has
     space for ``n`` coefficients. Does not support aliasing between any
     of the inputs and the output.
 
