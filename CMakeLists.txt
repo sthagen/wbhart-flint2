@@ -21,7 +21,9 @@ include(CheckLibraryExists)
 include(TestBigEndian)
 
 # Source of truth for project version
-file(STRINGS VERSION FLINT_VERSION)
+file(STRINGS VERSION FLINT_VERSION_FULL)
+string(REGEX MATCH "([0-9]+\.[0-9]+\.[0-9]+)" _ ${FLINT_VERSION_FULL})
+set(FLINT_VERSION ${CMAKE_MATCH_1})
 
 project(flint
   VERSION ${FLINT_VERSION}
