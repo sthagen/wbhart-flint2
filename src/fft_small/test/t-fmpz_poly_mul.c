@@ -1,17 +1,23 @@
-#include "ulong_extras.h"
+/*
+    Copyright (C) 2023 Fredrik Johansson
+
+    This file is part of FLINT.
+
+    FLINT is free software: you can redistribute it and/or modify it under
+    the terms of the GNU Lesser General Public License (LGPL) as published
+    by the Free Software Foundation; either version 2.1 of the License, or
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
+*/
+
+#include "test_helpers.h"
 #include "fmpz.h"
 #include "fmpz_vec.h"
 #include "fmpz_poly.h"
 #include "fft_small.h"
-#include "profiler.h"
 
-int main(void)
+TEST_FUNCTION_START(_fmpz_poly_mul_mid_mpn_ctx, state)
 {
     mpn_ctx_t R;
-    FLINT_TEST_INIT(state);
-
-    flint_printf("fmpz_poly_mul....");
-    fflush(stdout);
 
     mpn_ctx_init(R, UWORD(0x0003f00000000001));
 
@@ -132,8 +138,5 @@ int main(void)
 
     mpn_ctx_clear(R);
 
-    FLINT_TEST_CLEANUP(state);
-
-    flint_printf("PASS\n");
-    return 0;
+    TEST_FUNCTION_END(state);
 }

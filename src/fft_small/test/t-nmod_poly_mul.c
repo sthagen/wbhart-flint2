@@ -1,19 +1,27 @@
+/*
+    Copyright (C) 2022 Daniel Schultz
+    Copyright (C) 2023 Fredrik Johansson
+
+    This file is part of FLINT.
+
+    FLINT is free software: you can redistribute it and/or modify it under
+    the terms of the GNU Lesser General Public License (LGPL) as published
+    by the Free Software Foundation; either version 2.1 of the License, or
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
+*/
+
+#include "test_helpers.h"
 #include "ulong_extras.h"
 #include "nmod.h"
 #include "nmod_poly.h"
 #include "fft_small.h"
 #include "profiler.h"
 
-
-int main(void)
+TEST_FUNCTION_START(_nmod_poly_mul_mid_mpn_ctx, state)
 {
     flint_bitcnt_t nbits;
     mpn_ctx_t R;
     nmod_t mod;
-    FLINT_TEST_INIT(state);
-
-    flint_printf("nmod_poly_mul....");
-    fflush(stdout);
 
     mpn_ctx_init(R, UWORD(0x0003f00000000001));
 
@@ -72,9 +80,6 @@ int main(void)
         ulong * a, *b, * c, * d;
         ulong an, zn, zl, zh, sz, i, reps;
 
-        flint_printf("sqr nbits: %02wu", nbits);
-        fflush(stdout);
-
         for (reps = 0; reps < 100; reps++)
         {
             flint_set_num_threads(1 + n_randint(state, 10));
@@ -117,19 +122,12 @@ int main(void)
             flint_free(c);
             flint_free(d);
         }
-
-        for (i = 0; i < 13; i++)
-            flint_printf("%c", '\b');
-        fflush(stdout);
     }
 
     for (nbits = 1; nbits <= FLINT_BITS; nbits ++)
     {
         ulong * a, * b, * c, * d;
         ulong an, bn, zn, zl, zh, sz, i, reps;
-
-        flint_printf("mul nbits: %02wu", nbits);
-        fflush(stdout);
 
         for (reps = 0; reps < 100; reps++)
         {
@@ -177,21 +175,13 @@ int main(void)
             flint_free(c);
             flint_free(d);
         }
-
-        for (i = 0; i < 13; i++)
-            flint_printf("%c", '\b');
-        fflush(stdout);
     }
-
 
     for (nbits = 2; nbits <= FLINT_BITS; nbits++)
     {
         ulong * a, * b, * q1, * q2, * q3, * r1, * r2, * r3;
         ulong an, bn, qn, i, reps;
         nmod_poly_divrem_precomp_struct M[1];
-
-        flint_printf("divrem nbits: %02wu", nbits);
-        fflush(stdout);
 
         for (reps = 0; reps < 100; reps++)
         {
@@ -228,7 +218,7 @@ int main(void)
             ulong prec = qn + n_randint(state, 200);
             _nmod_poly_divrem_precomp_init(M, b, bn, prec, mod, R);
             _nmod_poly_divrem_precomp(q3, r3, a, an, M, mod, R);
-            _nmod_poly_divrem_precomp_clear(M);            
+            _nmod_poly_divrem_precomp_clear(M);
 
             for (i = qn; i > 0; i--)
             {
@@ -260,17 +250,9 @@ int main(void)
             flint_free(r1);
             flint_free(r2);
         }
-
-        for (i = 0; i < 16; i++)
-            flint_printf("%c", '\b');
-        fflush(stdout);
     }
 
     mpn_ctx_clear(R);
 
-    FLINT_TEST_CLEANUP(state);
-
-    flint_printf("PASS\n");
-    return 0;
+    TEST_FUNCTION_END(state);
 }
-
