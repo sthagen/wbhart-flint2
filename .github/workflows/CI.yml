@@ -524,6 +524,8 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1.12.1
         with:
           arch: x86_64
+          toolset: 14.37.32822
+          vsversion: 17.6.0
 
       - name: "Configure"
         run: |
@@ -531,7 +533,8 @@ jobs:
           cd build
           set "LIB=C:\Miniconda3\Library\lib;%LIB%"
           set "CPATH=C:\Miniconda3\Library\include;%CPATH%"
-          cmake -G "Ninja" -DCMAKE_C_FLAGS="/wd4018 /wd4146 /wd4244 /wd4267 /wd4305 /wd4996 /DFLINT_NO_CA_MAT_EXP_TEST" -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release ..
+          # For single build, we need atomics
+          cmake -G "Ninja" -DCMAKE_C_FLAGS="/wd4018 /wd4146 /wd4244 /wd4267 /wd4305 /wd4996 /DFLINT_NO_CA_MAT_EXP_TEST /std:c11 /experimental:c11atomics" -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release ..
 
       - name: "Build"
         run: |
@@ -545,6 +548,72 @@ jobs:
           cd build
           set "FLINT_TEST_MULTIPLIER=1"
           ctest -j3 --output-on-failure --timeout 450
+
+      - if: failure()
+        name: "If failure, stop all other jobs"
+        uses: andymckay/cancel-action@0.3
+
+
+
+  ##############################################################################
+  # alpine linux 32-bit
+  ##############################################################################
+  alpine-32bit:
+    name: Alpine Linux, musl, 32-bit (x1.5)
+
+    runs-on: ubuntu-latest
+
+    env:
+      CC: "gcc"
+      FLINT_TEST_MULTIPLIER: "1.5"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Setup latest Alpine Linux"
+        uses: jirutka/setup-alpine@v1
+        with:
+          arch: x86
+          branch: edge
+          packages: >
+            gmp-dev
+            mpfr-dev
+            gcc
+            musl-dev
+            make
+            autoconf
+            automake
+            libtool
+
+      - name: "Setup"
+        run: |
+          gcc --version
+          make --version
+          autoconf --version
+          libtool --version
+          echo "MAKE=make -j$(expr $(nproc) + 1) --output-sync=target" >> $GITHUB_ENV
+        shell: alpine.sh {0}
+
+      - name: "Configure"
+        run: |
+          ./bootstrap.sh
+          ./configure CC=${CC} --disable-static --enable-assert
+        shell: alpine.sh {0}
+
+      - name: "Compile library"
+        run: |
+          $MAKE
+        shell: alpine.sh {0}
+
+      - name: "Compile tests"
+        run: |
+          $MAKE tests
+        shell: alpine.sh {0}
+
+      - name: "Check"
+        run: |
+          $MAKE check
+        shell: alpine.sh {0}
 
       - if: failure()
         name: "If failure, stop all other jobs"
