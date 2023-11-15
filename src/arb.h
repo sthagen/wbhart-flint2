@@ -25,16 +25,6 @@
 extern "C" {
 #endif
 
-#define __ARB_VERSION 2
-#define __ARB_VERSION_MINOR 23
-#define __ARB_VERSION_PATCHLEVEL 0
-#define ARB_VERSION "2.23.0"
-#define __ARB_RELEASE (__ARB_VERSION * 10000 + \
-                         __ARB_VERSION_MINOR * 100 + \
-                         __ARB_VERSION_PATCHLEVEL)
-
-FLINT_DLL extern const char * arb_version;
-
 #define arb_midref(x) (&(x)->mid)
 #define arb_radref(x) (&(x)->rad)
 
@@ -555,6 +545,7 @@ void arb_const_catalan(arb_t z, slong prec);
 void arb_const_e(arb_t z, slong prec);
 void arb_const_khinchin(arb_t z, slong prec);
 void arb_const_glaisher(arb_t z, slong prec);
+void arb_const_reciprocal_fibonacci(arb_t res, slong prec);
 void arb_agm(arb_t z, const arb_t x, const arb_t y, slong prec);
 void arb_lgamma(arb_t z, const arb_t x, slong prec);
 void arb_rgamma(arb_t z, const arb_t x, slong prec);
