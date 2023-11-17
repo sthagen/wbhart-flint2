@@ -572,6 +572,7 @@ case "$host_cpu" in
         ;;
 esac
 AC_CONFIG_FILES([src/fft_tuning.h:$fft_tuning_in],[],[fft_tuning_in="$fft_tuning_in"])
+AC_SUBST(FFT_TUNING_IN, $fft_tuning_in)
 
 if test -z "$LDCONFIG";
 then
@@ -643,6 +644,7 @@ AC_COMPILE_IFELSE(
     gmpcompat_h_in="gmpcompat.h.in")
 
 AC_CONFIG_FILES([src/gmpcompat.h:src/$gmpcompat_h_in],[],[gmpcompat_h_in="$gmpcompat_h_in"])
+AC_SUBST(GMPCOMPAT_H_IN, $gmpcompat_h_in)
 
 # Check that MPFR >= 4.1.0
 AC_MSG_CHECKING([if version of MPFR is greater than 4.1.0])
@@ -958,7 +960,11 @@ AX_CHECK_COMPILE_FLAG([-Wall],[DEFAULT_CFLAGS="-Wall $DEFAULT_CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-Wno-stringop-overread],[DEFAULT_CFLAGS="-Wno-stringop-overread $DEFAULT_CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-Wno-stringop-overflow],[DEFAULT_CFLAGS="-Wno-stringop-overflow $DEFAULT_CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-Werror=implicit-function-declaration],[DEFAULT_CFLAGS="-Werror=implicit-function-declaration $DEFAULT_CFLAGS"])
-AX_CHECK_COMPILE_FLAG([-O2],[DEFAULT_CFLAGS="-O2 $DEFAULT_CFLAGS"])
+AX_CHECK_COMPILE_FLAG([-O3],[DEFAULT_CFLAGS="-O3 $DEFAULT_CFLAGS"])
+if test "$host" = "$build";
+then
+    AX_CHECK_COMPILE_FLAG([-march=native],[DEFAULT_CFLAGS="-march=native $DEFAULT_CFLAGS"])
+fi
 AX_CHECK_COMPILE_FLAG([-std=c11],[DEFAULT_CFLAGS="-std=c11 $DEFAULT_CFLAGS"])
 AX_CHECK_COMPILE_FLAG([-pedantic],[DEFAULT_CFLAGS="-pedantic $DEFAULT_CFLAGS"])
 
@@ -1028,7 +1034,15 @@ error
 error
 #endif
              ])],
-            [enable_fft_small="yes"]
+            [AC_COMPILE_IFELSE(
+                [AC_LANG_PROGRAM([#include <gmp.h>],[
+#if GMP_LIMB_BITS == 32
+#error Dead man
+error
+#endif
+                 ])],
+                [enable_fft_small="yes"]
+            )]
         )]
     )
 fi
@@ -1090,6 +1104,7 @@ else
 fi
 
 AC_CONFIG_FILES([src/fmpz/fmpz.c:$fmpz_c],[],[fmpz_c="$fmpz_c"])
+AC_SUBST(FMPZ_C_IN, $fmpz_c)
 
 if test "$enable_shared" = "yes";
 then
