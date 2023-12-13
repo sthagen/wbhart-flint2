@@ -129,12 +129,15 @@ typedef struct __FLINT_FILE FLINT_FILE;
 # define FLINT_OPTIMIZE_NESTED_2(part) FLINT_OPTIMIZE_NESTED_3(GCC optimize part)
 # define FLINT_OPTIMIZE_NESTED_1(part) FLINT_OPTIMIZE_NESTED_2(#part)
 # define FLINT_OPTIMIZE(x) FLINT_OPTIMIZE_NESTED_1(x)
+# define FLINT_UNREACHABLE __builtin_unreachable()
 #else
 # define __attribute__(x)
 # if defined(_MSC_VER)
 #  define FLINT_FORCE_INLINE static __forceinline
+#  define FLINT_UNREACHABLE __assume(0)
 # else
 #  define FLINT_FORCE_INLINE static inline
+#  define FLINT_UNREACHABLE
 # endif
 # define FLINT_STATIC_NOINLINE static
 # define FLINT_UNUSED(x) x
@@ -429,6 +432,10 @@ int flint_vprintf(const char * str, va_list ap); /* va_list version of flint_pri
 #ifdef FLINT_HAVE_FILE
 int flint_fprintf(FILE * f, const char * str, ...); /* flint version of fprintf */
 int flint_fscanf(FILE * f, const char * str, ...); /* flint version of fscanf */
+#endif
+
+#if defined(FLINT_HAVE_VA_LIST) && defined(FLINT_HAVE_FILE)
+int flint_vfprintf(FILE * f, const char * str, va_list ap);
 #endif
 
 #include "exception.h"
