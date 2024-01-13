@@ -174,7 +174,6 @@ set(_BUILD_DIRS
     perm
     double_extras   d_vec           d_mat
     mpn_extras
-    mpf_vec                         mpf_mat
     mpfr_vec                        mpfr_mat
     nmod            nmod_vec        nmod_mat        nmod_poly
     fmpz            fmpz_vec        fmpz_mat        fmpz_poly
@@ -205,7 +204,7 @@ set(_BUILD_DIRS
     fmpz_mod_mpoly_factor           fmpq_mpoly_factor
     fq_nmod_mpoly_factor            fq_zech_mpoly_factor
 
-    fft             ${FFT_SMALL}    fmpz_poly_q    fmpz_lll
+    fft             ${FFT_SMALL}    fmpz_poly_q     fmpz_lll
     n_poly          arith           qsieve          aprcl
 
     nf              nf_elem         qfb
@@ -238,26 +237,13 @@ string(REGEX REPLACE "([A-Za-z0-9_-]+;|[A-Za-z0-9_-]+$)" "src/\\1" BUILD_DIRS "$
 
 set(_HEADERS
     NTL-interface.h flint.h longlong.h flint-config.h gmpcompat.h fft_tuning.h
-    profiler.h templates.h exception.h
+    profiler.h templates.h exception.h mpf-impl.h
 )
 string(REGEX REPLACE "([A-Za-z0-9_-]+\.h;|[A-Za-z0-9_-]+\.h$)" "src/\\1" HEADERS "${_HEADERS}")
 
 # Setup for flint-config.h
 check_c_compiler_flag("-mpopcnt" HAS_FLAG_MPOPCNT)
 check_c_compiler_flag("-funroll-loops" HAS_FLAG_UNROLL_LOOPS)
-
-if(HAS_FLAG_MPOPCNT)
-  set(CMAKE_REQUIRED_FLAGS "-mpopcnt")
-endif()
-# Testing __builtin_popcountl...
-check_c_source_runs([[int main(int argc, char ** argv) {
-  #if defined(_WIN64)
-  return __builtin_popcountll(argc) == 100;
-  #else
-  return __builtin_popcountl(argc) == 100;
-  #endif
-  }]] FLINT_USES_POPCNT)
-unset(CMAKE_REQUIRED_FLAGS)
 
 # fenv configuration
 check_c_source_compiles([[#include <fenv.h>
