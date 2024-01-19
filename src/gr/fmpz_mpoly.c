@@ -9,13 +9,12 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
+#include <string.h>
+#include "fmpz.h"
+#include "fmpz_mpoly_factor.h"
 #include "gr.h"
 #include "gr_vec.h"
 #include "gr_generic.h"
-#include "fmpz_mpoly.h"
-#include "fmpz_mpoly.h"
-#include "fmpz_mpoly_factor.h"
 
 typedef struct
 {
@@ -129,6 +128,12 @@ _gr_fmpz_mpoly_randtest_small(fmpz_mpoly_t res, flint_rand_t state, gr_ctx_t ctx
 {
     fmpz_mpoly_randtest_bits(res, state, n_randint(state, 3), 3, 1 + n_randint(state, 3), MPOLYNOMIAL_MCTX(ctx));
     return GR_SUCCESS;
+}
+
+slong
+_gr_fmpz_mpoly_length(const fmpz_mpoly_t x, gr_ctx_t ctx)
+{
+    return x->length;
 }
 
 int
@@ -545,6 +550,7 @@ gr_method_tab_input _gr_fmpz_mpoly_methods_input[] =
     {GR_METHOD_SET_SHALLOW, (gr_funcptr) _gr_fmpz_mpoly_set_shallow},
     {GR_METHOD_RANDTEST,    (gr_funcptr) _gr_fmpz_mpoly_randtest},
     {GR_METHOD_RANDTEST_SMALL,    (gr_funcptr) _gr_fmpz_mpoly_randtest_small},
+    {_GR_METHOD_LENGTH,     (gr_funcptr) _gr_fmpz_mpoly_length},
     {GR_METHOD_WRITE,       (gr_funcptr) _gr_fmpz_mpoly_write},
     {GR_METHOD_ZERO,        (gr_funcptr) _gr_fmpz_mpoly_zero},
     {GR_METHOD_ONE,         (gr_funcptr) _gr_fmpz_mpoly_one},
@@ -558,6 +564,7 @@ gr_method_tab_input _gr_fmpz_mpoly_methods_input[] =
     {GR_METHOD_SET_FMPZ,    (gr_funcptr) _gr_fmpz_mpoly_set_fmpz},
     {GR_METHOD_SET_FMPQ,    (gr_funcptr) _gr_fmpz_mpoly_set_fmpq},
     {GR_METHOD_SET_OTHER,   (gr_funcptr) _gr_fmpz_mpoly_set_other},
+    {GR_METHOD_SET_STR,     (gr_funcptr) gr_generic_set_str_balance_additions},
     {GR_METHOD_NEG,         (gr_funcptr) _gr_fmpz_mpoly_neg},
     {GR_METHOD_ADD,         (gr_funcptr) _gr_fmpz_mpoly_add},
     {GR_METHOD_ADD_SI,      (gr_funcptr) _gr_fmpz_mpoly_add_si},
