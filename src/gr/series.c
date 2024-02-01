@@ -1765,6 +1765,25 @@ static int _gr_gr_series_ctx_write(gr_stream_t out, gr_ctx_t ctx)
     return GR_SUCCESS;
 }
 
+truth_t
+_gr_gr_series_ctx_is_ring(gr_ctx_t ctx)
+{
+    if (ctx->which_ring == GR_CTX_GR_SERIES_MOD && SERIES_SCTX(ctx)->mod == 0)
+        return T_TRUE;
+
+    return gr_ctx_is_ring(SERIES_ELEM_CTX(ctx));
+}
+
+truth_t
+_gr_gr_series_ctx_is_commutative_ring(gr_ctx_t ctx)
+{
+    if (ctx->which_ring == GR_CTX_GR_SERIES_MOD && SERIES_SCTX(ctx)->mod == 0)
+        return T_TRUE;
+
+    return gr_ctx_is_commutative_ring(SERIES_ELEM_CTX(ctx));
+}
+
+
 static void _gr_gr_series_init(gr_series_t res, gr_ctx_t ctx) { gr_series_init(res, SERIES_SCTX(ctx), SERIES_ELEM_CTX(ctx)); }
 static void _gr_gr_series_clear(gr_series_t res, gr_ctx_t ctx) { gr_series_clear(res, SERIES_SCTX(ctx), SERIES_ELEM_CTX(ctx)); }
 static void _gr_gr_series_swap(gr_series_t x, gr_series_t y, gr_ctx_t ctx) { gr_series_swap(x, y, SERIES_SCTX(ctx), SERIES_ELEM_CTX(ctx)); }
@@ -1960,6 +1979,8 @@ gr_method_tab_input _gr_series_methods_input[] =
     {GR_METHOD_CTX_CLEAR,   (gr_funcptr) _gr_gr_series_ctx_clear},
     {GR_METHOD_CTX_WRITE,   (gr_funcptr) _gr_gr_series_ctx_write},
     {GR_METHOD_CTX_SET_GEN_NAME, (gr_funcptr) _gr_gr_series_ctx_set_gen_name},
+    {GR_METHOD_CTX_IS_RING, (gr_funcptr) _gr_gr_series_ctx_is_ring},
+    {GR_METHOD_CTX_IS_COMMUTATIVE_RING, (gr_funcptr) _gr_gr_series_ctx_is_commutative_ring},
 
     {GR_METHOD_INIT,        (gr_funcptr) _gr_gr_series_init},
     {GR_METHOD_CLEAR,       (gr_funcptr) _gr_gr_series_clear},
@@ -2042,17 +2063,17 @@ gr_method_tab_input _gr_series_methods_input[] =
     {0,                     (gr_funcptr) NULL},
 };
 
-void
-gr_ctx_init_gr_series(gr_ctx_t ctx, gr_ctx_t base_ring, slong prec)
+static inline void
+_gr_ctx_init_gr_series(gr_ctx_t ctx, gr_ctx_t base_ring, int kind, slong mod, slong prec)
 {
-    ctx->which_ring = GR_CTX_GR_SERIES;
+    ctx->which_ring = kind;
     ctx->sizeof_elem = sizeof(gr_series_struct);
     ctx->size_limit = WORD_MAX;
 
     SERIES_CTX(ctx)->base_ring = (gr_ctx_struct *) base_ring;
     SERIES_CTX(ctx)->var = (char *) default_var;
-    SERIES_CTX(ctx)->sctx.mod = SERIES_ERR_EXACT;
-    SERIES_CTX(ctx)->sctx.prec = FLINT_MIN(FLINT_MAX(0, prec), SERIES_ERR_MAX);
+    SERIES_CTX(ctx)->sctx.mod = mod;
+    SERIES_CTX(ctx)->sctx.prec = prec;
 
     ctx->methods = _gr_series_methods;
 
@@ -2064,25 +2085,16 @@ gr_ctx_init_gr_series(gr_ctx_t ctx, gr_ctx_t base_ring, slong prec)
 }
 
 void
+gr_ctx_init_gr_series(gr_ctx_t ctx, gr_ctx_t base_ring, slong prec)
+{
+    _gr_ctx_init_gr_series(ctx, base_ring, GR_CTX_GR_SERIES, SERIES_ERR_EXACT, FLINT_MIN(FLINT_MAX(0, prec), SERIES_ERR_MAX));
+}
+
+void
 gr_ctx_init_gr_series_mod(gr_ctx_t ctx, gr_ctx_t base_ring, slong mod)
 {
-    ctx->which_ring = GR_CTX_GR_SERIES_MOD;
-    ctx->sizeof_elem = sizeof(gr_series_struct);
-    ctx->size_limit = WORD_MAX;
-
     if (mod >= SERIES_ERR_EXACT)
         flint_throw(FLINT_ERROR, "(%s)\n", __func__);
 
-    SERIES_CTX(ctx)->base_ring = (gr_ctx_struct *) base_ring;
-    SERIES_CTX(ctx)->var = (char *) default_var;
-    SERIES_CTX(ctx)->sctx.mod = FLINT_MAX(0, mod);
-    SERIES_CTX(ctx)->sctx.prec = mod;
-
-    ctx->methods = _gr_series_methods;
-
-    if (!_gr_series_methods_initialized)
-    {
-        gr_method_tab_init(_gr_series_methods, _gr_series_methods_input);
-        _gr_series_methods_initialized = 1;
-    }
+    _gr_ctx_init_gr_series(ctx, base_ring, GR_CTX_GR_SERIES_MOD, FLINT_MAX(0, mod), mod);
 }
