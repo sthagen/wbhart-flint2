@@ -69,7 +69,6 @@ jobs:
           ./configure \
             CC=${CC} \
             --enable-avx2 \
-            --disable-static \
             --enable-coverage
 
       - name: "Compile library"
@@ -102,6 +101,46 @@ jobs:
         with:
           files: build/coverage/coverage.info
           token: ${{ secrets.CODECOV_TOKEN }}
+
+
+
+  ##############################################################################
+  # gcc build check no regressions
+  ##############################################################################
+  gcc-build-regression-check:
+    name: GCC build regression check (no tests)
+
+    runs-on: ubuntu-latest
+
+    env:
+      CC: "gcc"
+      CFLAGS: "-march=native -std=c11 -Wall -Wextra -Werror"
+      MODULES: "build/thread_pool_merged.lo build/thread_support_merged.lo build/ulong_extras_merged.lo build/long_extras_merged.lo build/perm_merged.lo build/double_extras_merged.lo build/d_vec_merged.lo build/d_mat_merged.lo build/mpn_extras_merged.lo build/mpfr_vec_merged.lo build/mpfr_mat_merged.lo build/nmod_merged.lo build/nmod_vec_merged.lo build/nmod_mat_merged.lo build/nmod_poly_merged.lo build/fmpz_merged.lo build/fmpz_vec_merged.lo build/fmpz_mat_merged.lo build/fmpz_poly_merged.lo build/fmpz_mod_merged.lo build/fmpz_mod_vec_merged.lo build/fmpz_mod_mat_merged.lo build/fmpz_mod_poly_merged.lo build/fmpq_merged.lo build/fmpq_vec_merged.lo build/fmpq_mat_merged.lo build/fmpq_poly_merged.lo"
+      # Everything until finite fields
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Setup"
+        run: |
+          sudo apt-get install -y libgmp-dev libmpfr-dev autoconf libtool-bin
+          gcc --version
+          make --version
+          autoconf --version
+          libtool --version
+          echo "MAKE=make -j$(expr $(nproc) + 1) --output-sync=target" >> $GITHUB_ENV
+
+      - name: "Configure"
+        run: |
+          ./bootstrap.sh
+          ./configure \
+            CC=${CC} \
+            CFLAGS="${CFLAGS}" \
+            --disable-debug
+
+      - name: "Check regression in a subset of modules"
+        run: |
+          $MAKE $MODULES
 
 
 
@@ -142,7 +181,6 @@ jobs:
             CC=${CC} \
             --with-ntl \
             --enable-assert \
-            --disable-static \
             --disable-debug
 
       - name: "Compile library"
@@ -200,7 +238,6 @@ jobs:
             CC=$(brew --prefix llvm@15)/bin/clang \
             --with-gmp=$(brew --prefix) \
             --with-mpfr=$(brew --prefix) \
-            --disable-static \
             --disable-debug
 
       - name: "Compile library"
@@ -261,7 +298,6 @@ jobs:
             --with-gmp=$(brew --prefix) \
             --with-mpfr=$(brew --prefix) \
             --with-blas=$(brew --prefix)/opt/openblas \
-            --disable-static \
             --disable-debug
 
       - name: "Compile library"
@@ -316,7 +352,6 @@ jobs:
           ./bootstrap.sh
           ./configure \
             CC=${CC} \
-            --disable-static \
             --disable-debug
 
       - name: "Compile library"
@@ -389,7 +424,6 @@ jobs:
           ./bootstrap.sh
           ./configure \
             CC=${CC} \
-            --disable-static \
             --disable-debug
 
       - name: "Compile library"
@@ -523,7 +557,6 @@ jobs:
           ./configure \
             CC=${CC} \
             --enable-assert \
-            --disable-static \
             --disable-debug
         shell: alpine.sh {0}
 
@@ -605,7 +638,6 @@ jobs:
             --with-gmp=${gmp_path} \
             --with-mpfr=${mpfr_path} \
             --disable-mpfr-check \
-            --disable-static \
             --disable-debug
 
       - name: "Compile and install"
