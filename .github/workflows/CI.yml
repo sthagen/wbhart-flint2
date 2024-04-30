@@ -57,12 +57,12 @@ jobs:
           # ... plus these ones missing in apt
           sudo cpan -T Memory::Process Scalar::Util
 
-          # Install lcov 2.1
+          # Install lcov 2.0
           mkdir lcov
           cd lcov
-          wget https://github.com/linux-test-project/lcov/releases/download/v2.1/lcov-2.1.tar.gz
-          tar -xf lcov-2.1.tar.gz
-          cd lcov-2.1/
+          wget https://github.com/linux-test-project/lcov/releases/download/v2.0/lcov-2.0.tar.gz
+          tar -xf lcov-2.0.tar.gz
+          cd lcov-2.0/
           sudo make install
 
           # Check versions
@@ -101,16 +101,24 @@ jobs:
 
       - name: "Gather coverage data"
         run: |
-          # NOTE: When Ubuntu LTS ships lcov v2.1.0+, change this section to
+          # NOTE: When Ubuntu LTS ships lcov v2.0.0+, change this section to
           # `$MAKE coverage'.
           mkdir build/coverage
           lcov -j $(expr $(nproc) + 1) \
             --capture \
+            --rc geninfo_unexecuted_blocks=1 \
+            --ignore-errors unused \
             --omit-lines "flint_throw" \
             --omit-lines '^}$' \
-            --exclude "*test/t-*.c" \
-            --exclude "*test/main.c" \
             --exclude "/usr/*" \
+            --exclude "src/*/inlines.c" \
+            --exclude "src/test/main.c" \
+            --exclude "src/test/t-*.c" \
+            --exclude "src/*/test/main.c" \
+            --exclude "src/*/test/t-*.c" \
+            --exclude "src/generic_files/exception.c" \
+            --exclude "src/generic_files/profiler.c" \
+            --exclude "src/profiler.h" \
             --directory build \
             --output-file build/coverage/coverage.info
 
@@ -134,8 +142,8 @@ jobs:
     env:
       CC: "gcc"
       CFLAGS: "-march=native -std=c11 -Wall -Wextra -Werror"
-      MODULES: "build/thread_pool_merged.lo build/thread_support_merged.lo build/ulong_extras_merged.lo build/long_extras_merged.lo build/perm_merged.lo build/double_extras_merged.lo build/d_vec_merged.lo build/d_mat_merged.lo build/mpn_extras_merged.lo build/mpfr_vec_merged.lo build/mpfr_mat_merged.lo build/nmod_merged.lo build/nmod_vec_merged.lo build/nmod_mat_merged.lo build/nmod_poly_merged.lo build/mpn_mod_merged.lo build/fmpz_merged.lo build/fmpz_vec_merged.lo build/fmpz_mat_merged.lo build/fmpz_poly_merged.lo build/fmpz_mod_merged.lo build/fmpz_mod_vec_merged.lo build/fmpz_mod_mat_merged.lo build/fmpz_mod_poly_merged.lo build/fmpq_merged.lo build/fmpq_vec_merged.lo build/fmpq_mat_merged.lo build/fmpq_poly_merged.lo build/fq_merged.lo build/fq_vec_merged.lo build/fq_mat_merged.lo build/fq_poly_merged.lo build/fq_nmod_merged.lo build/fq_nmod_vec_merged.lo build/fq_nmod_mat_merged.lo build/fq_nmod_poly_merged.lo build/fq_zech_merged.lo build/fq_zech_mat_merged.lo build/fq_zech_poly_merged.lo build/fq_default_merged.lo build/fq_default_mat_merged.lo build/fq_default_poly_merged.lo build/fq_embed_merged.lo build/fq_nmod_embed_merged.lo build/fq_zech_embed_merged.lo build/padic_merged.lo build/padic_mat_merged.lo build/padic_poly_merged.lo build/qadic_merged.lo build/nmod_poly_factor_merged.lo build/fmpz_factor_merged.lo build/fmpz_poly_factor_merged.lo build/fmpz_mod_poly_factor_merged.lo build/fq_poly_factor_merged.lo build/fq_nmod_poly_factor_merged.lo build/fq_zech_poly_factor_merged.lo build/fq_default_poly_factor_merged.lo build/nmod_poly_mat_merged.lo build/fmpz_poly_mat_merged.lo build/mpoly_merged.lo build/nmod_mpoly_merged.lo build/fmpz_mpoly_merged.lo build/fmpz_mod_mpoly_merged.lo build/fmpq_mpoly_merged.lo build/fq_nmod_mpoly_merged.lo build/fq_zech_mpoly_merged.lo"
-      # Everything until mpoly_factor stuff
+      MODULES: "build/thread_pool_merged.lo build/thread_support_merged.lo build/ulong_extras_merged.lo build/long_extras_merged.lo build/perm_merged.lo build/double_extras_merged.lo build/d_vec_merged.lo build/d_mat_merged.lo build/mpn_extras_merged.lo build/mpfr_vec_merged.lo build/mpfr_mat_merged.lo build/nmod_merged.lo build/nmod_vec_merged.lo build/nmod_mat_merged.lo build/nmod_poly_merged.lo build/mpn_mod_merged.lo build/fmpz_merged.lo build/fmpz_vec_merged.lo build/fmpz_mat_merged.lo build/fmpz_poly_merged.lo build/fmpz_mod_merged.lo build/fmpz_mod_vec_merged.lo build/fmpz_mod_mat_merged.lo build/fmpz_mod_poly_merged.lo build/fmpq_merged.lo build/fmpq_vec_merged.lo build/fmpq_mat_merged.lo build/fmpq_poly_merged.lo build/fq_merged.lo build/fq_vec_merged.lo build/fq_mat_merged.lo build/fq_poly_merged.lo build/fq_nmod_merged.lo build/fq_nmod_vec_merged.lo build/fq_nmod_mat_merged.lo build/fq_nmod_poly_merged.lo build/fq_zech_merged.lo build/fq_zech_mat_merged.lo build/fq_zech_poly_merged.lo build/fq_default_merged.lo build/fq_default_mat_merged.lo build/fq_default_poly_merged.lo build/fq_embed_merged.lo build/fq_nmod_embed_merged.lo build/fq_zech_embed_merged.lo build/padic_merged.lo build/padic_mat_merged.lo build/padic_poly_merged.lo build/qadic_merged.lo build/nmod_poly_factor_merged.lo build/fmpz_factor_merged.lo build/fmpz_poly_factor_merged.lo build/fmpz_mod_poly_factor_merged.lo build/fq_poly_factor_merged.lo build/fq_nmod_poly_factor_merged.lo build/fq_zech_poly_factor_merged.lo build/fq_default_poly_factor_merged.lo build/nmod_poly_mat_merged.lo build/fmpz_poly_mat_merged.lo build/mpoly_merged.lo build/nmod_mpoly_merged.lo build/fmpz_mpoly_merged.lo build/fmpz_mod_mpoly_merged.lo build/fmpq_mpoly_merged.lo build/fq_nmod_mpoly_merged.lo build/fq_zech_mpoly_merged.lo build/nmod_mpoly_factor_merged.lo build/fmpz_mpoly_factor_merged.lo build/fmpz_mod_mpoly_factor_merged.lo build/fmpq_mpoly_factor_merged.lo build/fq_nmod_mpoly_factor_merged.lo build/fq_zech_mpoly_factor_merged.lo build/fft_merged.lo build/fft_small_merged.lo"
+      # Everything until fmpz_poly_q
 
     steps:
       - uses: actions/checkout@v4
