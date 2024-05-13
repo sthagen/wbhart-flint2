@@ -13,17 +13,18 @@
 
 #define _STDC_FORMAT_MACROS
 
-#ifdef __GNUC__
-# define strcpy __builtin_strcpy
-#else
-# include <math.h>
-#endif
-
 /* try to get fdopen, mkstemp declared */
-#if defined __STRICT_ANSI__
-#undef __STRICT_ANSI__
+#if defined(__STRICT_ANSI__)
+# undef __STRICT_ANSI__
 #endif
 
+#if defined(__CYGWIN__)
+# define ulong ulongxx
+# include <sys/param.h>
+# undef ulong
+#endif
+
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "thread_support.h"
@@ -34,7 +35,7 @@
 
 /* Use Windows API for temporary files under MSVC and MinGW */
 #if (defined(__WIN32) && !defined(__CYGWIN__)) || defined(_MSC_VER)
-#include <windows.h>
+# include <windows.h>
 #endif
 
 int compare_facs(const void * a, const void * b)
@@ -329,7 +330,7 @@ void qsieve_factor(fmpz_factor_t factors, const fmpz_t n)
                     flint_printf("\nBlock Lanczos\n");
 #endif
 
-                    flint_randinit(state); /* initialise the random generator */
+                    flint_rand_init(state); /* initialise the random generator */
 
                     do /* repeat block lanczos until it succeeds */
                     {
@@ -345,7 +346,7 @@ void qsieve_factor(fmpz_factor_t factors, const fmpz_t n)
                             count++;
                     }
 
-                    flint_randclear(state); /* clean up random state */
+                    flint_rand_clear(state); /* clean up random state */
 
     /**************************************************************************
         SQUARE ROOT:
