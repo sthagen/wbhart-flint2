@@ -1,29 +1,19 @@
 /*
-   Copyright 1991, 1992, 1993, 1994, 1996, 1997, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005 Free Software Foundation, Inc.
+    Copyright 1991, 1992, 1993, 1994, 1996, 1997, 1999, 2000, 2001, 2002, 2003,
+    2004, 2005 Free Software Foundation, Inc.
 
-   Copyright 2009, 2015, 2016 William Hart
-   Copyright 2011 Fredrik Johansson
-   Copyright 2023 Albin Ahlbäck
+    Copyright (C) 2009, 2015, 2016 William Hart
+    Copyright (C) 2011 Fredrik Johansson
+    Copyright (C) 2023 Albin Ahlbäck
 
-   This file is free software; you can redistribute it and/or modify
-   it under the terms of the GNU Lesser General Public License as published by
-   the Free Software Foundation; either version 2.1 of the License, or (at your
-   option) any later version.
+    This file is part of FLINT.
 
-   This file is distributed in the hope that it will be useful, but
-   WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-   License for more details.
+    Contains code from GNU MP Library.
 
-   You should have received a copy of the GNU Lesser General Public License
-   along with this file; see the file COPYING.LIB.  If not, write to
-   the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-   MA 02110-1301, USA.
-*/
-
-/*
-   N.B: This file has been adapted from code found in GMP 4.2.1.
+    FLINT is free software: you can redistribute it and/or modify it under
+    the terms of the GNU Lesser General Public License (LGPL) as published
+    by the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
 #ifndef FLINT_LONGLONG_H
@@ -36,18 +26,13 @@ extern "C" {
 #if defined(__GNUC__)
 
 /* Trailing and leading zeros */
-# ifndef _LONG_LONG_LIMB
-#  define flint_clz __builtin_clzl
-#  define flint_ctz __builtin_ctzl
-# else
+# if FLINT_LONG_LONG
 #  define flint_clz __builtin_clzll
 #  define flint_ctz __builtin_ctzll
+# else
+#  define flint_clz __builtin_clzl
+#  define flint_ctz __builtin_ctzl
 # endif
-
-/* Byte swap */
-# define _FLINT_CAT_(X,Y) X##Y
-# define _FLINT_CAT(X,Y) _FLINT_CAT_(X,Y)
-# define byte_swap(x) do { (x) = _FLINT_CAT(__builtin_bswap, GMP_LIMB_BITS)(x); } while (0)
 
 /* Addition, subtraction and multiplication */
 # if defined(__clang__)
@@ -84,7 +69,7 @@ FLINT_DLL extern const unsigned char __flint_clz_tab[128];
 # define flint_clz flint_clz
 static inline int flint_clz(ulong x)
 {
-    mp_limb_t a, xr = x;
+    ulong a, xr = x;
     const unsigned int bits4 = FLINT_BITS / 4;
     if (FLINT_BITS == 32)
         a = xr < ((ulong) 1 << 2 * bits4)
@@ -107,29 +92,6 @@ static inline int flint_ctz(ulong x)
 }
 #endif
 
-/* Byte swap */
-#if !defined(byte_swap)
-# if FLINT_BITS == 32
-#  define byte_swap(n) \
-  do { \
-      /* swap adjacent bytes */ \
-      (n) = ((((n) & 0xff00ff00) >> 8) | (((n) & 0x00ff00ff) << 8)); \
-      /* swap adjacent words */ \
-      (n) = (((n) >> 16) | ((n) << 16)); \
-  } while (0)
-# else
-#  define byte_swap(n) \
-  do { \
-      /* swap adjacent bytes */ \
-      (n) = ((((n) & 0xff00ff00ff00ff00) >> 8) | (((n) & 0x00ff00ff00ff00ff) << 8)); \
-      /* swap adjacent words */ \
-      (n) = ((((n) & 0xffff0000ffff0000) >> 16) | (((n) & 0x0000ffff0000ffff) << 16)); \
-      /* swap adjacent double words */ \
-      (n) = (((n) >> 32) | ((n) << 32)); \
-  } while (0)
-# endif
-#endif
-
 /* Addition and subtraction */
 #if !defined(add_ssaaaa)
 # define add_ssaaaa(s1, s0, a1, a0, b1, b0) \
@@ -141,18 +103,18 @@ static inline int flint_ctz(ulong x)
 
 # define add_sssaaaaaa(s2, s1, s0, a2, a1, a0, b2, b1, b0) \
   do { \
-    mp_limb_t __t1, __t2; \
-    add_ssaaaa(__t1, s0, (mp_limb_t) 0, a0, (mp_limb_t) 0, b0); \
-    add_ssaaaa(__t2, s1, (mp_limb_t) 0, a1, (mp_limb_t) 0, b1); \
+    ulong __t1, __t2; \
+    add_ssaaaa(__t1, s0, (ulong) 0, a0, (ulong) 0, b0); \
+    add_ssaaaa(__t2, s1, (ulong) 0, a1, (ulong) 0, b1); \
     add_ssaaaa(s2, s1, (a2) + (b2), s1, __t2, __t1); \
   } while (0)
 
 # define add_ssssaaaaaaaa(s3, s2, s1, s0, a3, a2, a1, a0, b3, b2, b1, b0) \
   do { \
-    mp_limb_t __u2; \
-    add_sssaaaaaa(__u2, s1, s0, (mp_limb_t) 0, a1, a0, (mp_limb_t) 0, b1, b0); \
+    ulong __u2; \
+    add_sssaaaaaa(__u2, s1, s0, (ulong) 0, a1, a0, (ulong) 0, b1, b0); \
     add_ssaaaa(s3, s2, a3, a2, b3, b2); \
-    add_ssaaaa(s3, s2, s3, s2, (mp_limb_t) 0, __u2); \
+    add_ssaaaa(s3, s2, s3, s2, (ulong) 0, __u2); \
   } while (0)
 
 # define sub_ddmmss(s1, s0, a1, a0, b1, b0) \
@@ -164,34 +126,29 @@ static inline int flint_ctz(ulong x)
 
 # define sub_dddmmmsss(d2, d1, d0, m2, m1, m0, s2, s1, s0) \
   do { \
-    mp_limb_t __t1, __t2; \
-    sub_ddmmss(__t1, d0, (mp_limb_t) 0, m0, (mp_limb_t) 0, s0); \
-    sub_ddmmss(__t2, d1, (mp_limb_t) 0, m1, (mp_limb_t) 0, s1); \
+    ulong __t1, __t2; \
+    sub_ddmmss(__t1, d0, (ulong) 0, m0, (ulong) 0, s0); \
+    sub_ddmmss(__t2, d1, (ulong) 0, m1, (ulong) 0, s1); \
     sub_ddmmss(d2, d1, (m2) - (s2), d1, -__t2, -__t1); \
   } while (0)
 #endif
 
 #if !defined(MPN_INCR_U)
-# define MPN_INCR_U MPN_INCR_U
-# define MPN_DECR_U MPN_DECR_U
-FLINT_FORCE_INLINE void MPN_INCR_U(mp_ptr ptr, mp_size_t size, mp_limb_t incr)
-{
 # if FLINT_WANT_ASSERT
-    mp_limb_t cy = mpn_add_1(ptr, ptr, size, incr);
-    FLINT_ASSERT(cy == 0);
+#  define MPN_INCR_U(ptr, size, incr) \
+  do { \
+    ulong __cy = mpn_add_1(ptr, ptr, size, incr); \
+    FLINT_ASSERT(__cy == 0); \
+  } while (0)
+#  define MPN_DECR_U(ptr, size, incr) \
+  do { \
+    ulong __cy = mpn_sub_1(ptr, ptr, size, incr); \
+    FLINT_ASSERT(__cy == 0); \
+  } while (0)
 # else
-    mpn_add_1(ptr, ptr, size, incr);
+#  define MPN_INCR_U(ptr, size, incr) mpn_add_1(ptr, ptr, size, incr)
+#  define MPN_DECR_U(ptr, size, incr) mpn_sub_1(ptr, ptr, size, incr)
 # endif
-}
-FLINT_FORCE_INLINE void MPN_DECR_U(mp_ptr ptr, mp_size_t size, mp_limb_t incr)
-{
-# if FLINT_WANT_ASSERT
-    mp_limb_t cy = mpn_sub_1(ptr, ptr, size, incr);
-    FLINT_ASSERT(cy == 0);
-# else
-    mpn_sub_1(ptr, ptr, size, incr);
-# endif
-}
 #endif
 
 /* Multiplication */
@@ -267,7 +224,7 @@ FLINT_FORCE_INLINE void MPN_DECR_U(mp_ptr ptr, mp_size_t size, mp_limb_t incr)
     if (__norm) \
     { \
       udiv_qrnnd_int((q), (r), ((n1) << __norm) + ((n0) >> (FLINT_BITS - __norm)), (n0) << __norm, (d) << __norm); \
-      (r) = ((mp_limb_t) (r) >> __norm); \
+      (r) = ((ulong) (r) >> __norm); \
     } \
     else \
        udiv_qrnnd_int((q), (r), (n1), (n0), (d)); \
@@ -277,8 +234,8 @@ FLINT_FORCE_INLINE void MPN_DECR_U(mp_ptr ptr, mp_size_t size, mp_limb_t incr)
 
 # define sdiv_qrnnd(q, r, n1, n0, d) \
   do { \
-    mp_limb_t __n1, __n0, __d; \
-    mp_limb_t __q, __r; \
+    ulong __n1, __n0, __d; \
+    ulong __q, __r; \
     unsigned int __sgn_n = 0, __sgn_d = 0; \
     if ((n1) & __highbit) \
     { \

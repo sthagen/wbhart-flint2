@@ -1,39 +1,11 @@
-/* Include file for internal GNU MP types and definitions.
-
-   THE CONTENTS OF THIS FILE ARE FOR INTERNAL USE AND ARE ALMOST CERTAIN TO
-   BE SUBJECT TO INCOMPATIBLE CHANGES IN FUTURE GNU MP RELEASES.
-
-Copyright 1991-2018, 2021, 2022 Free Software Foundation, Inc.
-
-This file is part of the GNU MP Library.
-
-The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of either:
-
-  * the GNU Lesser General Public License as published by the Free
-    Software Foundation; either version 3 of the License, or (at your
-    option) any later version.
-
-or
-
-  * the GNU General Public License as published by the Free Software
-    Foundation; either version 2 of the License, or (at your option) any
-    later version.
-
-or both in parallel, as here.
-
-The GNU MP Library is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
-
-You should have received copies of the GNU General Public License and the
-GNU Lesser General Public License along with the GNU MP Library.  If not,
-see https://www.gnu.org/licenses/.  */
 /*
+    Copyright 1991-2018, 2021, 2022 Free Software Foundation, Inc.
+
     Copyright 2024 Albin Ahlbäck
 
     This file is part of FLINT.
+
+    Contains code from GNU MP Library.
 
     FLINT is free software: you can redistribute it and/or modify it under
     the terms of the GNU Lesser General Public License (LGPL) as published
@@ -65,7 +37,7 @@ see https://www.gnu.org/licenses/.  */
 #if !FLINT_WANT_ASSERT && defined(__amd64__)
 # define MPN_IORD_U(ptr, incr, aors) \
   do { \
-    mp_ptr  __ptr_dummy; \
+    nn_ptr  __ptr_dummy; \
     if (__builtin_constant_p(incr) && (incr) == 0) \
     { \
     } \
@@ -77,7 +49,7 @@ see https://www.gnu.org/licenses/.  */
          "\tlea\t%c2(%0), %0\n" \
          "\tjc\t" ASM_L(top) \
          : "=r" (__ptr_dummy) \
-         : "0"  (ptr), "n" (sizeof(mp_limb_t)) \
+         : "0"  (ptr), "n" (sizeof(ulong)) \
          : "memory"); \
     } \
     else \
@@ -92,23 +64,23 @@ see https://www.gnu.org/licenses/.  */
          ASM_L(done) ":\n" \
          : "=r" (__ptr_dummy) \
          : "0"  (ptr), \
-           "re" ((mp_limb_t) (incr)), "n" (sizeof(mp_limb_t)) \
+           "re" ((ulong) (incr)), "n" (sizeof(ulong)) \
          : "memory"); \
     } \
   } while (0)
 
-# if GMP_LIMB_BITS == 32
+# if FLINT_BITS == 32
 #  define MPN_INCR_U(ptr, size, incr)  MPN_IORD_U(ptr, incr, "addl")
 #  define MPN_DECR_U(ptr, size, incr)  MPN_IORD_U(ptr, incr, "subl")
 # else
 #  define MPN_INCR_U(ptr, size, incr)  MPN_IORD_U(ptr, incr, "addq")
 #  define MPN_DECR_U(ptr, size, incr)  MPN_IORD_U(ptr, incr, "subq")
 # endif
-#elif !FLINT_WANT_ASSERT && (GMP_LIMB_BITS == 64 && defined(__aarch64__))
+#elif !FLINT_WANT_ASSERT && (FLINT_BITS == 64 && defined(__aarch64__))
 # define MPN_IORD_U(ptr, incr, aors, cond, anticond) \
   do { \
-    mp_ptr  __ptr_dummy; \
-    mp_limb_t  __reg_dummy; \
+    nn_ptr  __ptr_dummy; \
+    ulong  __reg_dummy; \
     if (__builtin_constant_p (incr) && (incr) == 0) \
     { \
     } \
@@ -138,7 +110,7 @@ see https://www.gnu.org/licenses/.  */
          "\tb." cond "\t" ASM_L(top) "\n" \
          ASM_L(done) ":\n" \
          : "=r" (__ptr_dummy), "=&r" (__reg_dummy) \
-         : "0"  (ptr), "rI" ((mp_limb_t) (incr)) \
+         : "0"  (ptr), "rI" ((ulong) (incr)) \
          : "memory"); \
     } \
   } while (0)
