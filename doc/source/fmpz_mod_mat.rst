@@ -160,7 +160,8 @@ Set and transpose
 
 .. function:: void fmpz_mod_mat_transpose(fmpz_mod_mat_t B, const fmpz_mod_mat_t A, const fmpz_mod_ctx_t ctx)
 
-    Set ``B`` to the transpose of ``A``.
+    Sets ``B`` to the transpose of ``A``. Dimensions must be compatible.
+    Aliasing is allowed for square matrices.
 
 
 Conversions
@@ -320,7 +321,7 @@ LU decomposition
 
 .. function:: slong fmpz_mod_mat_lu(slong * P, fmpz_mod_mat_t A, int rank_check, const fmpz_mod_ctx_t ctx)
 
-    Computes a generalised LU decomposition `LU = PA` of a given
+    Computes a generalised LU decomposition `PLU = A` of a given
     matrix `A`, returning the rank of `A`.
 
     If `A` is a nonsingular square matrix, it will be overwritten with
