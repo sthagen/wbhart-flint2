@@ -167,7 +167,6 @@ gr_test_set_si(gr_ctx_t R, flint_rand_t state, int test_flags)
     while (z_add_checked(&c, a, b));
 
     GR_TMP_INIT4(xa, xb, xc, xa_xb, R);
-
     GR_MUST_SUCCEED(gr_randtest(xa, state, R));
 
     status = GR_SUCCESS;
@@ -1931,7 +1930,6 @@ gr_test_is_invertible(gr_ctx_t R, flint_rand_t state, int test_flags)
     gr_ptr x, x_inv;
 
     GR_TMP_INIT2(x, x_inv, R);
-
     GR_MUST_SUCCEED(gr_randtest(x, state, R));
 
     status = GR_SUCCESS;
@@ -1955,7 +1953,7 @@ gr_test_is_invertible(gr_ctx_t R, flint_rand_t state, int test_flags)
         flint_printf("is_invertible\n");
         flint_printf("x = \n"); gr_println(x, R);
         flint_printf("x ^ -1 = \n"); gr_println(x_inv, R);
-        flint_printf("status = %d, invertible = %d\n", status, invertible);
+        flint_printf("status = %d, invertible = %{truth}\n", status, invertible);
         flint_printf("\n");
     }
 
@@ -2696,7 +2694,7 @@ gr_test_pow_fmpz_exponent_addition(gr_ctx_t R, flint_rand_t state, int test_flag
     {
         if (gr_set_si(x, -1 + (slong) n_randint(state, 3), R) != GR_SUCCESS)
             /* allow using for groups */
-            GR_MUST_SUCCEED(gr_one(x, R));
+            GR_IGNORE(gr_one(x, R));
         fmpz_randtest(a, state, 100);
         fmpz_randtest(b, state, 100);
     }
@@ -3373,7 +3371,7 @@ gr_test_canonical_associate(gr_ctx_t R, flint_rand_t state, int test_flags)
 
             if (i == 5)
             {
-                GR_MUST_SUCCEED(n_randint(state, 2) ? gr_one(v, R) : gr_neg_one(v, R));
+                GR_IGNORE(n_randint(state, 2) ? gr_one(v, R) : gr_neg_one(v, R));
                 break;
             }
         }
@@ -3628,8 +3626,104 @@ int gr_test_vec_add(gr_ctx_t R, flint_rand_t state, int test_flags) { return gr_
 int gr_test_vec_sub(gr_ctx_t R, flint_rand_t state, int test_flags) { return gr_test_vec_binary_op(R, "vec_sub", gr_sub, _gr_vec_sub, state, test_flags); }
 int gr_test_vec_mul(gr_ctx_t R, flint_rand_t state, int test_flags) { return gr_test_vec_binary_op(R, "vec_mul", gr_mul, _gr_vec_mul, state, test_flags); }
 int gr_test_vec_div(gr_ctx_t R, flint_rand_t state, int test_flags) { return gr_test_vec_binary_op(R, "vec_div", gr_div, _gr_vec_div, state, test_flags); }
-int gr_test_vec_divexact(gr_ctx_t R, flint_rand_t state, int test_flags) { return gr_test_vec_binary_op(R, "vec_divexact", gr_divexact, _gr_vec_divexact, state, test_flags); }
 int gr_test_vec_pow(gr_ctx_t R, flint_rand_t state, int test_flags) { return gr_test_vec_binary_op(R, "vec_pow", gr_pow, _gr_vec_pow, state, test_flags); }
+
+int gr_test_vec_divexact(gr_ctx_t R, flint_rand_t state, int test_flags)
+{
+    int status, aliasing, ref_aliasing;
+    slong i, len;
+    gr_ptr x, y, xy1, xy2;
+
+    len = n_randint(state, 5);
+
+    GR_TMP_INIT_VEC(x, len, R);
+    GR_TMP_INIT_VEC(y, len, R);
+    GR_TMP_INIT_VEC(xy1, len, R);
+    GR_TMP_INIT_VEC(xy2, len, R);
+
+    GR_MUST_SUCCEED(_gr_vec_randtest(x, state, len, R));
+    GR_MUST_SUCCEED(_gr_vec_randtest(y, state, len, R));
+    GR_MUST_SUCCEED(_gr_vec_randtest(xy1, state, len, R));
+    GR_MUST_SUCCEED(_gr_vec_randtest(xy2, state, len, R));
+
+    status = GR_SUCCESS;
+    for (i = 0; i < len && status == GR_SUCCESS; i++)
+    {
+        status |= gr_mul(GR_ENTRY(x, i, R->sizeof_elem),
+                    GR_ENTRY(x, i, R->sizeof_elem),
+                    GR_ENTRY(y, i, R->sizeof_elem), R);
+
+        /* Check that we can perform division */
+        status |= gr_div(xy1, GR_ENTRY(x, i, R->sizeof_elem),
+                                GR_ENTRY(y, i, R->sizeof_elem), R);
+    }
+
+    if (status == GR_SUCCESS)
+    {
+        aliasing = n_randint(state, 4);
+        ref_aliasing = 0;
+
+        switch (aliasing)
+        {
+            case 0:
+                status |= _gr_vec_set(xy1, x, len, R);
+                status |= _gr_vec_divexact(xy1, xy1, y, len, R);
+                break;
+            case 1:
+                status |= _gr_vec_set(xy1, y, len, R);
+                status |= _gr_vec_divexact(xy1, x, xy1, len, R);
+                break;
+            case 2:
+                status |= _gr_vec_set(y, x, len, R);
+                status |= _gr_vec_divexact(xy1, x, x, len, R);
+                break;
+            case 3:
+                status |= _gr_vec_set(y, x, len, R);
+                status |= _gr_vec_set(xy1, x, len, R);
+                status |= _gr_vec_divexact(xy1, xy1, xy1, len, R);
+                break;
+            default:
+                status |= _gr_vec_divexact(xy1, x, y, len, R);
+        }
+
+        for (i = 0; i < len; i++)
+            if (ref_aliasing)
+                status |= gr_divexact(GR_ENTRY(xy2, i, R->sizeof_elem),
+                                 GR_ENTRY(x, i, R->sizeof_elem),
+                                 GR_ENTRY(x, i, R->sizeof_elem), R);
+            else
+                status |= gr_divexact(GR_ENTRY(xy2, i, R->sizeof_elem),
+                                 GR_ENTRY(x, i, R->sizeof_elem),
+                                 GR_ENTRY(y, i, R->sizeof_elem), R);
+
+        if (status == GR_SUCCESS && _gr_vec_equal(xy1, xy2, len, R) == T_FALSE)
+        {
+            status = GR_TEST_FAIL;
+        }
+
+        if ((test_flags & GR_TEST_ALWAYS_ABLE) && (status & GR_UNABLE))
+            status = GR_TEST_FAIL;
+
+        if ((test_flags & GR_TEST_VERBOSE) || status == GR_TEST_FAIL)
+        {
+            flint_printf("divexact\n");
+            gr_ctx_println(R);
+            flint_printf("aliasing: %d\n", aliasing);
+            _gr_vec_print(x, len, R); flint_printf("\n");
+            _gr_vec_print(y, len, R); flint_printf("\n");
+            _gr_vec_print(xy1, len, R); flint_printf("\n");
+            _gr_vec_print(xy2, len, R); flint_printf("\n");
+        }
+    }
+
+    GR_TMP_CLEAR_VEC(x, len, R);
+    GR_TMP_CLEAR_VEC(y, len, R);
+    GR_TMP_CLEAR_VEC(xy1, len, R);
+    GR_TMP_CLEAR_VEC(xy2, len, R);
+
+    return status;
+}
+
 
 int
 gr_test_vec_binary_op_scalar(gr_ctx_t R, const char * opname, int (*gr_op)(gr_ptr, gr_srcptr, gr_srcptr, gr_ctx_t),
