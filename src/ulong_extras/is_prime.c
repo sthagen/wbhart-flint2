@@ -18,39 +18,21 @@
 #include "nmod.h"
 
 #define SMALL_ODDPRIME_LIMIT 32768
-#define NUM_32BIT_PSEUDOPRIMES 2314
-#define NUM_OVERSIZE_BASES 221
-#define WITNESS_BASE_HASH_SIZE 131072
-#define WITNESS_BASE_COMPRESSED_LEN 43691
+#define WITNESS_BASE_HASH_SIZE 98304
+#define NUM_OVERSIZE_BASES 4903
 
 /* To keep this file readable, the lookup tables have been
    placed in a seprate header file. */
 #include "is_prime_tables.h"
 
+/* Branch-free hash table lookup */
 static int u32_is_base2_pseudoprime(uint32_t x)
 {
-    const uint32_t * arr = base2_32bit_pseudoprimes;
+    uint32_t c = base2_32bit_pseudoprimes_hash_keys[x >> 25];
+    uint32_t h = (x ^ c) % 2560;
 
-    int a, b;
-    unsigned int bc = FLINT_BITS - flint_clz(x);
-
-    a = base2_32bit_pseudoprimes_start[bc - 1];
-    b = base2_32bit_pseudoprimes_start[bc];
-
-    while (a < b)
-    {
-        int m = a + (b - a) / 2;
-        uint32_t mid_val = arr[m];
-
-        if (mid_val == x)
-            return 1;
-        else if (mid_val < x)
-            a = m + 1;
-        else
-            b = m;
-    }
-
-    return 0;
+    /* Linear probing */
+    return (base2_32bit_pseudoprimes[h] == x) | (base2_32bit_pseudoprimes[h + 1] == x);
 }
 
 /* Faster arithmetic for 32-bit probable prime test on 64-bit machines. */
@@ -129,36 +111,19 @@ static int u32_is_base2_probabprime(uint32_t n)
 
 static uint32_t get_witness_base(uint64_t n)
 {
-    uint32_t hash, base;
-    uint64_t lookup;
+    uint32_t hash, b;
 
     /* The specific hash function used to generate the table. */
-    hash = ((uint32_t) (n * 314159265)) >> 15;
+    hash = ((uint32_t) ((n * 314159265) >> 15) % WITNESS_BASE_HASH_SIZE);
 
-    FLINT_ASSERT(hash < WITNESS_BASE_HASH_SIZE);
-    FLINT_ASSERT(hash / 3 < WITNESS_BASE_COMPRESSED_LEN);
+    /* Read 3 bytes = 24 bits. */
+    b = witness_base_tab[3 * hash] | (witness_base_tab[3 * hash + 1] << 8) | (witness_base_tab[3 * hash + 2] << 16);
 
-    /* Unpack bits from the hash table word. */
-    lookup = witness_base_tab[hash / 3];
-    base = lookup >> ((hash % 3) * 21);
-    base &= ((UWORD(1) << (21 + ((hash % 3) == 2))) - 1);
+    /* A small b value encodes an index into the oversize table for bases > 24 bits. */
+    if (b < NUM_OVERSIZE_BASES)
+        b = oversize[b];
 
-    if (base != 0)
-        return base;
-
-    /* If needed, binary search lookup in the oversize table. */
-    int a = 0, b = NUM_OVERSIZE_BASES - 1, mid;
-
-    while (a < b)
-    {
-        mid = (a + b) >> 1;
-        if (oversize_index[mid] < hash)
-            a = mid + 1;
-        else
-            b = mid;
-    }
-
-    return oversize_base[a];
+    return b;
 }
 
 #if FLINT_BITS == 64

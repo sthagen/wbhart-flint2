@@ -906,18 +906,16 @@ Primality testing
     by checking that `n` is not one of the 31894014 base-2 strong pseudoprimes
     `n < 2^{64}` which have been tabulated exhaustively by Feitsma [FeiGal2013]_.
 
-    For the 2314 pseudoprimes up to 32 bits, we simply store all
-    pseudoprimes in a table and do a lookup using binary search.
-    For the pseudoprimes up to 64 bits, we use a hash table following the
-    idea of Forisek and Jancina [ForJan2015]_. We precompute a function `T` such
+    The 2314 pseudoprimes up to 32 bits are simply looked up in a hash table.
+
+    For the pseudoprimes up to 64 bits, we follow the idea of Forisek and
+    Jancina [ForJan2015]_. We precompute a function `T` such
     that for pseudoprime `n < 2^{64}`, a probable prime test with base `T(n)`
     certifies compositeness of `n`. Our `T` is represented as a hash table
-    with 131072 entries most of which are 21-bit or 22-bit integers bit-packed
-    into an array of 43691 64-bit words, three entries per word. A small
-    number of oversize bases (up to 32-bit integers) are stored in a separate
-    binary search table. The probability of falling back on the binary
-    search table is only 0.17%, and this fallback is itself cheap. In total
-    the tables for 64-bit pseudoprimes require 343 KB, which is just 2/3 the
+    with 98304 entries stored in an array of 24-bit integers. A small number
+    of bases (around 5%) are larger than 24 bits, triggering a secondary
+    lookup in an array of 4903 32-bit integers. In total
+    the tables for 64-bit pseudoprimes require 307 KB, which is just 60% the
     size of the 512 KB Forisek-Jancina table of 262144 16-bit bases, while
     the test is as efficient.
 
