@@ -461,7 +461,7 @@ Jacobi and Kronecker symbols
     Computes the Jacobi symbol, allowing `x` to go up to a full limb.
 
 
-Modular Arithmetic
+Modular arithmetic
 --------------------------------------------------------------------------------
 
 
@@ -480,6 +480,12 @@ Modular Arithmetic
 
     This is merely an adaption of the extended Euclidean algorithm
     with appropriate normalisation.
+
+.. function:: ulong n_binvert(ulong n)
+
+    Assuming that `n` is odd, returns the multiplicative inverse modulo
+    `2^{\mathtt{FLINT\_BITS}}`. If `n` is even, some arbitrary
+    value is returned.
 
 .. function:: ulong n_powmod_precomp(ulong a, slong exp, ulong n, double npre)
 
@@ -597,7 +603,7 @@ Modular Arithmetic
     points to is set to NULL.
 
 
-Modular Arithmetic with Fixed Operand
+Modular arithmetic with fixed operand
 --------------------------------------------------------------------------------
 
 This is about computing several modular multiplications where one operand and
@@ -1476,16 +1482,13 @@ Factorisation
     the time for ``n_factor`` on numbers that reach the ``n_factor_pp1``
     stage, i.e. after trial factoring and one line factoring.
 
-.. function:: int n_factor_pollard_brent_single(ulong * factor, ulong n, ulong ninv, ulong ai, ulong xi, ulong normbits, ulong max_iters)
+.. function:: int n_factor_pollard_brent_single(ulong *factor, ulong n, ulong ai, ulong xi, ulong max_iters)
 
     Pollard Rho algorithm (with Brent modification) for integer factorization.
     Assumes that the `n` is not prime. `factor` is set as the factor if found.
     It is not assured that the factor found will be prime. Does not compute the complete
     factorization, just one factor. Returns 1 if factorization is successful
-    (non trivial factor is found), else returns 0. Assumes `n` is normalized
-    (shifted by normbits bits), and takes as input a precomputed inverse of `n` as
-    computed by :func:`n_preinvert_limb`. `ai` and `xi` should also be shifted
-    left by `normbits`.
+    (non trivial factor is found), else returns 0.
 
     `ai` is the constant of the polynomial used, `xi` is the initial value.
     `max\_iters` is the number of iterations tried in process of finding the
@@ -1493,7 +1496,7 @@ Factorisation
 
     The algorithm used is a modification of the original Pollard Rho algorithm,
     suggested by Richard Brent in the paper, available at
-    https://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf
+    https://maths-people.anu.edu.au/~brent/pd/rpb051i.pdf.
 
 .. function:: int n_factor_pollard_brent(ulong * factor, flint_rand_t state, ulong n_in, ulong max_tries, ulong max_iters)
 
@@ -1570,7 +1573,7 @@ Factorials
     large `n`.
 
 
-Primitive Roots and Discrete Logarithms
+Primitive roots and discrete logarithms
 --------------------------------------------------------------------------------
 
 
