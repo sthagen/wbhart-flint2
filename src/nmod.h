@@ -364,9 +364,7 @@ ulong n_redc(ulong x, ulong n, ulong nred)
 FLINT_FORCE_INLINE
 ulong n_ll_redc(ull_t x, ulong n, ulong nred)
 {
-    ulong lo, hi;
-
-    lo = n_mulhi(ull_lo(x) * (-nred), n);
+    ulong lo = n_mulhi(ull_lo(x) * (-nred), n), hi;
     hi = ull_hi(x);
 
     if (hi < lo)
