@@ -572,6 +572,21 @@ WARN_UNUSED_RESULT int _gr_poly_sin_cos_series_basecase(gr_ptr s, gr_ptr c, gr_s
 WARN_UNUSED_RESULT int gr_poly_sin_cos_series_basecase(gr_poly_t s, gr_poly_t c, const gr_poly_t h, slong n, int times_pi, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int _gr_poly_sin_cos_series_tangent(gr_ptr s, gr_ptr c, gr_srcptr h, slong hlen, slong n, int times_pi, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_poly_sin_cos_series_tangent(gr_poly_t s, gr_poly_t c, const gr_poly_t h, slong n, int times_pi, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_sin_cos_series_newton(gr_ptr s, gr_ptr c, gr_srcptr h, slong hlen, slong n, slong cutoff, int times_pi, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_sin_cos_series_newton(gr_poly_t s, gr_poly_t c, const gr_poly_t h, slong n, slong cutoff, int times_pi, gr_ctx_t ctx);
+
+WARN_UNUSED_RESULT int _gr_poly_sin_cos_series(gr_ptr s, gr_ptr c, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_sin_cos_pi_series(gr_ptr s, gr_ptr c, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_sin_series(gr_ptr s, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_sin_pi_series(gr_ptr s, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_cos_series(gr_ptr c, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_cos_pi_series(gr_ptr c, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_sin_cos_series(gr_poly_t s, gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_sin_cos_pi_series(gr_poly_t s, gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_sin_series(gr_poly_t s, const gr_poly_t h, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_sin_pi_series(gr_poly_t s, const gr_poly_t h, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_cos_series(gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_cos_pi_series(gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx);
 
 WARN_UNUSED_RESULT int _gr_poly_tan_series_basecase(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_poly_tan_series_basecase(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx);

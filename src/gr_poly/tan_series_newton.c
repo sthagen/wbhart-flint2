@@ -43,14 +43,17 @@ _gr_poly_tan_series_newton(gr_ptr res, gr_srcptr f, slong flen, slong len, slong
 
     for (i--; i >= 0; i--)
     {
+        slong ulen;
         m = n;
         n = a[i];
 
-        status |= _gr_poly_mullow(u, res, m, res, m, n, ctx);
+        ulen = FLINT_MIN(2 * m - 1, n);
+
+        status |= _gr_poly_mullow(u, res, m, res, m, ulen, ctx);
         status |= gr_add_ui(u, u, 1, ctx);
         status |= _gr_poly_atan_series(t, res, m, n, ctx);
         status |= _gr_poly_sub(GR_ENTRY(t, m, sz), GR_ENTRY(f, m, sz), FLINT_MAX(0, flen - m), GR_ENTRY(t, m, sz), n - m, ctx);
-        status |= _gr_poly_mullow(GR_ENTRY(res, m, sz), u, n, GR_ENTRY(t, m, sz), n - m, n - m, ctx);
+        status |= _gr_poly_mullow(GR_ENTRY(res, m, sz), u, ulen, GR_ENTRY(t, m, sz), n - m, n - m, ctx);
     }
 
     GR_TMP_CLEAR_VEC(t, 2 * len, ctx);

@@ -2431,23 +2431,19 @@ of polynomial multiplication.
 
     Set `g = \operatorname{asinh}(h) + O(x^n)`.
 
-.. function:: void _nmod_poly_sin_series(nn_ptr g, nn_srcptr h, slong n, nmod_t mod)
+.. function:: void _nmod_poly_sin_series(nn_ptr g, nn_srcptr h, slong hlen, slong n, nmod_t mod)
 
-    Set `g = \operatorname{sin}(h) + O(x^n)`. Assumes `n > 0` and that `h`
-    is zero-padded as necessary to length `n`. Aliasing of `g` and `h` is
-    allowed. The value is computed using the identity
-    `\sin(x) = 2 \tan(x/2)) / (1 + \tan^2(x/2)).`
+    Set `g = \operatorname{sin}(h) + O(x^n)`. Assumes `n > 0` and `hlen > 0`.
+    Aliasing of `g` and `h` is allowed.
 
 .. function:: void nmod_poly_sin_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 
     Set `g = \operatorname{sin}(h) + O(x^n)`.
 
-.. function:: void _nmod_poly_cos_series(nn_ptr g, nn_srcptr h, slong n, nmod_t mod)
+.. function:: void _nmod_poly_cos_series(nn_ptr g, nn_srcptr h, slong hlen, slong n, nmod_t mod)
 
-    Set `g = \operatorname{cos}(h) + O(x^n)`. Assumes `n > 0` and that `h`
-    is zero-padded as necessary to length `n`. Aliasing of `g` and `h` is
-    allowed. The value is computed using the identity
-    `\cos(x) = (1-\tan^2(x/2)) / (1 + \tan^2(x/2)).`
+    Set `g = \operatorname{cos}(h) + O(x^n)`. Assumes `n > 0` and `hlen > 0`.
+    Aliasing of `g` and `h` is allowed.`
 
 .. function:: void nmod_poly_cos_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 

@@ -1165,10 +1165,34 @@ Power series special functions
               int _gr_poly_exp_series(gr_ptr res, gr_srcptr f, slong flen, slong len, gr_ctx_t ctx)
               int gr_poly_exp_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx)
 
+.. function:: int _gr_poly_sin_cos_series(gr_ptr s, gr_ptr c, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
+              int _gr_poly_sin_cos_pi_series(gr_ptr s, gr_ptr c, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
+              int gr_poly_sin_cos_series(gr_poly_t s, gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx)
+              int gr_poly_sin_cos_pi_series(gr_poly_t s, gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx)
+              int _gr_poly_sin_series(gr_ptr s, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
+              int gr_poly_sin_series(gr_poly_t s, const gr_poly_t h, slong n, gr_ctx_t ctx)
+              int _gr_poly_sin_pi_series(gr_ptr s, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
+              int gr_poly_sin_pi_series(gr_poly_t s, const gr_poly_t h, slong n, gr_ctx_t ctx)
+              int _gr_poly_cos_series(gr_ptr c, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
+              int gr_poly_cos_series(gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx)
+              int _gr_poly_cos_pi_series(gr_ptr c, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
+              int gr_poly_cos_pi_series(gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx);
+
+    Compute `s = \sin(h)`, `c = \cos(h)` as power series truncated to length `m`,
+    or `s = \sin(\pi h)`, `c = \cos(\pi h)` for the ``pi`` variants.
+    The underscore methods allow aliasing.
+
 .. function:: int _gr_poly_sin_cos_series_basecase(gr_ptr s, gr_ptr c, gr_srcptr h, slong hlen, slong n, int times_pi, gr_ctx_t ctx)
               int gr_poly_sin_cos_series_basecase(gr_poly_t s, gr_poly_t c, const gr_poly_t h, slong n, int times_pi, gr_ctx_t ctx)
               int _gr_poly_sin_cos_series_tangent(gr_ptr s, gr_ptr c, gr_srcptr h, slong hlen, slong n, int times_pi, gr_ctx_t ctx)
               int gr_poly_sin_cos_series_tangent(gr_poly_t s, gr_poly_t c, const gr_poly_t h, slong n, int times_pi, gr_ctx_t ctx)
+              int _gr_poly_sin_cos_series_newton(gr_ptr s, gr_ptr c, gr_srcptr h, slong hlen, slong n, slong cutoff, int times_pi, gr_ctx_t ctx)
+              int gr_poly_sin_cos_series_newton(gr_poly_t s, gr_poly_t c, const gr_poly_t h, slong n, slong cutoff, int times_pi, gr_ctx_t ctx)
+
+    Various algorithms to compute sine and cosine of power series.
+    The default functions (:func:`_gr_poly_sin_cos_series` et al.)
+    choose an algorithm automatically.
+    The *times_pi* flag specifies that the input is to be multiplied by `\pi`.
 
     The *basecase* version uses a simple recurrence for the coefficients,
     requiring `O(nm)` operations where `m` is the length of `h`.
@@ -1181,8 +1205,10 @@ Power series special functions
     `\sin(h_0 + h_1) = \cos(h_0) \sin(h_1) + \sin(h_0) \cos(h_1)`,
     `\cos(h_0 + h_1) = \cos(h_0) \cos(h_1) - \sin(h_0) \sin(h_1)`.
 
-    The *basecase* and *tangent* versions take a flag *times_pi*
-    specifying that the input is to be multiplied by `\pi`.
+    The *newton* version uses Newton iteration for `\exp(ih)`. The complex
+    parts are represented formally; complex arithmetic is not required.
+    The *cutoff* parameter specifies the cutoff for using the basecase
+    algorithm.
 
 .. function:: int _gr_poly_tan_series_basecase(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
               int gr_poly_tan_series_basecase(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx)

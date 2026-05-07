@@ -85,6 +85,7 @@
 #include "t-shift_left_right.c"
 #include "t-shift_equivalent.c"
 #include "t-shiftless_decomposition.c"
+#include "t-sin_cos_series.c"
 #include "t-sqrt_series.c"
 #include "t-squarefree_part.c"
 #include "t-taylor_shift.c"
@@ -173,6 +174,7 @@ test_struct tests[] =
     TEST_FUNCTION(gr_poly_shift_left_right),
     TEST_FUNCTION(gr_poly_shift_equivalent),
     TEST_FUNCTION(gr_poly_shiftless_decomposition),
+    TEST_FUNCTION(gr_poly_sin_cos_series),
     TEST_FUNCTION(gr_poly_sqrt_series),
     TEST_FUNCTION(gr_poly_squarefree_part),
     TEST_FUNCTION(gr_poly_taylor_shift),

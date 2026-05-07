@@ -860,10 +860,10 @@ void nmod_poly_tan_series(nmod_poly_t g, const nmod_poly_t h, slong n);
 void _nmod_poly_asin_series(nn_ptr g, nn_srcptr h, slong hlen, slong n, nmod_t mod);
 void nmod_poly_asin_series(nmod_poly_t g, const nmod_poly_t h, slong n);
 
-void _nmod_poly_sin_series(nn_ptr g, nn_srcptr h, slong n, nmod_t mod);
+void _nmod_poly_sin_series(nn_ptr g, nn_srcptr h, slong hlen, slong n, nmod_t mod);
 void nmod_poly_sin_series(nmod_poly_t g, const nmod_poly_t h, slong n);
 
-void _nmod_poly_cos_series(nn_ptr g, nn_srcptr h, slong n, nmod_t mod);
+void _nmod_poly_cos_series(nn_ptr g, nn_srcptr h, slong hlen, slong n, nmod_t mod);
 void nmod_poly_cos_series(nmod_poly_t g, const nmod_poly_t h, slong n);
 
 void _nmod_poly_asinh_series(nn_ptr g, nn_srcptr h, slong hlen, slong n, nmod_t mod);
