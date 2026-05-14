@@ -2874,6 +2874,7 @@ const gr_method_tab_input _gr_generic_methods[] =
     {GR_METHOD_COS,                     (gr_funcptr) gr_generic_cos},
     {GR_METHOD_SIN_COS,                 (gr_funcptr) gr_generic_sin_cos},
     {GR_METHOD_TAN,                     (gr_funcptr) gr_generic_tan},
+    {GR_METHOD_TANH,                    (gr_funcptr) gr_generic_tanh},
     {GR_METHOD_ASIN,                    (gr_funcptr) gr_generic_asin},
     {GR_METHOD_ATAN,                    (gr_funcptr) gr_generic_atan},
     {GR_METHOD_ASINH,                   (gr_funcptr) gr_generic_asinh},

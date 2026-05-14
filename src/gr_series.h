@@ -132,6 +132,11 @@ WARN_UNUSED_RESULT int gr_series_cos_pi(gr_series_t res, const gr_series_t x, gr
 WARN_UNUSED_RESULT int gr_series_sin_cos(gr_series_t res1, gr_series_t res2, const gr_series_t x, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_series_sin_cos_pi(gr_series_t res1, gr_series_t res2, const gr_series_t x, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_series_tan(gr_series_t res, const gr_series_t x, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_series_tanh(gr_series_t res, const gr_series_t x, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_series_cot(gr_series_t res, const gr_series_t x, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_series_coth(gr_series_t res, const gr_series_t x, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_series_tan_pi(gr_series_t res, const gr_series_t x, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_series_cot_pi(gr_series_t res, const gr_series_t x, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_series_asin(gr_series_t res, const gr_series_t x, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_series_acos(gr_series_t res, const gr_series_t x, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_series_atan(gr_series_t res, const gr_series_t x, gr_ctx_t ctx);
@@ -229,6 +234,11 @@ WARN_UNUSED_RESULT int gr_series_mod_cos_pi(gr_poly_t res, const gr_poly_t x, gr
 WARN_UNUSED_RESULT int gr_series_mod_sin_cos(gr_poly_t res1, gr_poly_t res2, const gr_poly_t x, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_series_mod_sin_cos_pi(gr_poly_t res1, gr_poly_t res2, const gr_poly_t x, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_series_mod_tan(gr_poly_t res, const gr_poly_t x, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_series_mod_tanh(gr_poly_t res, const gr_poly_t x, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_series_mod_cot(gr_poly_t res, const gr_poly_t x, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_series_mod_coth(gr_poly_t res, const gr_poly_t x, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_series_mod_tan_pi(gr_poly_t res, const gr_poly_t x, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_series_mod_cot_pi(gr_poly_t res, const gr_poly_t x, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_series_mod_asin(gr_poly_t res, const gr_poly_t x, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_series_mod_acos(gr_poly_t res, const gr_poly_t x, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_series_mod_atan(gr_poly_t res, const gr_poly_t x, gr_ctx_t ctx);

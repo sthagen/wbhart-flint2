@@ -235,8 +235,8 @@ Multiplication algorithms
     algorithm with `O(n^{1.6})` complexity, the ring must overload :func:`_gr_poly_mul` to dispatch
     to :func:`_gr_poly_mul_karatsuba` above some cutoff.
 
-.. function:: int _gr_poly_mul_toom33(gr_ptr res, gr_srcptr poly1, slong len1, gr_srcptr poly2, slong len2, gr_ctx_t ctx);
-              int gr_poly_mul_toom33(gr_poly_t res, const gr_poly_t poly1, const gr_poly_t poly2, gr_ctx_t ctx);
+.. function:: int _gr_poly_mul_toom33(gr_ptr res, gr_srcptr poly1, slong len1, gr_srcptr poly2, slong len2, gr_ctx_t ctx)
+              int gr_poly_mul_toom33(gr_poly_t res, const gr_poly_t poly1, const gr_poly_t poly2, gr_ctx_t ctx)
 
     Balanced Toom-3 multiplication with interpolation in five points,
     using the Bodrato evaluation scheme. Assumes commutativity and that the ring
@@ -1016,9 +1016,9 @@ Shift equivalence
 
     Computes (if possible) *s* such that `p(x+s) = q(x)(1+O(x^2))`.
 
-.. function:: int gr_poly_dispersion_resultant(fmpz_t disp, gr_vec_t disp_set, const gr_poly_t f, const gr_poly_t g, gr_ctx_t ctx);
-              int gr_poly_dispersion_factor(fmpz_t disp, gr_vec_t disp_set, const gr_poly_t f, const gr_poly_t g, gr_ctx_t ctx);
-              int gr_poly_dispersion(fmpz_t disp, gr_vec_t disp_set, const gr_poly_t f, const gr_poly_t g, gr_ctx_t ctx);
+.. function:: int gr_poly_dispersion_resultant(fmpz_t disp, gr_vec_t disp_set, const gr_poly_t f, const gr_poly_t g, gr_ctx_t ctx)
+              int gr_poly_dispersion_factor(fmpz_t disp, gr_vec_t disp_set, const gr_poly_t f, const gr_poly_t g, gr_ctx_t ctx)
+              int gr_poly_dispersion(fmpz_t disp, gr_vec_t disp_set, const gr_poly_t f, const gr_poly_t g, gr_ctx_t ctx)
 
     Computes the dispersion and/or the dispersion set of *f* and *g*.
 
@@ -1036,7 +1036,7 @@ Shift equivalence
     The *resultant* version computes the integer roots of a bivariate resultant
     and is mainly intended for testing.
 
-.. function:: int gr_poly_dispersion_from_factors(fmpz_t disp, gr_vec_t disp_set, const gr_vec_t ffac, const gr_vec_t gfac, gr_ctx_t ctx);
+.. function:: int gr_poly_dispersion_from_factors(fmpz_t disp, gr_vec_t disp_set, const gr_vec_t ffac, const gr_vec_t gfac, gr_ctx_t ctx)
 
     Same as :func:`gr_poly_dispersion_factor` for nonzero *f* and *g* but takes
     as input their nonconstant irreducible factors (without multiplicities)
@@ -1176,11 +1176,27 @@ Power series special functions
               int _gr_poly_cos_series(gr_ptr c, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
               int gr_poly_cos_series(gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx)
               int _gr_poly_cos_pi_series(gr_ptr c, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
-              int gr_poly_cos_pi_series(gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx);
+              int gr_poly_cos_pi_series(gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx)
 
-    Compute `s = \sin(h)`, `c = \cos(h)` as power series truncated to length `m`,
+    Compute `s = \sin(h)`, `c = \cos(h)` as power series truncated to length `n`,
     or `s = \sin(\pi h)`, `c = \cos(\pi h)` for the ``pi`` variants.
     The underscore methods allow aliasing.
+
+.. function:: int _gr_poly_tan_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
+              int gr_poly_tan_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx)
+              int _gr_poly_tanh_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
+              int gr_poly_tanh_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx)
+              int _gr_poly_cot_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
+              int gr_poly_cot_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx)
+              int _gr_poly_coth_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
+              int gr_poly_coth_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx)
+              int _gr_poly_tan_pi_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
+              int gr_poly_tan_pi_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx)
+              int _gr_poly_cot_pi_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
+              int gr_poly_cot_pi_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx)
+
+    Compute the respective trigonometric and hyperbolic functions of power series
+    truncated to length `n`. The underscore methods allow aliasing.
 
 .. function:: int _gr_poly_sin_cos_series_basecase(gr_ptr s, gr_ptr c, gr_srcptr h, slong hlen, slong n, int times_pi, gr_ctx_t ctx)
               int gr_poly_sin_cos_series_basecase(gr_poly_t s, gr_poly_t c, const gr_poly_t h, slong n, int times_pi, gr_ctx_t ctx)
@@ -1207,15 +1223,42 @@ Power series special functions
 
     The *newton* version uses Newton iteration for `\exp(ih)`. The complex
     parts are represented formally; complex arithmetic is not required.
-    The *cutoff* parameter specifies the cutoff for using the basecase
-    algorithm.
+    The *cutoff* parameter specifies the initial length to compute with the
+    basecase algorithm.
 
-.. function:: int _gr_poly_tan_series_basecase(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
-              int gr_poly_tan_series_basecase(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx)
-              int _gr_poly_tan_series_newton(gr_ptr f, gr_srcptr h, slong hlen, slong n, slong cutoff, gr_ctx_t ctx)
-              int gr_poly_tan_series_newton(gr_poly_t f, const gr_poly_t h, slong n, slong cutoff, gr_ctx_t ctx)
-              int _gr_poly_tan_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx)
-              int gr_poly_tan_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx)
+.. function:: int _gr_poly_tan_series_basecase(gr_ptr f, gr_srcptr h, slong hlen, slong n, int func, gr_ctx_t ctx)
+              int gr_poly_tan_series_basecase(gr_poly_t f, const gr_poly_t h, slong n, int func, gr_ctx_t ctx)
+              int _gr_poly_tan_series_newton(gr_ptr f, gr_srcptr h, slong hlen, slong n, slong cutoff, int func, gr_ctx_t ctx)
+              int gr_poly_tan_series_newton(gr_poly_t f, const gr_poly_t h, slong n, slong cutoff, int func, gr_ctx_t ctx)
+              int _gr_poly_tan_series_sine_cosine(gr_ptr f, gr_srcptr h, slong hlen, slong n, int func, gr_ctx_t ctx)
+              int gr_poly_tan_series_sine_cosine(gr_poly_t res, const gr_poly_t h, slong len, int func, gr_ctx_t ctx)
+              int _gr_poly_tan_series_exponential(gr_ptr f, gr_srcptr h, slong hlen, slong n, int func, gr_ctx_t ctx)
+              int gr_poly_tan_series_exponential(gr_poly_t res, const gr_poly_t h, slong len, int func, gr_ctx_t ctx)
+
+    Various algorithms to compute tangent-like functions of power series.
+    The *func* parameter specifies the function as follows:
+
+    * 0 - tan
+    * 1 - tanh
+    * 2 - cot
+    * 3 - coth
+    * 4 - tan_pi
+    * 5 - tanh_pi  (not currently implemented)
+    * 6 - cot_pi
+    * 7 - coth_pi  (not currently implemented)
+
+    The *basecase* algorithm uses an `O(n^2)` recurrence for the coefficients.
+    The *newton* algorithm uses Newton iteration to invert the integral
+    defining the corresponding inverse function; the *cutoff* parameter
+    specifies the initial length to compute with the basecase algorithm.
+    The *sine_cosine* algorithm computes the function as a quotient of
+    a sine and cosine; for the hyperbolic functions this algorithm requires that
+    the ring contains the imaginary unit.
+    The *exponential* algorithm computes the function as a quotient of
+    `\pm 1` plus an exponential, where the sign of the exponent is chosen
+    (if possible) so that the exponential is small. For the trigonometric
+    functions this algorithm requires that the ring contains the imaginary unit.
+
 
 Modular arithmetic and composition
 --------------------------------------------------------------------------------

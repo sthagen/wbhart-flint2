@@ -88,6 +88,7 @@
 #include "t-sin_cos_series.c"
 #include "t-sqrt_series.c"
 #include "t-squarefree_part.c"
+#include "t-tan_series.c"
 #include "t-taylor_shift.c"
 #include "t-taylor_shift_convolution.c"
 #include "t-taylor_shift_divconquer.c"
@@ -177,6 +178,7 @@ test_struct tests[] =
     TEST_FUNCTION(gr_poly_sin_cos_series),
     TEST_FUNCTION(gr_poly_sqrt_series),
     TEST_FUNCTION(gr_poly_squarefree_part),
+    TEST_FUNCTION(gr_poly_tan_series),
     TEST_FUNCTION(gr_poly_taylor_shift),
     TEST_FUNCTION(gr_poly_taylor_shift_convolution),
     TEST_FUNCTION(gr_poly_taylor_shift_divconquer),

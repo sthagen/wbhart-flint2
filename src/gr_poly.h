@@ -588,12 +588,28 @@ WARN_UNUSED_RESULT int gr_poly_sin_pi_series(gr_poly_t s, const gr_poly_t h, slo
 WARN_UNUSED_RESULT int gr_poly_cos_series(gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_poly_cos_pi_series(gr_poly_t c, const gr_poly_t h, slong n, gr_ctx_t ctx);
 
-WARN_UNUSED_RESULT int _gr_poly_tan_series_basecase(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
-WARN_UNUSED_RESULT int gr_poly_tan_series_basecase(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx);
-WARN_UNUSED_RESULT int _gr_poly_tan_series_newton(gr_ptr f, gr_srcptr h, slong hlen, slong n, slong cutoff, gr_ctx_t ctx);
-WARN_UNUSED_RESULT int gr_poly_tan_series_newton(gr_poly_t f, const gr_poly_t h, slong n, slong cutoff, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_tan_series_basecase(gr_ptr f, gr_srcptr h, slong hlen, slong n, int func, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_tan_series_basecase(gr_poly_t f, const gr_poly_t h, slong n, int func, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_tan_series_newton(gr_ptr f, gr_srcptr h, slong hlen, slong n, slong cutoff, int func, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_tan_series_newton(gr_poly_t f, const gr_poly_t h, slong n, slong cutoff, int func, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_tan_series_sine_cosine(gr_ptr f, gr_srcptr h, slong hlen, slong n, int func, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_tan_series_sine_cosine(gr_poly_t res, const gr_poly_t h, slong len, int func, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_tan_series_exponential(gr_ptr f, gr_srcptr h, slong hlen, slong n, int func, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_tan_series_exponential(gr_poly_t res, const gr_poly_t h, slong len, int func, gr_ctx_t ctx);
+
 WARN_UNUSED_RESULT int _gr_poly_tan_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_tanh_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_cot_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_coth_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_tan_pi_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int _gr_poly_cot_pi_series(gr_ptr f, gr_srcptr h, slong hlen, slong n, gr_ctx_t ctx);
 WARN_UNUSED_RESULT int gr_poly_tan_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_tanh_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_cot_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_coth_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_tan_pi_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx);
+WARN_UNUSED_RESULT int gr_poly_cot_pi_series(gr_poly_t f, const gr_poly_t h, slong n, gr_ctx_t ctx);
+
 
 /* Modular arithmetic and composition */
 

@@ -1554,7 +1554,7 @@ class gr_ctx:
             >>> CC.tan(1+1j)
             ([0.2717525853195117 +/- 9.11e-17] + [1.083923327338694 +/- 5.77e-16]*I)
             >>> x = RRser.gen(); RRser.tan(x)
-            x + [0.333333333333333 +/- 3.99e-16]*x^3 + [0.1333333333333333 +/- 8.32e-17]*x^5 + O(x^6)
+            x + [0.3333333333333333 +/- 7.04e-17]*x^3 + [0.1333333333333333 +/- 5.37e-17]*x^5 + O(x^6)
         """
         return ctx._unary_op(x, libgr.gr_tan, "tan($x)")
 
@@ -5445,7 +5445,6 @@ class gr_poly(gr_elem):
         return self._data.length
 
     def __getitem__(self, i):
-        n = len(self)
         R = self.parent()._coefficient_ring
         c = R()
         status = libgr.gr_poly_get_coeff_scalar(c._ref, self._ref, i, R._ref)
@@ -5731,6 +5730,20 @@ class gr_poly(gr_elem):
 
 
 class gr_series(gr_elem):
+    """
+
+        >>> f = QQser("exp(x)")
+        >>> f
+        1 + x + (1/2)*x^2 + (1/6)*x^3 + (1/24)*x^4 + (1/120)*x^5 + O(x^6)
+        >>> f[5]
+        1/120
+        >>> f[6]
+        Traceback (most recent call last):
+            ...
+        Undecidable: coefficient is not known
+
+    """
+
     _struct_type = gr_series_struct
 
     def __init__(self, val=None, error=None, context=None, random=False):
@@ -5796,6 +5809,18 @@ class gr_series(gr_elem):
         else:
             libgr._gr_series_set_error(self._ref, n, self.parent()._ref)
 
+    def __getitem__(self, i):
+        assert i >= 0
+        error = self._error()
+        if error is not None and i >= error:
+            raise Undecidable("coefficient is not known")
+        R = self.parent()._coefficient_ring
+        c = R()
+        # XXX: hack; want a gr_series method
+        status = libgr.gr_poly_get_coeff_scalar(c._ref, self._ref, i, R._ref)
+        if status:
+            raise NotImplementedError
+        return c
 
 
 class ModularGroup_psl2z(gr_ctx_ca):
@@ -8773,7 +8798,36 @@ def test_series():
 
     assert CCser(1+ZZser.gen()) == 1 + RRser.gen()
 
-    
+    # Test that trigonometric and hyperbolic functions use numerically
+    # stable formulas for large arguments
+    S = PowerSeriesRing(RR,  4)
+    x = S.gen()
+    c = RR(10)
+    v = c + x + x**2
+    d = 14
+    assert S.tanh(v)[3].nstr(d) == '-1.0992819274357e-8'
+    assert S.tanh(-v)[3].nstr(d) == '1.0992819274357e-8'
+    assert S.coth(v)[3].nstr(d) == '1.0992819364988e-8'
+    assert S.coth(-v)[3].nstr(d) == '-1.0992819364988e-8'
+    S = PowerSeriesRing(CC,  3)
+    x = S.gen()
+    c = CC(0.25+10j)
+    v = c + x + x**2
+    d = 14
+    assert S.tan(v)[2].nstr(d) == '(3.2826512022173e-9 + 1.1188008582726e-8*I)'
+    assert S.tan(-v)[2].nstr(d) == '(-3.2826512022173e-9 - 1.1188008582726e-8*I)'
+    assert S.cot(v)[2].nstr(d) == '(3.2826511245479e-9 + 1.1188008713377e-8*I)'
+    assert S.cot(-v)[2].nstr(d) == '(-3.2826511245479e-9 - 1.1188008713377e-8*I)'
+    assert S.tan_pi(v)[2].nstr(d) == '(-2.0362573263061e-26 + 6.4816083777740e-27*I)'
+    assert S.tan_pi(-v)[2].nstr(d) == '(2.0362573263061e-26 - 6.4816083777740e-27*I)'
+    assert S.cot_pi(v)[2].nstr(d) == '(-2.0362573263061e-26 + 6.4816083777740e-27*I)'
+    assert S.cot_pi(-v)[2].nstr(d) == '(2.0362573263061e-26 - 6.4816083777740e-27*I)'
+    v *= CC(1j)
+    assert S.tanh(v)[2].nstr(d) == '(-1.1188008582726e-8 + 3.2826512022173e-9*I)'
+    assert S.tanh(-v)[2].nstr(d) == '(1.1188008582726e-8 - 3.2826512022173e-9*I)'
+    assert S.coth(v)[2].nstr(d) == '(1.1188008713377e-8 - 3.2826511245479e-9*I)'
+    assert S.coth(-v)[2].nstr(d) == '(-1.1188008713377e-8 + 3.2826511245479e-9*I)'
+
 
 def test_float():
     assert RF(5).mul_2exp(-1) == RF(2.5)

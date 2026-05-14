@@ -1188,6 +1188,8 @@ DEF_FUNC(cos)
 DEF_FUNC(cos_pi)
 DEF_FUNC_SING(tan)
 DEF_FUNC_SING(cot)
+DEF_FUNC_SING(tan_pi)
+DEF_FUNC_SING(cot_pi)
 
 DEF_FUNC(sinc)
 DEF_FUNC(sinc_pi)
@@ -2343,7 +2345,9 @@ gr_method_tab_input _acb_methods_input[] =
     {GR_METHOD_COS_PI,          (gr_funcptr) _gr_acb_cos_pi},
     {GR_METHOD_SIN_COS_PI,      (gr_funcptr) _gr_acb_sin_cos_pi},
     {GR_METHOD_TAN,             (gr_funcptr) _gr_acb_tan},
+    {GR_METHOD_TAN_PI,          (gr_funcptr) _gr_acb_tan_pi},
     {GR_METHOD_COT,             (gr_funcptr) _gr_acb_cot},
+    {GR_METHOD_COT_PI,          (gr_funcptr) _gr_acb_cot_pi},
     {GR_METHOD_SINC,            (gr_funcptr) _gr_acb_sinc},
     {GR_METHOD_SINC_PI,         (gr_funcptr) _gr_acb_sinc_pi},
     {GR_METHOD_SINH,            (gr_funcptr) _gr_acb_sinh},

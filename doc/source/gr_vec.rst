@@ -210,7 +210,7 @@ Sorting and searching
 --------------------------------------------------------------------------------
 
 .. function:: truth_t _gr_vec_contains(gr_srcptr vec, slong len, gr_srcptr x, gr_ctx_t ctx)
-              truth_t gr_vec_contains(const gr_vec_t vec, gr_srcptr x, gr_ctx_t ctx);
+              truth_t gr_vec_contains(const gr_vec_t vec, gr_srcptr x, gr_ctx_t ctx)
 
 .. function:: int _gr_vec_sort(gr_ptr vec, slong len, gr_ctx_t ctx)
               int gr_vec_sort(gr_vec_t dest, const gr_vec_t src, gr_ctx_t ctx)

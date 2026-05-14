@@ -333,58 +333,32 @@ nmod_poly_sin_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 }
 
 void
-_nmod_poly_tanh_series(nn_ptr f, nn_srcptr h, slong n, nmod_t mod)
+_nmod_poly_tanh_series(nn_ptr f, nn_srcptr h, slong hlen, slong n, nmod_t mod)
 {
-    nn_ptr t, u;
-
-    t = _nmod_vec_init(n);
-    u = _nmod_vec_init(n);
-
-    _nmod_vec_add(t, h, h, n, mod);
-    _nmod_poly_exp_series(u, t, n, n, mod);
-    _nmod_vec_set(t, u, n);
-    t[0] = UWORD(0);
-    u[0] = UWORD(2);
-    _nmod_poly_div_series(f, t, n, u, n, n, mod);
-
-    _nmod_vec_clear(t);
-    _nmod_vec_clear(u);
+    gr_ctx_t ctx;
+    _gr_ctx_init_nmod(ctx, &mod);
+    GR_MUST_SUCCEED(_gr_poly_tanh_series(f, h, hlen, n, ctx));
 }
 
 void
 nmod_poly_tanh_series(nmod_poly_t g, const nmod_poly_t h, slong n)
 {
-    nn_ptr h_coeffs;
-    slong h_len = h->length;
+    slong hlen = h->length;
 
-    if (h_len > 0 && h->coeffs[0] != UWORD(0))
+    if (hlen > 0 && h->coeffs[0] != UWORD(0))
     {
         flint_throw(FLINT_ERROR, "Exception (nmod_poly_tanh_series). Constant term != 0.\n");
     }
 
-    if (h_len == 1 || n < 2)
+    if (hlen <= 1 || n <= 1)
     {
         nmod_poly_zero(g);
         return;
     }
 
     nmod_poly_fit_length(g, n);
-
-    if (h_len < n)
-    {
-        h_coeffs = _nmod_vec_init(n);
-        flint_mpn_copyi(h_coeffs, h->coeffs, h_len);
-        flint_mpn_zero(h_coeffs + h_len, n - h_len);
-    }
-    else
-        h_coeffs = h->coeffs;
-
-    _nmod_poly_tanh_series(g->coeffs, h_coeffs, n, h->mod);
-
-    if (h_len < n)
-        _nmod_vec_clear(h_coeffs);
-
-    g->length = n;
+    _nmod_poly_tanh_series(g->coeffs, h->coeffs, hlen, n, h->mod);
+    _nmod_poly_set_length(g, n);
 	_nmod_poly_normalise(g);
 }
 

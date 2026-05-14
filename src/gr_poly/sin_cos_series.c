@@ -41,7 +41,7 @@ _gr_poly_sin_cos_series_with_pi(gr_ptr s, gr_ptr c, gr_srcptr h, slong hlen,
         cutoff = 25;
     }
 
-    if (n < cutoff)
+    if (hlen < cutoff)
         return _gr_poly_sin_cos_series_basecase(s, c, h, hlen, n, times_pi, ctx);
     else
         return _gr_poly_sin_cos_series_newton(s, c, h, hlen, n, cutoff, times_pi, ctx);

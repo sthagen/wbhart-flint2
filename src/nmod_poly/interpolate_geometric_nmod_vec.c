@@ -18,7 +18,7 @@ void _nmod_poly_interpolate_geometric_nmod_vec_fast_precomp(nn_ptr poly,
             nn_srcptr v, const nmod_geometric_progression_t G, slong len, nmod_t mod)
 {
     FLINT_ASSERT(len <= G->len);
-    FLINT_ASSERT((G->function >> 1) & 1);
+    FLINT_ASSERT((G->function & UWORD(2)) == UWORD(2));
 
     if (len == 1)
     {
@@ -131,7 +131,7 @@ void _nmod_poly_interpolate_geometric_nmod_vec_fast_precomp(nn_ptr poly,
 void nmod_poly_interpolate_geometric_nmod_vec_fast_precomp(nmod_poly_t poly,
                 nn_srcptr v, const nmod_geometric_progression_t G, slong len)
 {
-    FLINT_ASSERT((G->function >> 1) & 1);
+    FLINT_ASSERT((G->function & UWORD(2)) == UWORD(2));
 
     nmod_poly_fit_length(poly, len);
     _nmod_poly_set_length(poly, len);
