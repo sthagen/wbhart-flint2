@@ -1010,6 +1010,15 @@ static void sd_fft_trunc_internal(
 
 /********************* interface functions ***********************/
 
+/*
+compute a truncated FFT inline in the array `d`, assuming terms beyond `itrunc`
+first terms are zero. The output satisfies
+    eval_poly(in_data, sd_fft_ctx_w(Q, i)) = out_data[sd_fft_ctx_trunc_index(L, i)]
+Usually it only make sense to have `otrunc >= itrunc`.
+The array `d` need to have size at least the smallest power of 2 larger than or equal
+to `n_max(itrunc, otrunc)`. See [vdH2004]_.
+This function is tested in `test/t-sd_fft.c`.
+*/
 void sd_fft_trunc(
     sd_fft_ctx_t Q,
     double* d,

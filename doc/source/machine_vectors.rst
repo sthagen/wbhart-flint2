@@ -235,13 +235,13 @@ Other assumptions are not yet documented.
               vec4d vec4d_reduce_pm1n_to_pmhn(vec4d a, vec4d n)
               vec8d vec8d_reduce_pm1n_to_pmhn(vec8d a, vec8d n)
 
-    Return `a \bmod n` reduced to `[-n/2, n/2]` given given `a \in [-n,n]`.
+    Return `a \bmod n` reduced to `[-n/2, n/2]` given `a \in [-n,n]`.
 
 .. function:: vec1d vec1d_reduce_2n_to_n(vec1d a, vec1d n)
               vec4d vec4d_reduce_2n_to_n(vec4d a, vec4d n)
               vec8d vec8d_reduce_2n_to_n(vec8d a, vec8d n)
 
-    Return `a \bmod n` reduced to `[0,n)` given given `a \in [0,2n)`.
+    Return `a \bmod n` reduced to `[0,n)` given `a \in [0,2n)`.
 
 .. function:: vec1d vec1d_reduce_to_0n(vec1d a, vec1d n, vec1d ninv)
               vec4d vec4d_reduce_to_0n(vec4d a, vec4d n, vec4d ninv)

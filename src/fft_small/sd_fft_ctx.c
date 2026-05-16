@@ -25,6 +25,12 @@ void sd_fft_ctx_clear(sd_fft_ctx_t Q)
 #endif
 }
 
+/*
+    Initialize FFT context.
+    pp is a prime with at most ~ 50 bits (exactly representable with a `double`)
+    such that pp - 1 has sufficiently high 2-valuation.
+    Used in sd_fft_trunc, sd_ifft_trunc, sd_fft_ctx_point_mul, etc.
+*/
 void sd_fft_ctx_init_prime(sd_fft_ctx_t Q, ulong pp)
 {
     ulong N, i, k, l;
@@ -47,7 +53,12 @@ void sd_fft_ctx_init_prime(sd_fft_ctx_t Q, ulong pp)
         2^(SD_FFT_CTX_W2TAB_INIT-1) entries: 1, e(1/4), e(1/8), e(3/8), ...
 
         Q->w2tab[j] is itself a table of length 2^(j-1) containing 2^(j+1) st
-        roots of unity.
+        roots of unity. More documentation on the layout of w2tab can be found
+        before the definition of SD_FFT_CTX_W2TAB_SIZE.
+
+        All entries in w2tab are exactly-representable integers modulo pp, but
+        they're stored as `double` to make use of the vectorized functions in
+        machine_vectors.h.
     */
     N = n_pow2(SD_FFT_CTX_W2TAB_INIT - 1);
     t = (double*) flint_aligned_alloc(4096, n_round_up(N*sizeof(double), 4096));

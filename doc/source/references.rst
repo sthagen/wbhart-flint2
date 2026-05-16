@@ -357,6 +357,8 @@ References
 
 .. [vdH1995] \J. van der Hoeven, "Automatic numerical expansions". Proc. of the conference Real numbers and computers (1995), 261-274. https://www.texmacs.org/joris/ane/ane-abs.html
 
+.. [vdH2004] \J. van der Hoeven, "Truncated FFTs", ISSAC 2004 notes, https://www.texmacs.org/joris/issac04/issac04.html
+
 .. [vdH2006] \J. van der Hoeven, "Computations with effective real numbers". Theoretical Computer Science, Volume 351, Issue 1, 14 February 2006, Pages 52-60. https://doi.org/10.1016/j.tcs.2005.09.060
 
 All referenced works: [AbbottBronsteinMulders1999]_, [Apostol1997]_, [Ari2011]_, [Ari2012]_, [Arn2010]_, [Arn2012]_, [ArnoldMonagan2011]_,

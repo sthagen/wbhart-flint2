@@ -6734,6 +6734,80 @@ class gr_mat(gr_elem):
             if status & GR_DOMAIN: raise ValueError
         return (D, L, R)
 
+    def qr(self):
+        """
+        QR decomposition.
+
+            >>> A = Mat(RF)([[1,2,3],[0,0,1],[0,1,0],[2,2,1]])
+            >>> Q, R = A.qr()
+            >>> Q
+            [[0.4472135954999579, 0.5962847939999439, 0.5716619504750294],
+            [0, 0, 0.5144957554275265],
+            [0, 0.7453559924999299, -0.5716619504750294],
+            [0.8944271909999159, -0.2981423969999719, -0.2858309752375147]]
+            >>> R
+            [[2.236067977499790, 2.683281572999748, 2.236067977499790],
+            [0, 1.341640786499874, 1.490711984999860],
+            [0, 0, 1.943650631615100]]
+            >>> (Q * R - A).norm_max() < 1e-15
+            True
+
+            >>> A = Mat(QQbar)([[1,2,3],[0,0,1],[0,1,0],[2,2,1]])
+            >>> Q, R = A.qr()
+            >>> Q[1,2]
+            Root a = 0.514496 of 34*a^2-9
+            >>> Q * R - A
+            [[0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]]
+
+            >>> A = Mat(RF, 100, 100)([[i+j+i//(1+j) for i in range(100)] for j in range(100)])
+            >>> Q, R = A.qr()
+            >>> (Q * R - A).norm_max() < 1e-13
+            True
+
+        """
+        Cmat = self.parent()
+        C = Cmat._element_ring
+        m = self.nrows()
+        n = self.ncols()
+        Q = gr_mat(m, n, context=self.parent())
+        R = gr_mat(n, n, context=self.parent())
+        status = libgr.gr_mat_qr(Q._ref, R._ref, self._ref, C._ref)
+        if status:
+            if status & GR_UNABLE: raise NotImplementedError
+            if status & GR_DOMAIN: raise ValueError
+        return (Q, R)
+
+    def lq(self):
+        """
+        LQ decomposition.
+
+            >>> A = Mat(RF)([[1,2,3],[0,0,1],[0,1,0],[2,2,1]]).transpose()
+            >>> L, Q = A.lq()
+            >>> L
+            [[2.236067977499790, 0, 0],
+            [2.683281572999748, 1.341640786499874, 0],
+            [2.236067977499790, 1.490711984999860, 1.943650631615100]]
+            >>> Q
+            [[0.4472135954999579, 0, 0, 0.8944271909999159],
+            [0.5962847939999439, 0, 0.7453559924999299, -0.2981423969999719],
+            [0.5716619504750294, 0.5144957554275265, -0.5716619504750294, -0.2858309752375147]]
+            >>> (L * Q - A).norm_max() < 1e-15
+            True
+        """
+        Cmat = self.parent()
+        C = Cmat._element_ring
+        m = self.nrows()
+        n = self.ncols()
+        L = gr_mat(m, m, context=self.parent())
+        Q = gr_mat(m, n, context=self.parent())
+        status = libgr.gr_mat_lq(L._ref, Q._ref, self._ref, C._ref)
+        if status:
+            if status & GR_UNABLE: raise NotImplementedError
+            if status & GR_DOMAIN: raise ValueError
+        return (L, Q)
 
     #def __getitem__(self, i):
     #    pass

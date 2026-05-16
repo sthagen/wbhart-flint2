@@ -896,6 +896,11 @@ DEFINE_IT(7, 6, 5)
 DEFINE_IT(8, 7, 6)
 #undef DEFINE_IT
 
+/*
+    Specialized helper function, currently only called from mpn_ctx_init.
+    Assume p is odd and p - 1 has high 2-valuation, return some number q
+    (not necessarily prime) less than p such that q - 1 has high 2-valuation.
+*/
 static ulong next_fft_number(ulong p)
 {
     ulong bits, l, q;
@@ -968,10 +973,6 @@ static void fill_vec_two_pow_tab(
 
     flint_aligned_free(ps);
 }
-
-
-
-
 
 void mpn_ctx_init(mpn_ctx_t R, ulong p)
 {

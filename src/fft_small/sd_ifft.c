@@ -1497,6 +1497,11 @@ static void sd_ifft_trunc_internal(
 
 /********************* interface functions ***********************/
 
+/*
+Truncated inverse Fourier transform, inverse of sd_fft_trunc, assume the entries
+past `trunc` first entries of the _output_ are zero. See [vdH2004]_.
+The array `d` need to have size at least `n_pow2(L)`.
+*/
 void sd_ifft_trunc(
     sd_fft_ctx_t Q,
     double* d,
