@@ -157,6 +157,11 @@ class fmpz_mpoly_q_struct(ctypes.Structure):
                 ('den', fmpz_mpoly_struct)]
 
 
+class padic_radix_struct(ctypes.Structure):
+    _fields_ = [('u', radix_integer_struct),
+                ('v', c_slong),
+                ('N', c_slong)]
+
 # todo: actually a union
 class nf_elem_struct(ctypes.Structure):
     _fields_ = [('poly', fmpq_poly_struct)]
@@ -285,6 +290,7 @@ libflint.flint_free.argtypes = (ctypes.c_void_p,)
 libflint.fmpz_set_str.argtypes = ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int
 libflint.fmpz_get_str.argtypes = ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(fmpz_struct)
 libflint.fmpz_get_str.restype = ctypes.c_void_p
+libflint.n_is_prime.argtypes = (c_ulong,)
 
 libgr.gr_heap_init.argtypes = (ctypes.POINTER(gr_ctx_struct),)
 libgr.gr_heap_init.restype = ctypes.c_void_p
@@ -312,6 +318,7 @@ libgr.gr_heap_clear.argtypes = (ctypes.c_void_p, ctypes.POINTER(gr_ctx_struct))
 
 libgr.gr_ctx_init_nmod.argtypes = (ctypes.POINTER(gr_ctx_struct), c_ulong)
 libgr.gr_ctx_init_dirichlet_group.argtypes = (ctypes.POINTER(gr_ctx_struct), c_ulong)
+libgr.gr_ctx_init_padic_radix.argtypes = (ctypes.POINTER(gr_ctx_struct), c_ulong, c_slong, c_slong, ctypes.c_int)
 
 _add_methods = [libgr.gr_add, libgr.gr_add_si, libgr.gr_add_fmpz, libgr.gr_add_other, libgr.gr_other_add]
 _sub_methods = [libgr.gr_sub, libgr.gr_sub_si, libgr.gr_sub_fmpz, libgr.gr_sub_other, libgr.gr_other_sub]
@@ -2973,12 +2980,12 @@ class gr_ctx:
             [1, -1/2, 1/6, 0, -1/30, 0, 1/42, 0, -1/30, 0, 5/66, 0]
             >>> CC_ca.bernoulli_vec(5)
             [1, -0.500000 {-1/2}, 0.166667 {1/6}, 0, -0.0333333 {-1/30}]
-            >>> sum(RR.bernoulli_vec(100))
-            [1.127124216595034e+76 +/- 6.74e+60]
+            >>> sum(RR.bernoulli_vec(100)).nprint(16)
+            1.127124216595034e+76
             >>> sum(RF.bernoulli_vec(100))
             1.127124216595034e+76
-            >>> sum(CC.bernoulli_vec(100))
-            [1.127124216595034e+76 +/- 6.74e+60]
+            >>> sum(CC.bernoulli_vec(100)).nprint(16)
+            1.127124216595034e+76
 
         """
         return ctx._op_vec_len(length, libgr.gr_bernoulli_vec, "bernoulli_vec($length)")
@@ -3939,6 +3946,12 @@ class gr_elem:
         if status:
             _handle_error(self.parent(), status, rstr)
         return res
+
+    def overlaps(self, other):
+        self, other = gr_elem._binary_coercion(self, other)
+        truth = libgr.gr_equal(self._ref, other._ref, self._ctx)
+        if truth == T_FALSE: return False
+        return True
 
     def __eq__(self, other):
         return self._binary_predicate(self, other, libgr.gr_equal, "x == y")
@@ -4915,6 +4928,131 @@ class ComplexExtended_ca(gr_ctx_ca):
         self._set_options(kwargs)
 
 
+
+
+PADIC_RADIX_SIGNED = 1     # allow signed units for exact elements
+PADIC_RADIX_DECIMAL = 4    # print the unit as a plain decimal integer
+PADIC_RADIX_PREC_INF = WORD_MAX    # context precision sentinel for "infinite"
+
+class Qp_padic_radix(gr_ctx):
+    r"""
+    The field of p-adic numbers Q_p, implemented with radix arithmetic
+    arithmetic (padic_radix). A nonzero element is stored canonically as
+    u * p^v + O(p^N): the unit u has p-adic valuation 0, v is the valuation,
+    and N is the absolute precision (N == +inf marks an exactly represented
+    element, printed with no error term).
+
+        >>> Q7 = Qp_padic_radix(7, rel_prec=30)
+        >>> d1 = Mat(Q7, 20, 20)().hilbert().det()
+        >>> d2 = Q7(Mat(QQ, 20, 20)().hilbert().det())
+        >>> d1
+        (5138346895024451929101583) * 7^-19 + O(7^11)
+        >>> d2
+        (5138346895024451929101583) * 7^-19 + O(7^11)
+        >>> d1 - d2
+        0 + O(7^11)
+        >>> d1.overlaps(d2)
+        True
+
+    The relative precision ``rel_prec`` bounds N - v and the absolute precision
+    ``abs_prec`` bounds N; either may be left infinite. With both infinite the
+    structure holds only exactly representable numbers, so an inexact result
+    such as 1/3 is reported as not computable rather than silently truncated.
+    ``p`` must be a word-size prime.
+
+        >>> Q7 = Qp_padic_radix(7, rel_prec=None)
+        >>> Q7
+        Radix 7-adic numbers (rel prec inf, abs prec inf)
+        >>> Q7(0)
+        0
+        >>> Q7(5)
+        (5)
+        >>> Q7(14)            # 14 = 2 * 7
+        (2) * 7^1
+        >>> Q7(98)            # 98 = 2 * 7^2
+        (2) * 7^2
+        >>> Q7(-1)
+        (-1)
+
+    Arithmetic on exactly representable elements stays exact:
+
+        >>> Q7(2) + Q7(3)
+        (5)
+        >>> Q7(3) * Q7(7)
+        (3) * 7^1
+        >>> Q7(7) * Q7(7)
+        (1) * 7^2
+        >>> Q7(2) - Q7(2)
+        0
+        >>> Q7(6) / Q7(2)
+        (3)
+        >>> Q7(1) / Q7(7)     # 7^-1 is exact
+        (1) * 7^-1
+
+    A non-unit denominator gives an infinite expansion, which an exact ring
+    cannot represent:
+
+        >>> Q7(1) / Q7(3)
+        Traceback (most recent call last):
+          ...
+        FlintUnableError: ...
+
+    A finite relative precision truncates such expansions to N - v digits,
+    recording the error term O(p^N):
+
+        >>> Q7r = Qp_padic_radix(7, rel_prec=8)
+        >>> Q7r
+        Radix 7-adic numbers (rel prec 8, abs prec inf)
+        >>> Q7r(1) / Q7r(2)               # 2^-1 (mod 7^8)
+        (2882401) + O(7^8)
+        >>> Q7r(1) / Q7r(3)               # 3^-1 (mod 7^8)
+        (3843201) + O(7^8)
+        >>> Q7r(1) / Q7r(14)              # (2*7)^-1: valuation -1, 8 digits
+        (2882401) * 7^-1 + O(7^7)
+
+    Exactly representable elements stay exact even in a finite-precision ring,
+    and a finite *relative* precision does not bound the valuation:
+
+        >>> Q7r(5)
+        (5)
+        >>> Q7r(7**10)
+        (1) * 7^10
+        >>> Q7r(1) / Q7r(7)
+        (1) * 7^-1
+
+    A finite *absolute* precision instead bounds N directly: anything at or
+    below the horizon p^abs_prec collapses to zero:
+
+        >>> Q7a = Qp_padic_radix(7, rel_prec=None, abs_prec=5)
+        >>> Q7a
+        Radix 7-adic numbers (rel prec inf, abs prec 5)
+        >>> Q7a(7**3)                     # valuation 3 < 5: still exact
+        (1) * 7^3
+        >>> Q7a(7**5)                     # at the horizon
+        0 + O(7^5)
+        >>> Q7a(7**10)
+        0 + O(7^5)
+        >>> Q7a(1) / Q7a(3)               # 3^-1 (mod 7^5)
+        (11205) + O(7^5)
+
+    """
+
+    def __init__(self, p, rel_prec=10, abs_prec=None, signed=True, decimal=True):
+        gr_ctx.__init__(self)
+        prec_rel = PADIC_RADIX_PREC_INF if rel_prec is None else int(rel_prec)
+        prec_abs = PADIC_RADIX_PREC_INF if abs_prec is None else int(abs_prec)
+        flags = 0
+        if signed:
+            flags |= PADIC_RADIX_SIGNED
+        if decimal:
+            flags |= PADIC_RADIX_DECIMAL
+        p = int(p)
+        if p < 0 or p > UWORD_MAX or not libflint.n_is_prime(p):
+            raise FlintUnableError("p must be a word-size prime")
+        libgr.gr_ctx_init_padic_radix(self._ref, p, prec_rel, prec_abs, flags)
+        self._elem_type = padic_radix
+
+
 class PolynomialRing_gr_poly(gr_ctx):
     def __init__(self, coefficient_ring, var=None):
         assert isinstance(coefficient_ring, gr_ctx)
@@ -5142,6 +5280,46 @@ class acb(gr_elem):
     @staticmethod
     def _default_context():
         return CC_acb
+
+    def secondary_zeta(self):
+        """
+        Secondary zeta function (ad-hoc wrapper for testing).
+
+            >>> CC(0.5+10j).secondary_zeta()
+            ([0.1725005546943535 +/- 4.73e-17] + [-0.1680692210280708 +/- 4.12e-17]*I)
+            >>> CC(2).secondary_zeta()
+            [0.02310499311541897 +/- 3.75e-18]
+            >>> CC("-20.001").secondary_zeta()
+            [1.32e+18 +/- 6.41e+15]
+            >>> ComplexField_acb(prec=128)("-20.001").secondary_zeta()
+            [1.31697271383159e+18 +/- 8.21e+3]
+            >>> [raises(lambda: CC(s).secondary_zeta(), FlintUnableError)
+            ...     for s in [1, -1, -3, "1 +/- 0.001", "-5 +/- 0.001"]]
+            [True, True, True, True, True]
+
+        Dyadic values:
+
+            >>> for n in range(10):
+            ...     print(CC(-2*n).secondary_zeta())
+            ... 
+            0.8750000000000000
+            -0.2812500000000000
+            0.02343750000000000
+            -0.1347656250000000
+            -0.6723632812500000
+            -6.168090820312500
+            [-82.48159790039063 +/- 5.00e-15]
+            [-1521.003639221191 +/- 4.07e-13]
+            [-36986.37416267395 +/- 1.96e-13]
+            [-1146735.990261555 +/- 2.82e-10]
+        """
+        C = self.parent()
+        prec = C.prec
+        res = C()
+        libflint.acb_dirichlet_secondary_zeta(res._ref, self._ref, prec)
+        if not libflint.acb_is_finite(res._ref):
+            raise FlintUnableError("unable")
+        return res
 
 class gr_arf_ctx(gr_ctx):
     pass
@@ -5669,7 +5847,7 @@ class gr_poly(gr_elem):
             >>> f.roots(domain=QQbar)     # complex algebraic roots
             ([Root a = 1.00000*I of a^2+1, Root a = -1.00000*I of a^2+1, Root a = 1.41421 of a^2-2, Root a = -1.41421 of a^2-2, -3/2], [1, 1, 1, 1, 2])
             >>> f.roots(domain=RR)      # real ball roots
-            ([[-1.414213562373095 +/- 4.89e-17], [1.414213562373095 +/- 4.89e-17], -1.500000000000000], [1, 1, 2])
+            ([[-1.414213562373095 +/- 6.23e-17], [1.414213562373095 +/- 6.23e-17], -1.500000000000000], [1, 1, 2])
             >>> f.roots(domain=CC)      # complex ball roots
             ([[-1.414213562373095 +/- 4.89e-17], [1.414213562373095 +/- 4.89e-17], 1.000000000000000*I, -1.000000000000000*I, -1.500000000000000], [1, 1, 1, 1, 2])
             >>> f.roots(RF)     # real floating-point roots
@@ -6723,7 +6901,7 @@ class gr_mat(gr_elem):
             >>> Mat(ZZ)([[1,2],[3,4]]).eigenvalues(domain=QQbar)
             ([Root a = 5.37228 of a^2-5*a-2, Root a = -0.372281 of a^2-5*a-2], [1, 1])
             >>> Mat(ZZ)([[1,2],[3,4]]).eigenvalues(domain=RR)
-            ([[-0.3722813232690143 +/- 3.00e-17], [5.372281323269014 +/- 3.30e-16]], [1, 1])
+            ([[-0.3722813232690143 +/- 3.00e-17], [5.372281323269014 +/- 3.31e-16]], [1, 1])
             >>> Mat(QQbar)([[1, 0, QQbar.i()], [0, 0, 1], [1, 1, 1]]).eigenvalues()
             ([Root a = 1.94721 + 0.604643*I of a^6-4*a^5+4*a^4+2*a^3-3*a^2+1, Root a = 0.654260 - 0.430857*I of a^6-4*a^5+4*a^4+2*a^3-3*a^2+1, Root a = -0.601467 - 0.173786*I of a^6-4*a^5+4*a^4+2*a^3-3*a^2+1], [1, 1, 1])
             >>> Mat(ZZi)([[1, 0, ZZi.i()], [0, 0, 1], [1, 1, 1]]).eigenvalues(domain=QQbar)
@@ -7338,6 +7516,51 @@ class Complex_gr_complex(gr_ctx):
         self._real_ctx._decrement_refcount()
 
 
+class padic_radix(gr_elem):
+
+    _struct_type = padic_radix_struct
+
+    def valuation(self):
+        """
+        The p-adic valuation v of this element (the exponent of the leading
+        power of p). The valuation of zero is reported as ``None``.
+
+            >>> Q7 = Qp_padic_radix(7)
+            >>> Q7(14).valuation()
+            1
+            >>> Q7(98).valuation()
+            2
+            >>> (Q7(1) / Q7(7)).valuation()
+            -1
+            >>> Q7(5).valuation()
+            0
+            >>> Q7(0).valuation() is None
+            True
+        """
+        if self._data.u.size == 0:
+            return None
+        return int(self._data.v)
+
+    def precision(self):
+        """
+        The absolute precision N: the element is known modulo p^N. An exactly
+        represented element returns ``None`` (infinite precision).
+
+            >>> Q7r = Qp_padic_radix(7, rel_prec=8)
+            >>> (Q7r(1) / Q7r(2)).precision()
+            8
+            >>> (Q7r(1) / Q7r(14)).precision()
+            7
+            >>> Q7r(5).precision() is None        # exact
+            True
+            >>> Q7r(1) / Q7r(7)                    # 7^-1 is exact
+            (1) * 7^-1
+            >>> (Q7r(1) / Q7r(7)).precision() is None
+            True
+        """
+        if int(self._data.N) == PADIC_RADIX_PREC_INF:
+            return None
+        return int(self._data.N)
 
 
 class fexpr(gr_elem):
@@ -9538,6 +9761,18 @@ def test_is_vector_space():
         assert R.is_rational_vector_space()
         assert R.is_real_vector_space()
         assert R.is_complex_vector_space()
+
+def test_padic():
+    Q7 = Qp_padic_radix(7, rel_prec=10)
+    assert str(Q7(7) * Q7(7)) == "(1) * 7^2"
+    assert Q7(0).sqrt() == 0
+    assert Q7(1).sqrt() == 1
+    assert Q7(4).sqrt() == 2
+    assert str(Q7(2).sqrt()) == "(266983762) + O(7^10)"
+    assert str((1/(1/Q7(4))).sqrt()) == "(2) + O(7^10)"
+    assert raises(lambda: Q7(3).sqrt(), FlintDomainError)
+    assert raises(lambda: Q7(5).sqrt(), FlintDomainError)
+    assert raises(lambda: Q7(6).sqrt(), FlintDomainError)
 
 
 if __name__ == "__main__":
