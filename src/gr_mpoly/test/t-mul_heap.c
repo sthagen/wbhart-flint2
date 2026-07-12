@@ -14,12 +14,12 @@
 
 FLINT_DLL extern gr_static_method_table _ca_methods;
 
-TEST_FUNCTION_START(gr_mpoly_mul_johnson, state)
+TEST_FUNCTION_START(gr_mpoly_mul_heap, state)
 {
     slong i, j;
 
     /* Check f*(g + h) = f*g + f*h */
-    for (i = 0; i < 100; i++)
+    for (i = 0; i < 100 * flint_test_multiplier(); i++)
     {
         gr_ctx_t cctx;
         gr_mpoly_ctx_t ctx;
@@ -38,17 +38,17 @@ TEST_FUNCTION_START(gr_mpoly_mul_johnson, state)
         gr_mpoly_init(k2, ctx);
         gr_mpoly_init(t, ctx);
 
-        if (cctx->methods == _ca_methods)
-        {
-            len = n_randint(state, 10);
-            len1 = n_randint(state, 10);
-            len2 = n_randint(state, 10);
-        }
-        else
+        if (gr_ctx_is_finite(cctx) == T_TRUE)
         {
             len = n_randint(state, 100);
             len1 = n_randint(state, 100);
             len2 = n_randint(state, 100);
+        }
+        else
+        {
+            len = n_randint(state, 5);
+            len1 = n_randint(state, 5);
+            len2 = n_randint(state, 5);
         }
 
         exp_bits = n_randint(state, 200) + 2;
@@ -70,19 +70,19 @@ TEST_FUNCTION_START(gr_mpoly_mul_johnson, state)
             status |= gr_mpoly_add(k1, g, h, ctx);
 
             if (n_randint(state, 2) || (gr_ctx_is_commutative_ring(ctx) != T_TRUE))
-                status |= gr_mpoly_mul_johnson(k1, f, k1, ctx);
+                status |= gr_mpoly_mul_heap(k1, f, k1, ctx);
             else
-                status |= gr_mpoly_mul_johnson(k1, k1, f, ctx);
+                status |= gr_mpoly_mul_heap(k1, k1, f, ctx);
 
             if (status == GR_SUCCESS)
                 gr_mpoly_assert_canonical(k1, ctx);
 
-            status |= gr_mpoly_mul_johnson(k2, f, g, ctx);
+            status |= gr_mpoly_mul_heap(k2, f, g, ctx);
 
             if (status == GR_SUCCESS)
                 gr_mpoly_assert_canonical(k2, ctx);
 
-            status |= gr_mpoly_mul_johnson(t, f, h, ctx);
+            status |= gr_mpoly_mul_heap(t, f, h, ctx);
 
             if (status == GR_SUCCESS)
                 gr_mpoly_assert_canonical(t, ctx);

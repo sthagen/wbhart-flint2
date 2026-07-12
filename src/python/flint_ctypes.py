@@ -5541,6 +5541,16 @@ class FiniteField_base(gr_ctx):
 
 
 class FiniteField_fq(FiniteField_base):
+    """
+    Finite field (fq representation).
+
+        >>> K = FiniteField_fq(5, 3)
+        >>> K
+        GF(5^3) (fq)
+        >>> (1 + K.gen()) ** 10
+        4*a^2+2
+    """
+
     def __init__(self, p, n, var=None):
         gr_ctx.__init__(self)
         p = ZZ(p)
@@ -5553,6 +5563,16 @@ class FiniteField_fq(FiniteField_base):
         self._elem_type = fq
 
 class FiniteField_fq_nmod(FiniteField_base):
+    """
+    Finite field (fq_nmod representation).
+
+        >>> K = FiniteField_fq_nmod(5, 3)
+        >>> K
+        GF(5^3) (fq_nmod)
+        >>> (1 + K.gen()) ** 10
+        4*a^2+2
+    """
+
     def __init__(self, p, n, var=None):
         gr_ctx.__init__(self)
         p = self._as_ui(p)
@@ -5565,6 +5585,16 @@ class FiniteField_fq_nmod(FiniteField_base):
         self._elem_type = fq_nmod
 
 class FiniteField_fq_zech(FiniteField_base):
+    """
+    Finite field (Zech logarithm representation).
+
+        >>> K = FiniteField_fq_zech(5, 3)
+        >>> K
+        GF(5^3) (fq_zech)
+        >>> (1 + K.gen()) ** 10
+        a^92
+    """
+
     def __init__(self, p, n, var=None):
         gr_ctx.__init__(self)
         p = self._as_ui(p)
@@ -9425,6 +9455,20 @@ def test_mpoly():
     RB = PolynomialRing_gr_mpoly(ZZi, 2, ["x", "y"])
     assert raises(lambda: RA(RB.gens()[0]), NotImplementedError)
     assert raises(lambda: RB(RA.gens()[0]), NotImplementedError)
+
+    x, y, z = PolynomialRing_gr_mpoly(QQbar, 3, ["x", "y", "z"]).gens()
+    I = QQbar.i()
+    assert ((x+I)*(x-I)*(y+I)*(y-I)) / ((x+I)*(y-I)) == (x-I)*(y+I)
+    assert raises(lambda: ((x+I)*(x-I)*(y+I)*(y-I)) / ((x+I)*(z+I)), FlintDomainError)
+
+    x, y, z = PolynomialRing_gr_mpoly(RR, 3, ["x", "y", "z"]).gens()
+    assert raises(lambda: x / (x**0 - y**0), FlintDomainError)
+    assert raises(lambda: (x**4 * y**3) / (RR("0 +/- 0.1")*(x**3 * y**2)), FlintUnableError)
+
+    R = PolynomialRing_gr_mpoly(QQx, 1, "y");
+    f = R("(x/3 + x^2/5)*y^2")
+    assert f == R(str(f))
+
 
 def test_fmpq_mpoly():
     QQxyz = PolynomialRing_fmpq_mpoly(3)
