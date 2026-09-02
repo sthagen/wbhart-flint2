@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2025 Albin Ahlbäck
+    Copyright (C) 2026 Fredrik Johansson
 
     This file is part of FLINT.
 
@@ -9,11 +9,17 @@
     (at your option) any later version.  See <https://www.gnu.org/licenses/>.
 */
 
-#ifndef FMPQ_MAT_IMPL_H
-#define FMPQ_MAT_IMPL_H
+#include "fmpz.h"
+#include "fmpz_vec.h"
 
-#include "fmpq_types.h"
+slong
+_fmpz_vec_weight_bits(const fmpz * vec, slong len)
+{
+    slong i;
+    ulong w = 0;
 
-int _fmpq_mat_check_solution_fmpz_mat(const fmpq_mat_t X, const fmpz_mat_t A, const fmpz_mat_t B);
+    for (i = 0; i < len; i++)
+        w += fmpz_bits(vec + i);
 
-#endif
+    return w;
+}
