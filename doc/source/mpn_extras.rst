@@ -1171,8 +1171,8 @@ between output and input arrays.
     `ar + ai i`). Each part takes an independent length, at least 1 limb
     and not necessarily normalized. A *signed length* is written for each
     output: the magnitude occupies ``|*zr_len|`` limbs and a negative
-    value means the result is negative; nothing above ``|*zr_len|`` limbs
-    is written. The outputs must have room for
+    value means the result is negative. Limbs above ``|*zr_len|`` are
+    not significant, though the transformed path may zero them. The outputs must have room for
     ``max(arn, ain) + max(brn, bin) + 1`` limbs (``2 max(arn, ain) + 1``
     for the square). The algorithm is selected from the shape: schoolbook
     when a part is much shorter than its partner, Karatsuba when the

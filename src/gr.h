@@ -1510,6 +1510,15 @@ void _gr_ctx_init_fmpz_mod_from_ref(gr_ctx_t ctx, const void * fmod_ctx);
    sign bit; mixed-sign accumulations switch the pointwise additions and
    subtractions, and the sign of a mixed result is resolved at conversion
    out. Conversions in and out are by limb arrays with an explicit sign;
+   A conversion out needs gr_transformed_mpn_get_limbs limbs of window
+   to reconstruct into, a few more than the value itself occupies; a
+   caller supplying at least that many gets the reconstruction written
+   straight into its own buffer. A shorter window is accepted and the
+   ring stages the conversion internally, at the cost of a copy of the
+   result, succeeding whenever the value fits and returning GR_DOMAIN
+   otherwise, as an undersized window always has -- but for the
+   destructive forms that refusal arrives with the element already
+   consumed, so it cannot be retried.
    gr_transformed_mpn_get_trunc returns the limbs of the value starting
    at a given position, with an error against the exact value within
    (-1.5, +0.5) ulp of the lowest returned limb -- equivalently, at most
@@ -1520,15 +1529,34 @@ void _gr_ctx_init_fmpz_mod_from_ref(gr_ctx_t ctx, const void * fmod_ctx);
    (under half an ulp either way). */
 /* Operand allocation strategies for the transformed ring: plain
    aligned allocation per element, or a pool of num_live slabs in a
-   stable reserved tail of the thread's fft_small scratch buffer.
-   The latter costs no allocation once the thread's buffer is warm
-   and shares its memory with the fft scratch, but requires the
-   caller to be the exclusive user of the thread's fft_small context
-   until the ring context is destroyed (no interleaved fft_small
-   operations outside this ring); elements past num_live fall back
-   to plain allocation. */
+   reserved tail of the thread's fft_small scratch buffer, which costs
+   no allocation once the thread's buffer is warm. Elements past
+   num_live fall back to plain allocation.
+
+   The reservation is designed for a context that is the only user of
+   fft_small on its thread while it lives -- reserve, do ring
+   operations, release -- which is how every library caller uses it.
+   It is a design assumption, not a requirement: fft_small serves an
+   interleaved multiplication from a secondary buffer while a
+   reservation is live (see mpn_ctx_fit_buffer in fft_small.h), so a
+   context held across unrelated work, or test code checking ring
+   results against fmpz arithmetic, stays correct at the cost of that
+   buffer. One reservation exists per thread; a context constructed
+   while another holds it silently uses plain allocation instead. */
+/* Conversions out whose window is too short to hold the reconstruction
+   (which exceeds the value by the top CRT coefficient's length) are
+   staged inside the ring rather than by the caller. The staging is a
+   fraction of one element and rides in the slab reservation; a caller
+   that will always have an element dead by conversion time can pass
+   GR_TRANSFORMED_MPN_SCRATCH_FROM_SLAB, OR-ed into alloc_strategy, and
+   the ring takes a free slab instead of reserving anything. The flag
+   is a footprint declaration, not a correctness contract: if no slab
+   is free the ring falls back to an allocation cached for the
+   context's lifetime. One conversion may be in flight at a time. */
 #define GR_TRANSFORMED_MPN_ALLOC_MALLOC 0
 #define GR_TRANSFORMED_MPN_ALLOC_FIT_BUFFER 1
+#define GR_TRANSFORMED_MPN_ALLOC_STRATEGY_MASK 1
+#define GR_TRANSFORMED_MPN_SCRATCH_FROM_SLAB 2
 
 int gr_ctx_init_transformed_mpn(gr_ctx_t ctx, slong bits_bound,
                     slong terms_bound, int is_signed, slong num_live,
@@ -1537,6 +1565,8 @@ int gr_transformed_mpn_set(gr_ptr res, nn_srcptr a, slong an, int sign,
                     gr_ctx_t ctx);
 int gr_transformed_mpn_get(nn_ptr z, slong zn, slong * zn_out, int * sign,
                     gr_srcptr x, gr_ctx_t ctx);
+int gr_transformed_mpn_get_fmpz_destructive(fmpz_t f, slong lo_limbs,
+                                        gr_ptr x, gr_ctx_t ctx);
 int gr_transformed_mpn_get_destructive(nn_ptr z, slong zn, slong * zn_out,
                     int * sign, gr_ptr x, gr_ctx_t ctx);
 int gr_transformed_mpn_get_trunc_destructive(nn_ptr z, slong zn,

@@ -1702,8 +1702,9 @@ FLINT_DLL extern slong flint_mpn_sqr_complex_fft_cutoff;
    The full products take an independent length (>= 1 limb) for every
    part, which need not be normalized, and report a *signed length* for
    each output: the magnitude occupies |len| limbs and len < 0 means
-   negative. Nothing above |len| is written, so an fmpz caller can use
-   the value as an mpz size directly. zr and zi must each have room for
+   negative. Limbs above |len| are not significant, though the
+   transformed path may zero them, so an fmpz caller can use the value
+   as an mpz size directly. zr and zi must each have room for
    max(arn, ain) + max(brn, bin) + 1 limbs (2 max(arn, ain) + 1 for the
    square) -- one bound for both, covering either product plus the carry
    of the sum. The algorithm is chosen per shape: schoolbook when any

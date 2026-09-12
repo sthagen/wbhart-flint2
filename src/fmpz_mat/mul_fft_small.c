@@ -90,50 +90,23 @@ _set_entry(gr_ptr elem, const fmpz * e, gr_ctx_t tctx)
    acc, which the caller re-initializes */
 static int
 _export_entry(fmpz * e, gr_ptr acc, slong lo_limbs, int add_into,
-              nn_ptr t, slong tn_max, gr_ctx_t tctx)
+              gr_ctx_t tctx)
 {
-    slong need, zn;
-    int sg, ok;
-
-    need = (lo_limbs == 0)
-            ? gr_transformed_mpn_get_limbs(tctx, acc)
-            : gr_transformed_mpn_get_limbs_trunc(tctx, acc, lo_limbs);
-    /* the buffer was sized from gr_transformed_mpn_get_limbs_bound, of
-       which need is a per-element instance */
-    FLINT_ASSERT(need <= tn_max);
-    (void) tn_max;
-    if (lo_limbs == 0)
-        ok = gr_transformed_mpn_get_destructive(t, need, &zn, &sg, acc,
-                tctx) == GR_SUCCESS;
-    else
-        ok = gr_transformed_mpn_get_trunc_destructive(t, need, &zn, &sg,
-                lo_limbs, acc, tctx) == GR_SUCCESS;
-    if (!ok)
-        return 0;
-
     if (!add_into)
-    {
-        if (zn == 0)
-            fmpz_zero(e);
-        else
-        {
-            fmpz_set_ui_array(e, t, zn);
-            if (sg)
-                fmpz_neg(e, e);
-        }
-    }
-    else if (zn != 0)
+        return gr_transformed_mpn_get_fmpz_destructive(e, lo_limbs, acc, tctx)
+               == GR_SUCCESS;
+
     {
         fmpz_t p;
+        int ok;
         fmpz_init(p);
-        fmpz_set_ui_array(p, t, zn);
-        if (sg)
-            fmpz_sub(e, e, p);
-        else
+        ok = gr_transformed_mpn_get_fmpz_destructive(p, lo_limbs, acc, tctx)
+             == GR_SUCCESS;
+        if (ok)
             fmpz_add(e, e, p);
         fmpz_clear(p);
+        return ok;
     }
-    return 1;
 }
 
 #endif
@@ -151,8 +124,7 @@ _fmpz_mat_mul_fft_small(fmpz_mat_t C, const fmpz_mat_t A, const fmpz_mat_t B,
     slong i, j, l, I, J, L;
     gr_ctx_t tctx;
     gr_ptr EA, EB, acc;
-    nn_ptr t;
-    slong tn_max, budget, mb, nb, kb;
+    slong budget, mb, nb, kb;
     int ok = 1;
 #define EA_(i) GR_ENTRY(EA, i, tctx->sizeof_elem)
 #define EB_(i) GR_ENTRY(EB, i, tctx->sizeof_elem)
@@ -276,8 +248,6 @@ _fmpz_mat_mul_fft_small(fmpz_mat_t C, const fmpz_mat_t A, const fmpz_mat_t B,
 
     /* conversion staging sized by the ring's own bound rather than a
        reconstruction of its limb requirements here */
-    tn_max = gr_transformed_mpn_get_limbs_bound(tctx);
-    t = flint_malloc(tn_max * sizeof(ulong));
 
     for (L = 0; ok && L < k; L += kb)
     {
@@ -329,7 +299,7 @@ _fmpz_mat_mul_fft_small(fmpz_mat_t C, const fmpz_mat_t A, const fmpz_mat_t B,
 
                         if (ok)
                             ok = _export_entry(fmpz_mat_entry(C, I + i, J + j),
-                                    acc, lo_limbs, L > 0, t, tn_max, tctx);
+                                    acc, lo_limbs, L > 0, tctx);
 
                         gr_clear(acc, tctx);
                         gr_init(acc, tctx);
@@ -349,7 +319,6 @@ _fmpz_mat_mul_fft_small(fmpz_mat_t C, const fmpz_mat_t A, const fmpz_mat_t B,
     }
     gr_clear(acc, tctx);
     flint_free(acc);
-    flint_free(t);
     gr_ctx_clear(tctx);
 #undef EA_
 #undef EB_

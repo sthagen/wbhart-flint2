@@ -59,27 +59,7 @@ _set_coeff(gr_ptr elem, const fmpz * f, gr_ctx_t ctx)
 static int
 _get_coeff(fmpz * f, gr_ptr elem, gr_ctx_t ctx)
 {
-    slong w = gr_transformed_mpn_get_limbs(ctx, elem);
-    slong zl;
-    int sg, status;
-    mpz_ptr m;
-
-    if (w <= 0)
-        w = 1;
-
-    m = _fmpz_promote(f);
-    status = gr_transformed_mpn_get_destructive(FLINT_MPZ_REALLOC(m, w), w,
-                                                &zl, &sg, elem, ctx);
-    if (status != GR_SUCCESS)
-    {
-        _fmpz_demote(f);
-        fmpz_zero(f);
-        return status;
-    }
-
-    m->_mp_size = sg ? -zl : zl;
-    _fmpz_demote_val(f);
-    return GR_SUCCESS;
+    return gr_transformed_mpn_get_fmpz_destructive(f, 0, elem, ctx);
 }
 
 #endif
