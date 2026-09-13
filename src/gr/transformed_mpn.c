@@ -457,6 +457,23 @@ gr_transformed_mpn_set(gr_ptr res, nn_srcptr a, slong an, int sign,
     return GR_SUCCESS;
 }
 
+static int
+tmpn_set_fmpz(gr_ptr elem, const fmpz_t a, gr_ctx_t tctx)
+{
+    fmpz c = *a;
+
+    if (!COEFF_IS_MPZ(c))
+    {
+        ulong v = FLINT_ABS(c);
+        return gr_transformed_mpn_set(elem, &v, c != 0, c < 0, tctx);
+    }
+    else
+    {
+        mpz_srcptr m = COEFF_TO_PTR(c);
+        return gr_transformed_mpn_set(elem, m->_mp_d, FLINT_ABS(m->_mp_size), m->_mp_size < 0, tctx);
+    }
+}
+
 /* number of limbs certainly sufficient for the biased reconstruction of
    an element with m chunks */
 static slong
@@ -1186,6 +1203,7 @@ static gr_method_tab_input __tmpn_methods_input[] =
     {GR_METHOD_ZERO,            (gr_funcptr) (void (*)(void)) tmpn_zero},
     {GR_METHOD_WRITE,           (gr_funcptr) (void (*)(void)) tmpn_write},
     {GR_METHOD_ONE,             (gr_funcptr) (void (*)(void)) tmpn_one},
+    {GR_METHOD_SET_FMPZ,        (gr_funcptr) (void (*)(void)) tmpn_set_fmpz},
     {GR_METHOD_RANDTEST,        (gr_funcptr) (void (*)(void)) tmpn_randtest},
     {GR_METHOD_IS_ZERO,         (gr_funcptr) (void (*)(void)) tmpn_is_zero},
     {GR_METHOD_EQUAL,           (gr_funcptr) (void (*)(void)) tmpn_equal},
