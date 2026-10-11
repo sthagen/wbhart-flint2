@@ -37,8 +37,10 @@
 #include "t-fmpz_poly.c"
 #include "t-fq.c"
 #include "t-fq_nmod.c"
+#include "t-fq_special.c"
 #include "t-fq_zech.c"
 #include "t-fraction.c"
+#include "t-poly_quotient.c"
 #include "t-matrix_acb.c"
 #include "t-matrix_arb.c"
 #include "t-matrix_fmpq.c"
@@ -51,6 +53,7 @@
 #include "t-nmod.c"
 #include "t-perm.c"
 #include "t-poly.c"
+#include "t-pretend_field.c"
 #include "t-polynomial_acb.c"
 #include "t-polynomial_arb.c"
 #include "t-polynomial_fmpq.c"
@@ -90,8 +93,10 @@ test_struct tests[] =
     TEST_FUNCTION(gr_fmpz_poly),
     TEST_FUNCTION(gr_fq),
     TEST_FUNCTION(gr_fq_nmod),
+    TEST_FUNCTION(gr_fq_special),
     TEST_FUNCTION(gr_fq_zech),
     TEST_FUNCTION(gr_fraction),
+    TEST_FUNCTION(gr_poly_quotient),
     TEST_FUNCTION(gr_matrix_acb),
     TEST_FUNCTION(gr_matrix_arb),
     TEST_FUNCTION(gr_matrix_fmpq),
@@ -104,6 +109,7 @@ test_struct tests[] =
     TEST_FUNCTION(gr_nmod),
     TEST_FUNCTION(gr_perm),
     TEST_FUNCTION(gr_poly),
+    TEST_FUNCTION(gr_pretend_field),
     TEST_FUNCTION(gr_polynomial_acb),
     TEST_FUNCTION(gr_polynomial_arb),
     TEST_FUNCTION(gr_polynomial_fmpq),

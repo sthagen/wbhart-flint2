@@ -8,7 +8,7 @@ Macros
 
 .. macro:: MPN_NORM(a, an)
 
-    Normalise ``(a, an)`` so that either ``an`` is zero or 
+    Normalise ``(a, an)`` so that either ``an`` is zero or
     ``a[an - 1]`` is nonzero.
 
 .. macro:: MPN_SWAP(a, an, b, bn)
@@ -21,7 +21,7 @@ Utility functions
 
 .. function:: void flint_mpn_debug(mp_srcptr x, mp_size_t xsize)
 
-    Prints debug information about ``(x, xsize)`` to ``stdout``. 
+    Prints debug information about ``(x, xsize)`` to ``stdout``.
     In particular, this will print binary representations of all the limbs.
 
 .. function:: char * flint_mpn_get_str(char * res, int base, mp_srcptr x, mp_size_t xn, int negative)
@@ -547,15 +547,15 @@ Divisibility
 
 .. function:: mp_size_t flint_mpn_remove_2exp(mp_ptr x, mp_size_t xsize, flint_bitcnt_t * bits)
 
-    Divides ``(x, xsize)`` by `2^n` where `n` is the number of trailing 
-    zero bits in `x`. The new size of `x` is returned, and `n` is stored in 
+    Divides ``(x, xsize)`` by `2^n` where `n` is the number of trailing
+    zero bits in `x`. The new size of `x` is returned, and `n` is stored in
     the bits argument. `x` may not be zero.
 
 .. function:: mp_size_t flint_mpn_remove_power_ascending(mp_ptr x, mp_size_t xsize, mp_ptr p, mp_size_t psize, ulong * exp)
 
-    Divides ``(x, xsize)`` by the largest power `n` of ``(p, psize)`` 
-    that is an exact divisor of `x`. The new size of `x` is returned, and 
-    `n` is stored in the ``exp`` argument. `x` may not be zero, and `p` 
+    Divides ``(x, xsize)`` by the largest power `n` of ``(p, psize)``
+    that is an exact divisor of `x`. The new size of `x` is returned, and
+    `n` is stored in the ``exp`` argument. `x` may not be zero, and `p`
     must be greater than `2`.
 
     This function works by testing divisibility by ascending squares
@@ -565,16 +565,16 @@ Divisibility
 
 .. function:: int flint_mpn_factor_trial(mp_srcptr x, mp_size_t xsize, slong start, slong stop)
 
-    Searches for a factor of ``(x, xsize)`` among the primes in positions 
-    ``start, ..., stop-1`` of ``flint_primes``. Returns `i` if 
-    ``flint_primes[i]`` is a factor, otherwise returns `0` if no factor 
+    Searches for a factor of ``(x, xsize)`` among the primes in positions
+    ``start, ..., stop-1`` of ``flint_primes``. Returns `i` if
+    ``flint_primes[i]`` is a factor, otherwise returns `0` if no factor
     is found. It is assumed that ``start >= 1``.
 
 .. function:: int flint_mpn_factor_trial_tree(slong * factors, mp_srcptr x, mp_size_t xsize, slong num_primes)
 
     Searches for a factor of ``(x, xsize)`` among the primes in positions
     approximately in the range ``0, ..., num_primes - 1`` of ``flint_primes``.
-    
+
     Returns the number of prime factors found and fills ``factors`` with their
     indices in ``flint_primes``. It is assumed that ``num_primes`` is in the
     range ``0, ..., 3512``.
@@ -595,7 +595,7 @@ Division
 .. function:: int flint_mpn_divides(mp_ptr q, mp_srcptr array1, mp_size_t limbs1, mp_srcptr arrayg, mp_size_t limbsg, mp_ptr temp)
 
     If ``(arrayg, limbsg)`` divides ``(array1, limbs1)`` then
-    ``(q, limbs1 - limbsg + 1)`` is set to the quotient and 1 is 
+    ``(q, limbs1 - limbsg + 1)`` is set to the quotient and 1 is
     returned, otherwise 0 is returned. The temporary space ``temp``
     must have space for ``limbsg`` limbs.
 
@@ -622,12 +622,12 @@ Division
     * Long quotients (both `bn` and `an - bn + 1` above
       ``FLINT_MPN_TDIV_QR_NEWTON_CUTOFF``, or `bn \ge`
       ``FLINT_MPN_TDIV_QR_NEWTON_LONG_CUTOFF`` and `an - bn + 1 \ge 2 bn`):
-      Karp-Markstein Newton division (:func:`fixed_div_newton`) using
+      Karp-Markstein Newton division (:func:`_mp_real_div_newton`) using
       FLINT's multiplication; unbalanced divisions (`an \ge 3 bn` for
       divisors above ``FLINT_MPN_TDIV_QR_UNBALANCED3_CUTOFF`` limbs,
       `an \ge 4 bn` above ``FLINT_MPN_TDIV_QR_UNBALANCED4_CUTOFF`` limbs) as
       a sequence of `2bn \times bn` block divisions sharing one approximate
-      inverse of `b` (:func:`fixed_inv_newton`). Short divisors with long
+      inverse of `b` (:func:`_mp_real_inv_newton`). Short divisors with long
       dividends (`4 \le bn < 32` and `an \ge 32 bn`, or `bn \ge 32` and
       `an \ge 4 bn`) go through :func:`flint_mpn_preinvn` and
       :func:`flint_mpn_divrem_preinvn`.
@@ -668,7 +668,7 @@ Division
     case the remainder follows from a low product; otherwise the candidate
     quotient is corrected by `O(1)` steps using a full product.
     The preinv version requires `(binv, binvn + 2)` to be the output of
-    ``fixed_inv_newton(binv, b, bn, binvn)`` with `binvn \ge n + 2` and
+    ``_mp_real_inv_newton(binv, b, bn, binvn)`` with `binvn \ge n + 2` and
     `an \ge n + 2`; the unbalanced version requires `an > 2 bn` and
     `bn \ge 3`.
 
@@ -693,7 +693,7 @@ Division
     permitted. This follows the algorithm selection of
     :func:`flint_mpn_tdiv_q` (so that it is never slower) but skips the
     final corrections of the divide and conquer division, and uses
-    :func:`fixed_div_newton` with one guard limb, rounded up by more than
+    :func:`_mp_real_div_newton` with one guard limb, rounded up by more than
     its error bound, instead of the Newton division, and already instead
     of the divide and conquer or short division when both `bn` and
     `an - bn + 1` are at least ``FLINT_MPN_DIVAPPROX_NEWTON_CUTOFF``.
@@ -723,7 +723,7 @@ Division
     chains for `xn \le 2` and register-based division for short `x` and
     quotients, :func:`flint_mpn_divapprox_fraction` of `B^n`
     (the zero limbs not formed in the short and Newton divisions) below
-    the Newton cutoffs, and above, :func:`fixed_inv_newton` with one guard
+    the Newton cutoffs, and above, :func:`_mp_real_inv_newton` with one guard
     limb instead of three, rounded up by more than its error bound.
 
 .. function:: mp_limb_t _flint_mpn_divrem_basecase_preinv1(mp_ptr qp, mp_ptr np, mp_size_t nn, mp_srcptr dp, mp_size_t dn, mp_limb_t dinv)
@@ -869,9 +869,11 @@ Division
 
     Precomputed data for repeated exact division by a fixed divisor: its
     odd part `b'` (with `b = 2^v B^k b'`) and the 2-adic inverse
-    `b'^{-1} \bmod B^{bn'+1}`.
+    `b'^{-1} \bmod B^{m}`, where `m = bn' + 1` unless a smaller precision
+    was requested with :func:`flint_mpn_divexact_preinv_init_prec`.
 
 .. function:: void flint_mpn_divexact_preinv_init(flint_mpn_divexact_preinv_t pre, mp_srcptr b, mp_size_t bn)
+              void flint_mpn_divexact_preinv_init_prec(flint_mpn_divexact_preinv_t pre, mp_srcptr b, mp_size_t bn, mp_size_t qn)
               void flint_mpn_divexact_preinv_clear(flint_mpn_divexact_preinv_t pre)
               void flint_mpn_divexact_preinv(mp_ptr q, mp_srcptr a, mp_size_t an, const flint_mpn_divexact_preinv_t pre)
 
@@ -885,10 +887,19 @@ Division
     limbs of `a` that can influence the quotient are read (and shifted when
     `b` is even). Compared with a fresh ``mpn_divexact`` for every division,
     which recomputes an inverse each time, this is 1.5-2.5 times faster for
-    balanced operands and 10-25% faster for long quotients. Used by
+    balanced operands and 10-25% faster for long quotients.
+
+    A quotient of `n` limbs only needs the inverse modulo `B^n`, which
+    depends only on the low `n` limbs of `b'`. The *init_prec* version
+    computes the inverse only to `\min(bn' + 1, qn)` limbs, which is much
+    cheaper when all quotients are known to have at most `qn \ll bn'`
+    limbs (the cost of the inverse is then that of about one division
+    rather than several `bn'`-limb products). Longer quotients remain
+    correct but are not accelerated by the inverse. Used by
     :func:`_fmpz_vec_scalar_divexact_fmpz` and
     :func:`fmpz_mat_scalar_divexact_fmpz` when at least two entries are as
-    large as the divisor.
+    large as the divisor, with the inverse computed to the precision of
+    the longest quotient.
 
 .. function:: int flint_mpn_divisible(mp_srcptr a, mp_size_t an, mp_srcptr b, mp_size_t bn)
 
@@ -983,11 +994,11 @@ Division
     `x`), the quotient is computed by
     :func:`flint_mpn_tdiv_q` without the remainder (reading only the top
     `O(n - xn)` limbs of `x` for short quotients), and above it by
-    :func:`fixed_inv_newton` with three extra fraction limbs, with the same
+    :func:`_mp_real_inv_newton` with three extra fraction limbs, with the same
     certification and correction scheme as :func:`flint_mpn_tdiv_qr`,
     which avoids forming the numerator `B^n` altogether in the common case.
     :func:`_flint_mpn_inv_basecase` is the version without Newton
-    inversion. It is used by :func:`fixed_inv_newton_basecase`, so that
+    inversion. It is used by :func:`_mp_real_inv_newton_basecase`, so that
     the mutual calls between the Newton inversion and the division only
     ever go to lower precisions, whatever the cutoffs.
 
@@ -1133,7 +1144,7 @@ Square root
     remainder space beyond `\lceil an/2 \rceil + 1` limbs.
 
     Above the cutoff, `a` is viewed as a
-    fixed-point number in `[B^{-2}, 1)` and :func:`fixed_sqrt_newton` is used
+    fixed-point number in `[B^{-2}, 1)` and :func:`_mp_real_sqrt_newton` is used
     with three extra fraction limbs, so that the truncated root is certified
     whenever the first fraction limb lies in `[2, B-2]`; otherwise it is
     corrected by `O(1)` steps. With a ``NULL`` remainder the Newton path
@@ -1209,10 +1220,10 @@ Division and modular arithmetic with precomputed inverses
 
 .. function:: void flint_mpn_mulmod_preinv1(mp_ptr r, mp_srcptr a, mp_srcptr b, mp_size_t n, mp_srcptr d, mp_limb_t dinv, ulong norm)
 
-    Given a normalised integer `d` with precomputed inverse ``dinv`` 
+    Given a normalised integer `d` with precomputed inverse ``dinv``
     provided by ``flint_mpn_preinv1``, computes `ab \pmod{d}` and
-    stores the result in `r`. Each of `a`, `b` and `r` is expected to 
-    have `n` limbs of space, with zero padding if necessary. 
+    stores the result in `r`. Each of `a`, `b` and `r` is expected to
+    have `n` limbs of space, with zero padding if necessary.
 
     The value ``norm`` is provided for convenience. If `a`, `b` and
     `d` have been shifted left by ``norm`` bits so that `d` is
@@ -1246,23 +1257,23 @@ Division and modular arithmetic with precomputed inverses
 
 .. function:: mp_limb_t flint_mpn_divrem_preinvn(mp_ptr q, mp_ptr r, mp_srcptr a, mp_size_t m, mp_srcptr d, mp_size_t n, mp_srcptr dinv)
 
-    Given a normalised integer `d` with precomputed inverse ``dinv`` 
-    provided by ``flint_mpn_preinvn``, computes the quotient of `a` by `d` 
+    Given a normalised integer `d` with precomputed inverse ``dinv``
+    provided by ``flint_mpn_preinvn``, computes the quotient of `a` by `d`
     and stores the result in `q` and the remainder in the lower `n` limbs of
     `a`. The remaining limbs of `a` are destroyed.
 
     The value `q` is expected to have space for `m - n` limbs and we require
     `m \ge n`. No aliasing is permitted between `q` and `a` or between these
-    and any of the other operands. 
+    and any of the other operands.
 
     Note that this function is not always as fast as ordinary division.
 
 .. function:: void flint_mpn_mulmod_preinvn(mp_ptr r, mp_srcptr a, mp_srcptr b, mp_size_t n, mp_srcptr d, mp_srcptr dinv, ulong norm)
 
-    Given a normalised integer `d` with precomputed inverse ``dinv`` 
+    Given a normalised integer `d` with precomputed inverse ``dinv``
     provided by ``flint_mpn_preinvn``, computes `ab \pmod{d}` and
-    stores the result in `r`. Each of `a`, `b` and `r` is expected to 
-    have `n` limbs of space, with zero padding if necessary. 
+    stores the result in `r`. Each of `a`, `b` and `r` is expected to
+    have `n` limbs of space, with zero padding if necessary.
 
     The value ``norm`` is provided for convenience. If `a`, `b` and
     `d` have been shifted left by ``norm`` bits so that `d` is
@@ -1270,7 +1281,23 @@ Division and modular arithmetic with precomputed inverses
     so that it has the same shift as all the inputs.
 
     We require `a` and `b` to be reduced modulo `d` before calling the
-    function. 
+    function.
+
+.. function:: void flint_mpn_powmod_preinvn(mp_ptr res, mp_srcptr a, mp_srcptr e, mp_size_t en, mp_size_t n, mp_srcptr d, mp_srcptr dinv, ulong norm)
+
+    Given a normalised integer `d` of `n` limbs with precomputed inverse
+    ``dinv`` provided by :func:`flint_mpn_preinvn`, computes `a^e \pmod{d}`
+    and stores the result in ``res``. The exponent is the nonnegative integer
+    held in the `en` limbs at `e`, which need not be normalised; `a` and
+    ``res`` have `n` limbs of space.
+
+    The shift convention is that of :func:`flint_mpn_mulmod_preinvn`: if `a`
+    and `d` have been shifted left by ``norm`` bits so that `d` is
+    normalised, then ``res`` carries the same shift. The exponent is not
+    shifted. Aliasing of ``res`` with `a` or `e` is not permitted.
+
+    We require `a` to be reduced modulo `d`, and the unshifted modulus
+    `d 2^{-\mathrm{norm}}` to be at least 2.
 
 .. function:: void flint_mpn_mulmod_preinvn_2(mp_ptr r, mp_srcptr a, mp_srcptr b, mp_srcptr d, mp_srcptr dinv, ulong norm)
 
@@ -1284,6 +1311,44 @@ Division and modular arithmetic with precomputed inverses
     Given ``dnormed`` containing a normalised integer `d 2^{norm}` with precomputed inverse ``dinv``
     provided by ``flint_mpn_preinvn``, computes `a_1 b_1 + a_2 b_2 \pmod{d}`. We require
     all operands to be reduced modulo `d`.
+
+Square roots modulo an odd prime
+--------------------------------------------------------------------------------
+
+The following take an `n`-limb odd modulus `d` with `d_{n-1} \ne 0` and an
+operand already reduced to `[0, d)`, and are the implementation behind
+:func:`mpn_mod_sqrt`, :func:`gr_sqrt` over :ref:`fmpz_mod <fmpz-mod>` and
+:func:`fmpz_sqrtmod`. Primality of `d` is assumed and never checked.
+
+The ``preinv`` variants take ``dinv``, the precomputed inverse that
+:func:`flint_mpn_preinvn` produces from `d 2^{\mathrm{norm}}`, together with
+`\mathrm{norm} = \mathrm{clz}(d_{n-1})`, in the form a caller such as an
+:type:`mpn_mod` or :type:`fmpz_mod_ctx_t` context already has it. ``dinv`` may
+be ``NULL``, in which case the inverse is computed internally.
+
+Apart from the Jacobi symbol, which GMP exposes only on ``mpz``, the arithmetic
+is :func:`flint_mpn_mulmod_preinvn` and :func:`flint_mpn_powmod_preinvn`
+throughout.
+
+.. function:: int flint_mpn_is_square_mod(nn_srcptr a, nn_srcptr d, mp_size_t n)
+
+    Returns 1 if `a` is a square modulo the odd prime `d`, and 0 if it is not.
+
+    This uses the Jacobi symbol `\left(\frac{a}{d}\right)`, which is computed
+    by GMP in quasi-linear time; a return value of 0 means the symbol is `-1`,
+    so it also proves that `a` is not a square for an odd `d` that is not prime,
+    while a return value of 1 proves nothing in that case.
+
+.. function:: int flint_mpn_sqrtmod(nn_ptr res, nn_srcptr a, nn_srcptr d, mp_size_t n)
+              int flint_mpn_sqrtmod_preinv(nn_ptr res, nn_srcptr a, nn_srcptr d, mp_size_t n, nn_srcptr dinv, flint_bitcnt_t norm)
+
+    Sets *res* to a square root of `a` modulo the odd prime `d` and returns 1.
+
+    Returns 0, having set *res* to zero, when the Jacobi symbol rules a root
+    out; as above this is conclusive whether or not `d` is prime. Returns
+    `-1`, again setting *res* to zero, when the algorithm itself failed, which
+    happens only for a `d` that is not prime (or, with negligible probability,
+    for a prime whose least quadratic nonresidue exceeds `2^{20}`).
 
 Preconditioned modular multiplication
 --------------------------------------------------------------------------------
@@ -1368,7 +1433,7 @@ GCD
 .. function:: mp_size_t flint_mpn_gcd_full(mp_ptr arrayg, mp_srcptr array1, mp_size_t limbs1, mp_srcptr array2, mp_size_t limbs2)
 
     Sets ``(arrayg, retvalue)`` to the gcd of ``(array1, limbs1)`` and
-    ``(array2, limbs2)``. 
+    ``(array2, limbs2)``.
 
     The only assumption is that neither ``limbs1`` nor ``limbs2`` is
     zero.

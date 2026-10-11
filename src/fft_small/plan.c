@@ -14,6 +14,7 @@
 #include "ulong_extras.h"
 #include "nmod.h"
 #include "fft_small.h"
+#include "fft_small/impl.h"
 
 int _fft_small_plan_set_bound(fft_small_plan_t P, ulong c, ulong e, ulong np_max)
 {
@@ -321,11 +322,15 @@ have_choice:
    Direct computation requires `mod.n` to be prime and `mod.n - 1`
    to have sufficiently high 2-valuation.
    This is usually faster when CRT would need multiple primes, but it pays
-   the setup cost of initializing and clearing a temporary `sd_fft_ctx_t`.  */
+   the setup cost of initializing and clearing a temporary `sd_fft_ctx_t`,
+   which is only significant for very short operands.  */
 static int
 _nmod_poly_should_directly_fft(ulong bn, ulong depth, nmod_t mod)
 {
-    if (bn < 1500)
+    /* cache the last modulus found to be prime */
+    static FLINT_TLS_PREFIX ulong last_prime = 0;
+
+    if (bn < 100)
         return 0;
 
     if (NMOD_BITS(mod) < 20)
@@ -334,7 +339,17 @@ _nmod_poly_should_directly_fft(ulong bn, ulong depth, nmod_t mod)
     if (!fft_small_prime_supports_depth(mod.n, depth))
         return 0;
 
-    return n_is_prime(mod.n); /* check the most expensive condition last */
+    /* check the most expensive condition last */
+    if (mod.n == last_prime)
+        return 1;
+
+    if (n_is_prime(mod.n))
+    {
+        last_prime = mod.n;
+        return 1;
+    }
+
+    return 0;
 }
 
 /* np/offset selection shared by the nmod plans. len_bound * 2^prod_bits
@@ -347,27 +362,21 @@ static int _fft_small_plan_set_bound_nmod(fft_small_plan_t P,
                     ulong direct_len)
 {
     mpn_ctx_struct * R = P->R;
-    ulong modbits = FLINT_BITS - mod.norm;
-    ulong i;
+    slong i;
 
     P->bound_c = len_bound;
     P->bound_e = prod_bits;
 
     /* first see if mod.n is one of R->ffts[i].mod.n */
-    if (modbits == 50)
+    i = _fft_small_mpn_ctx_prime_index(R, mod.n);
+    if (i >= 0)
     {
-        for (i = 0; i < MPN_CTX_NCRTS; i++)
-        {
-            if (mod.n == R->ffts[i].mod.n)
-            {
-                P->np = 1;
-                P->offset = i;
-                P->ffts = R->ffts;
-                P->crts = R->crts;
-                P->use_direct_fft = 0;
-                return 1;
-            }
-        }
+        P->np = 1;
+        P->offset = i;
+        P->ffts = R->ffts;
+        P->crts = R->crts;
+        P->use_direct_fft = 0;
+        return 1;
     }
 
     if (direct_len != 0 &&

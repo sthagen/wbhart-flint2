@@ -1374,17 +1374,17 @@ flint_mpn_preinv1(mp_limb_t d1, mp_limb_t d0)
    flint_mpn_preinv1(d1, d0) */
 #define FLINT_MPN_UDIV_QR_3BY2(q, r1, r0, n2, n1, n0, d1, d0, dinv) \
     do { \
-        mp_limb_t __q0, __t1, __t0, __mask; \
-        umul_ppmm((q), __q0, (n2), (dinv)); \
-        add_ssaaaa((q), __q0, (q), __q0, (n2), (n1)); \
+        mp_limb_t __u3b2_q0, __u3b2_t1, __u3b2_t0, __u3b2_mask; \
+        umul_ppmm((q), __u3b2_q0, (n2), (dinv)); \
+        add_ssaaaa((q), __u3b2_q0, (q), __u3b2_q0, (n2), (n1)); \
         (r1) = (n1) - (d1) * (q); \
         sub_ddmmss((r1), (r0), (r1), (n0), (d1), (d0)); \
-        umul_ppmm(__t1, __t0, (d0), (q)); \
-        sub_ddmmss((r1), (r0), (r1), (r0), __t1, __t0); \
+        umul_ppmm(__u3b2_t1, __u3b2_t0, (d0), (q)); \
+        sub_ddmmss((r1), (r0), (r1), (r0), __u3b2_t1, __u3b2_t0); \
         (q)++; \
-        __mask = -(mp_limb_t) ((r1) >= __q0); \
-        (q) += __mask; \
-        add_ssaaaa((r1), (r0), (r1), (r0), __mask & (d1), __mask & (d0)); \
+        __u3b2_mask = -(mp_limb_t) ((r1) >= __u3b2_q0); \
+        (q) += __u3b2_mask; \
+        add_ssaaaa((r1), (r0), (r1), (r0), __u3b2_mask & (d1), __u3b2_mask & (d0)); \
         if (FLINT_UNLIKELY((r1) >= (d1))) \
         { \
             if ((r1) > (d1) || (r0) >= (d0)) \
@@ -1567,7 +1567,8 @@ flint_mpn_divexact(mp_ptr q, mp_srcptr a, mp_size_t an, mp_srcptr b, mp_size_t b
 typedef struct
 {
     mp_ptr b;           /* odd part b' of the divisor, bn limbs */
-    mp_ptr binv;        /* b'^(-1) mod B^(bn+1) */
+    mp_ptr binv;        /* b'^(-1) mod B^binvn */
+    mp_size_t binvn;    /* limbs of binv: bn + 1, or fewer with init_prec */
     mp_size_t bn;
     mp_size_t bn_orig;  /* limbs of the original divisor */
     mp_size_t k;        /* zero low limbs stripped */
@@ -1578,6 +1579,7 @@ flint_mpn_divexact_preinv_struct;
 typedef flint_mpn_divexact_preinv_struct flint_mpn_divexact_preinv_t[1];
 
 void flint_mpn_divexact_preinv_init(flint_mpn_divexact_preinv_t pre, mp_srcptr b, mp_size_t bn);
+void flint_mpn_divexact_preinv_init_prec(flint_mpn_divexact_preinv_t pre, mp_srcptr b, mp_size_t bn, mp_size_t qn);
 void flint_mpn_divexact_preinv_clear(flint_mpn_divexact_preinv_t pre);
 void flint_mpn_divexact_preinv(mp_ptr q, mp_srcptr a, mp_size_t an, const flint_mpn_divexact_preinv_t pre);
 
@@ -1686,6 +1688,7 @@ mp_size_t flint_mpn_gcd_full(mp_ptr gp, mp_srcptr ap, mp_size_t an, mp_srcptr bp
 
 void flint_mpn_mulmod_preinv1(mp_ptr r, mp_srcptr a, mp_srcptr b, mp_size_t n, mp_srcptr d, mp_limb_t dinv, ulong norm);
 void flint_mpn_mulmod_preinvn(mp_ptr r, mp_srcptr a, mp_srcptr b, mp_size_t n, mp_srcptr d, mp_srcptr dinv, ulong norm);
+void flint_mpn_powmod_preinvn(mp_ptr res, mp_srcptr a, mp_srcptr e, mp_size_t en, mp_size_t n, mp_srcptr d, mp_srcptr dinv, ulong norm);
 
 #define MPN_MULMOD_PRECOND_NONE 0
 #define MPN_MULMOD_PRECOND_SHOUP 1
@@ -1705,6 +1708,12 @@ void flint_mpn_fmmamod_preinvn_2(mp_ptr r, mp_srcptr a, mp_srcptr b, mp_srcptr e
 void flint_mpn_fmmamod_precond_matrix(mp_ptr rp, mp_srcptr apre1, mp_srcptr b1, mp_srcptr apre2, mp_srcptr b2, mp_size_t n, mp_srcptr d, mp_srcptr dinv, ulong norm);
 
 int flint_mpn_mulmod_2expp1_basecase(mp_ptr xp, mp_srcptr yp, mp_srcptr zp, int c, flint_bitcnt_t b, mp_ptr tp);
+
+/* square roots modulo an odd prime ******************************************/
+
+int flint_mpn_is_square_mod(nn_srcptr a, nn_srcptr d, mp_size_t n);
+int flint_mpn_sqrtmod(nn_ptr res, nn_srcptr a, nn_srcptr d, mp_size_t n);
+int flint_mpn_sqrtmod_preinv(nn_ptr res, nn_srcptr a, nn_srcptr d, mp_size_t n, nn_srcptr dinv, flint_bitcnt_t norm);
 
 /* miscellaneous *************************************************************/
 

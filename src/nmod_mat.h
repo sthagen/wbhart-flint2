@@ -157,6 +157,7 @@ int nmod_mat_is_square(const nmod_mat_t mat)
 
 void nmod_mat_set(nmod_mat_t B, const nmod_mat_t A);
 void nmod_mat_transpose(nmod_mat_t B, const nmod_mat_t A);
+void _nmod_mat_transpose(nn_ptr B, slong Bstride, nn_srcptr A, slong Astride, slong m, slong n);
 
 /* Addition and subtraction */
 
@@ -185,6 +186,16 @@ void _nmod_mat_mul_u8(uint8_t * C, slong Cstride,
                  const uint8_t * B, slong Bstride,
                  slong m, slong k, slong n, nmod_t mod);
 void nmod_mat_mul_u8(nmod_mat_t C, const nmod_mat_t A, const nmod_mat_t B);
+
+int nmod_mat_mul_u32(nmod_mat_t C, const nmod_mat_t A, const nmod_mat_t B);
+int _nmod_mat_mul_u32(uint32_t * C, slong Cstride,
+                 const uint32_t * A, slong Astride,
+                 const uint32_t * B, slong Bstride,
+                 slong m, slong k, slong n, nmod_t mod);
+
+int nmod_mat_mul_u52(nmod_mat_t C, const nmod_mat_t A, const nmod_mat_t B);
+int nmod_mat_mul_fp50(nmod_mat_t C, const nmod_mat_t A, const nmod_mat_t B);
+int nmod_mat_mul_k52(nmod_mat_t C, const nmod_mat_t A, const nmod_mat_t B);
 
 void nmod_mat_mul_classical(nmod_mat_t C, const nmod_mat_t A, const nmod_mat_t B);
 
